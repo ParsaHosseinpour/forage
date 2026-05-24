@@ -1,0 +1,245 @@
+/**
+ * Mock recipes that match the Spoonacular complexSearch response shape
+ * (with addRecipeInformation:true and fillIngredients:true).
+ *
+ * These are shown when the daily API quota is exhausted (HTTP 402).
+ * They include both card-level AND detail-level fields so the drill-down
+ * view works completely offline — no second API call required.
+ */
+
+const MOCK_RECIPES = [
+  {
+    id: 9001,
+    title: 'Garlic Butter Pasta with Cherry Tomatoes',
+    image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=480&q=80',
+    readyInMinutes: 20,
+    servings: 2,
+    diets: ['vegetarian'],
+    usedIngredientCount: 4,
+    missedIngredientCount: 1,
+    usedIngredients: [
+      { name: 'pasta',          original: '200g spaghetti or linguine' },
+      { name: 'cherry tomatoes',original: '200g cherry tomatoes, halved' },
+      { name: 'garlic',         original: '4 cloves garlic, minced' },
+      { name: 'butter',         original: '3 tbsp unsalted butter' },
+    ],
+    missedIngredients: [
+      { name: 'fresh basil', original: 'handful fresh basil leaves' },
+    ],
+    extendedIngredients: [
+      { name: 'spaghetti',       original: '200g spaghetti or linguine' },
+      { name: 'cherry tomatoes', original: '200g cherry tomatoes, halved' },
+      { name: 'garlic',          original: '4 cloves garlic, minced' },
+      { name: 'butter',          original: '3 tbsp unsalted butter' },
+      { name: 'olive oil',       original: '2 tbsp olive oil' },
+      { name: 'parmesan',        original: '50g parmesan, freshly grated' },
+      { name: 'fresh basil',     original: 'handful fresh basil leaves' },
+      { name: 'salt',            original: 'salt and black pepper to taste' },
+    ],
+    analyzedInstructions: [{
+      steps: [
+        { number: 1, step: 'Bring a large pot of salted water to a boil. Cook pasta according to package directions until al dente, reserving ½ cup pasta water before draining.', equipment: [{name: 'large pot'}] },
+        { number: 2, step: 'While pasta cooks, heat olive oil and 1 tbsp butter in a wide skillet over medium heat. Add garlic and sauté for 60 seconds until fragrant — don\'t let it brown.', equipment: [{name: 'skillet'}] },
+        { number: 3, step: 'Add cherry tomatoes and cook 3–4 minutes, pressing gently, until they burst and release their juices.', equipment: [] },
+        { number: 4, step: 'Add drained pasta to the skillet along with remaining butter and a splash of pasta water. Toss vigorously over medium heat for 1–2 minutes until a silky sauce forms.', equipment: [] },
+        { number: 5, step: 'Remove from heat. Fold in parmesan and basil, season with salt and pepper, and serve immediately.', equipment: [] },
+      ],
+    }],
+    sourceUrl: 'https://www.seriouseats.com',
+  },
+  {
+    id: 9002,
+    title: 'One-Pan Lemon Herb Chicken Thighs',
+    image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c3?w=480&q=80',
+    readyInMinutes: 35,
+    servings: 4,
+    diets: ['gluten free', 'dairy free'],
+    usedIngredientCount: 4,
+    missedIngredientCount: 2,
+    usedIngredients: [
+      { name: 'chicken thighs', original: '4 bone-in, skin-on chicken thighs' },
+      { name: 'garlic',         original: '5 cloves garlic, smashed' },
+      { name: 'lemon',          original: '1 lemon, sliced into rounds' },
+      { name: 'olive oil',      original: '2 tbsp olive oil' },
+    ],
+    missedIngredients: [
+      { name: 'fresh thyme',  original: '6 sprigs fresh thyme' },
+      { name: 'chicken stock',original: '120ml chicken stock' },
+    ],
+    extendedIngredients: [
+      { name: 'chicken thighs',original: '4 bone-in, skin-on chicken thighs' },
+      { name: 'garlic',        original: '5 cloves garlic, smashed' },
+      { name: 'lemon',         original: '1 lemon, sliced into rounds' },
+      { name: 'olive oil',     original: '2 tbsp olive oil' },
+      { name: 'fresh thyme',   original: '6 sprigs fresh thyme' },
+      { name: 'chicken stock', original: '120ml chicken stock' },
+      { name: 'paprika',       original: '1 tsp smoked paprika' },
+      { name: 'salt',          original: 'salt and black pepper' },
+    ],
+    analyzedInstructions: [{
+      steps: [
+        { number: 1, step: 'Pat chicken thighs dry and season generously with salt, pepper, and smoked paprika on both sides.', equipment: [] },
+        { number: 2, step: 'Heat olive oil in an oven-safe skillet over medium-high heat. Place chicken skin-side down and sear undisturbed for 7–8 minutes until skin is deep golden and crispy.', equipment: [{name: 'oven-safe skillet'}] },
+        { number: 3, step: 'Flip chicken and add garlic, thyme, and lemon slices around the pieces. Pour in stock and bring to a simmer.', equipment: [] },
+        { number: 4, step: 'Transfer skillet to a 200°C (400°F) oven and roast 18–20 minutes until internal temperature reaches 74°C (165°F).', equipment: [{name: 'oven'}] },
+        { number: 5, step: 'Rest 5 minutes before serving. Spoon pan juices over the top.', equipment: [] },
+      ],
+    }],
+    sourceUrl: 'https://www.seriouseats.com',
+  },
+  {
+    id: 9003,
+    title: 'Quick Vegetable Fried Rice',
+    image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=480&q=80',
+    readyInMinutes: 15,
+    servings: 3,
+    diets: ['vegetarian', 'dairy free'],
+    usedIngredientCount: 5,
+    missedIngredientCount: 1,
+    usedIngredients: [
+      { name: 'rice',          original: '2 cups cooked and cooled rice (day-old works best)' },
+      { name: 'eggs',          original: '3 large eggs, beaten' },
+      { name: 'soy sauce',     original: '3 tbsp soy sauce' },
+      { name: 'garlic',        original: '3 cloves garlic, minced' },
+      { name: 'sesame oil',    original: '1 tbsp sesame oil' },
+    ],
+    missedIngredients: [
+      { name: 'frozen peas',  original: '1 cup frozen peas and carrots' },
+    ],
+    extendedIngredients: [
+      { name: 'rice',         original: '2 cups cooked, day-old rice' },
+      { name: 'eggs',         original: '3 large eggs, beaten' },
+      { name: 'soy sauce',    original: '3 tbsp soy sauce' },
+      { name: 'garlic',       original: '3 cloves garlic, minced' },
+      { name: 'sesame oil',   original: '1 tbsp sesame oil' },
+      { name: 'frozen peas',  original: '1 cup frozen peas and carrots' },
+      { name: 'spring onions',original: '3 spring onions, sliced' },
+      { name: 'vegetable oil',original: '2 tbsp vegetable oil' },
+    ],
+    analyzedInstructions: [{
+      steps: [
+        { number: 1, step: 'Heat vegetable oil in a wok or large skillet over high heat until smoking. Add garlic and stir-fry 20 seconds.', equipment: [{name: 'wok'}] },
+        { number: 2, step: 'Add frozen peas and carrots, stir-fry 2 minutes. Push everything to the edges and pour eggs into the centre. Scramble until just set then mix into the vegetables.', equipment: [] },
+        { number: 3, step: 'Add cold rice and break up any clumps. Stir-fry 3–4 minutes, pressing rice against the hot pan to get some crispy bits.', equipment: [] },
+        { number: 4, step: 'Pour soy sauce and sesame oil over the rice and toss to combine. Taste and adjust seasoning.', equipment: [] },
+        { number: 5, step: 'Serve immediately topped with sliced spring onions.', equipment: [] },
+      ],
+    }],
+    sourceUrl: 'https://www.budgetbytes.com',
+  },
+  {
+    id: 9004,
+    title: 'Creamy Tomato & Spinach Soup',
+    image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=480&q=80',
+    readyInMinutes: 25,
+    servings: 4,
+    diets: ['vegetarian', 'gluten free'],
+    usedIngredientCount: 4,
+    missedIngredientCount: 1,
+    usedIngredients: [
+      { name: 'canned tomatoes', original: '2 × 400g cans whole peeled tomatoes' },
+      { name: 'spinach',         original: '100g fresh spinach' },
+      { name: 'onion',           original: '1 large onion, diced' },
+      { name: 'garlic',          original: '3 cloves garlic' },
+    ],
+    missedIngredients: [
+      { name: 'heavy cream', original: '4 tbsp double cream, to serve' },
+    ],
+    extendedIngredients: [
+      { name: 'canned tomatoes',original: '2 × 400g cans whole peeled tomatoes' },
+      { name: 'spinach',        original: '100g fresh spinach' },
+      { name: 'onion',          original: '1 large onion, diced' },
+      { name: 'garlic',         original: '3 cloves garlic, minced' },
+      { name: 'heavy cream',    original: '4 tbsp double cream' },
+      { name: 'vegetable stock',original: '500ml vegetable stock' },
+      { name: 'olive oil',      original: '2 tbsp olive oil' },
+      { name: 'sugar',          original: '1 tsp sugar' },
+    ],
+    analyzedInstructions: [{
+      steps: [
+        { number: 1, step: 'Heat olive oil in a large saucepan. Sauté onion over medium heat for 6 minutes until softened. Add garlic and cook 1 minute more.', equipment: [{name: 'saucepan'}] },
+        { number: 2, step: 'Add canned tomatoes, stock, sugar, salt and pepper. Bring to a boil then simmer 12 minutes.', equipment: [] },
+        { number: 3, step: 'Use an immersion blender to blitz until smooth. Alternatively, blend in batches in a standing blender.', equipment: [{name: 'immersion blender'}] },
+        { number: 4, step: 'Return to low heat and stir in spinach until just wilted, about 1 minute.', equipment: [] },
+        { number: 5, step: 'Ladle into bowls and swirl in a spoonful of cream. Serve with crusty bread.', equipment: [] },
+      ],
+    }],
+    sourceUrl: 'https://www.bbcgoodfood.com',
+  },
+  {
+    id: 9005,
+    title: 'Black Bean & Avocado Tacos',
+    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=480&q=80',
+    readyInMinutes: 15,
+    servings: 2,
+    diets: ['vegetarian', 'vegan', 'dairy free'],
+    usedIngredientCount: 3,
+    missedIngredientCount: 2,
+    usedIngredients: [
+      { name: 'black beans', original: '1 × 400g can black beans, drained' },
+      { name: 'avocado',     original: '2 ripe avocados' },
+      { name: 'lime',        original: '1 lime' },
+    ],
+    missedIngredients: [
+      { name: 'corn tortillas', original: '8 small corn tortillas' },
+      { name: 'fresh coriander',original: 'handful fresh coriander (cilantro)' },
+    ],
+    extendedIngredients: [
+      { name: 'black beans',    original: '1 × 400g can black beans, drained' },
+      { name: 'avocado',        original: '2 ripe avocados, sliced' },
+      { name: 'lime',           original: '1 lime, juiced' },
+      { name: 'corn tortillas', original: '8 small corn tortillas' },
+      { name: 'fresh coriander',original: 'handful fresh coriander' },
+      { name: 'cumin',          original: '1 tsp ground cumin' },
+      { name: 'chilli powder',  original: '½ tsp chilli powder' },
+      { name: 'salt',           original: 'salt to taste' },
+    ],
+    analyzedInstructions: [{
+      steps: [
+        { number: 1, step: 'Warm black beans in a small pan with cumin, chilli powder and a pinch of salt for 3–4 minutes, stirring occasionally. Mash roughly with a fork, leaving some texture.', equipment: [{name: 'small pan'}] },
+        { number: 2, step: 'Warm tortillas one at a time in a dry skillet for 30 seconds per side, or wrap in a damp paper towel and microwave 30 seconds.', equipment: [{name: 'skillet'}] },
+        { number: 3, step: 'Slice avocados and squeeze lime juice over to prevent browning.', equipment: [] },
+        { number: 4, step: 'Spread a spoonful of beans on each tortilla, top with avocado slices, and scatter fresh coriander over the top.', equipment: [] },
+        { number: 5, step: 'Serve with extra lime wedges and your favourite hot sauce.', equipment: [] },
+      ],
+    }],
+    sourceUrl: 'https://minimalistbaker.com',
+  },
+  {
+    id: 9006,
+    title: 'Classic French Omelette with Herbs',
+    image: 'https://images.unsplash.com/photo-1510693206972-df098062cb71?w=480&q=80',
+    readyInMinutes: 10,
+    servings: 1,
+    diets: ['vegetarian', 'gluten free'],
+    usedIngredientCount: 4,
+    missedIngredientCount: 0,
+    usedIngredients: [
+      { name: 'eggs',   original: '3 large eggs' },
+      { name: 'butter', original: '1 tbsp unsalted butter' },
+      { name: 'salt',   original: 'pinch of salt' },
+      { name: 'chives', original: 'fresh chives or parsley, chopped' },
+    ],
+    missedIngredients: [],
+    extendedIngredients: [
+      { name: 'eggs',         original: '3 large eggs' },
+      { name: 'butter',       original: '1 tbsp unsalted butter' },
+      { name: 'salt',         original: 'pinch of fine salt' },
+      { name: 'chives',       original: '1 tbsp fresh chives, finely chopped' },
+      { name: 'cold water',   original: '1 tbsp cold water' },
+      { name: 'black pepper', original: 'white or black pepper' },
+    ],
+    analyzedInstructions: [{
+      steps: [
+        { number: 1, step: 'Crack eggs into a bowl. Add water, salt, and a pinch of pepper. Beat vigorously with a fork until completely homogeneous — no streaks of white.', equipment: [{name: 'mixing bowl'}, {name: 'fork'}] },
+        { number: 2, step: 'Melt butter in a non-stick skillet over medium-high heat. When butter foams and just starts to subside, pour in eggs all at once.', equipment: [{name: 'non-stick skillet'}] },
+        { number: 3, step: 'Immediately begin stirring with a rubber spatula in small rapid circles while shaking the pan. Cook 45–60 seconds until eggs are creamy and just barely set.', equipment: [{name: 'rubber spatula'}] },
+        { number: 4, step: 'Remove from heat. Tilt the pan and fold the omelette in thirds onto a warm plate. It should be pale yellow with no colour.', equipment: [] },
+        { number: 5, step: 'Top with fresh chives and serve immediately — a French omelette waits for no one.', equipment: [] },
+      ],
+    }],
+    sourceUrl: 'https://www.seriouseats.com',
+  },
+]
+
+export default MOCK_RECIPES

@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, RefreshCw } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
-import { useSavedRecipes } from '../../hooks/useSavedRecipes'
 import { findRecipes } from '../../lib/spoonacular'
+import { useToast } from '../ui/Toast'
 import RecipeCard, { RecipeCardSkeleton } from '../recipes/RecipeCard'
 import RecipeDetail from '../recipes/RecipeDetail'
 import FilterBar from '../recipes/FilterBar'
@@ -17,14 +17,15 @@ const DEFAULT_FILTERS = {
 
 export default function RecipesPage({ user }) {
   const { items, loading: fridgeLoading } = useFridge(user.id)
-  const { isSaved, toggle: toggleSave }   = useSavedRecipes(user.id)
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const toast     = useToast()
 
-  const [recipes, setRecipes]   = useState([])
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState('')
-  const [selected, setSelected] = useState(null)
-  const [filters, setFilters]   = useState(DEFAULT_FILTERS)
+  const [recipes, setRecipes]     = useState([])
+  const [loading, setLoading]     = useState(false)
+  const [error, setError]         = useState('')
+  const [selected, setSelected]   = useState(null)
+  const [filters, setFilters]     = useState(DEFAULT_FILTERS)
+  const [isDemo, setIsDemo]       = useState(false)
 
   const ingredientNames = items.map(i => i.name)
 
@@ -34,8 +35,20 @@ export default function RecipesPage({ user }) {
     setError('')
     setSelected(null)
     try {
-      const results = await findRecipes(ingredientNames, activeFilters)
+      const { recipes: results, fromMock } = await findRecipes(ingredientNames, activeFilters)
       setRecipes(results)
+      setIsDemo(fromMock)
+      if (fromMock) {
+        toast({
+          type:     'warning',
+          message:  'Daily API limit reached — showing sample recipes so you can keep testing the UX.',
+          duration: 8000,
+          action: {
+            label:   'Learn more',
+            onClick: () => window.open('https://spoonacular.com/food-api/pricing', '_blank'),
+          },
+        })
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -44,6 +57,7 @@ export default function RecipesPage({ user }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ingredientNames.join(',')])
 
+  // Initial search once fridge has loaded
   useEffect(() => {
     if (!fridgeLoading && ingredientNames.length >= 2) {
       search(DEFAULT_FILTERS)
@@ -56,11 +70,44 @@ export default function RecipesPage({ user }) {
     search(newFilters)
   }
 
-  const tooFew = !fridgeLoading && ingredientNames.length < 2
+  const tooFewIngredients = !fridgeLoading && ingredientNames.length < 2
 
   return (
     <div className="max-w-5xl mx-auto px-5 py-8">
 
+      {/* Demo mode banner */}
+      {isDemo && !loading && (
+        <div
+          className="flex items-start gap-3 rounded-2xl border px-5 py-4 mb-6 fade-in"
+          style={{
+            background:  'var(--amber-light)',
+            borderColor: '#F5D9B8',
+          }}
+        >
+          <span className="text-lg leading-none mt-0.5">🧪</span>
+          <div>
+            <p className="text-sm font-medium" style={{ color: 'var(--amber)' }}>
+              Showing sample recipes
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: '#A0622A' }}>
+              The Spoonacular daily quota is exhausted. These are curated demo recipes so you
+              can keep testing the full UX — filters, detail view, saving, and shopping list all work.
+              Add a fresh API key in your{' '}
+              <a
+                href="https://vercel.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                Vercel env vars
+              </a>{' '}
+              to restore live data.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Page header */}
       {!selected && (
         <div className="mb-8">
           <div className="flex items-start justify-between mb-4">
@@ -86,15 +133,19 @@ export default function RecipesPage({ user }) {
           {ingredientNames.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
               {ingredientNames.map(name => (
-                <span key={name} className="text-xs px-3 py-1 rounded-full border"
-                      style={{ background: 'white', borderColor: 'var(--border)', color: 'var(--ink)' }}>
+                <span
+                  key={name}
+                  className="text-xs px-3 py-1 rounded-full border"
+                  style={{ background: 'white', borderColor: 'var(--border)', color: 'var(--ink)' }}
+                >
                   {name}
                 </span>
               ))}
             </div>
           )}
 
-          {!tooFew && (
+          {/* Filter bar */}
+          {!tooFewIngredients && (
             <FilterBar
               filters={filters}
               onChange={handleFiltersChange}
@@ -105,6 +156,7 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
+      {/* Error */}
       {error && !loading && (
         <div className="rounded-xl p-4 mb-6 text-sm fade-in"
              style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}>
@@ -112,7 +164,8 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
-      {tooFew && (
+      {/* Too few ingredients */}
+      {tooFewIngredients && (
         <div className="text-center py-24 fade-in">
           <div className="text-5xl mb-4">🧅</div>
           <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -127,6 +180,7 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
+      {/* Loading skeletons */}
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(9)].map((_, i) => (
@@ -137,16 +191,16 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
+      {/* Recipe detail */}
       {selected && !loading && (
         <RecipeDetail
           recipe={selected}
           fridgeIngredients={ingredientNames}
           onBack={() => setSelected(null)}
-          isSaved={isSaved(selected.id)}
-          onSave={() => toggleSave(selected)}
         />
       )}
 
+      {/* Recipe grid */}
       {!loading && !selected && recipes.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 fade-in">
           {recipes.map(recipe => (
@@ -154,14 +208,13 @@ export default function RecipesPage({ user }) {
               key={recipe.id}
               recipe={recipe}
               onClick={setSelected}
-              isSaved={isSaved(recipe.id)}
-              onSave={() => toggleSave(recipe)}
             />
           ))}
         </div>
       )}
 
-      {!loading && !selected && recipes.length === 0 && !tooFew && !error && (
+      {/* No results */}
+      {!loading && !selected && recipes.length === 0 && !tooFewIngredients && !error && (
         <div className="text-center py-24 fade-in">
           <div className="text-5xl mb-4">🤷</div>
           <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -175,6 +228,7 @@ export default function RecipesPage({ user }) {
           </Button>
         </div>
       )}
+
     </div>
   )
 }

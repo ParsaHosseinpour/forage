@@ -21,8 +21,9 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
   useEffect(() => {
     setLoading(true)
     setError('')
-    getRecipeDetails(recipe.id)
-      .then(setDetail)
+    // Pass full recipe for mock IDs (>=9000) so no second API call fires
+    getRecipeDetails(recipe.id, recipe.id >= 9000 ? recipe : null)
+      .then(({ detail }) => setDetail(detail))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
     window.scrollTo({ top: 0, behavior: 'smooth' })
