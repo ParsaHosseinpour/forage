@@ -4,6 +4,7 @@ import AuthPage from './components/auth/AuthPage'
 import Navbar from './components/layout/Navbar'
 import FridgePage from './components/fridge/FridgePage'
 import RecipesPage from './components/fridge/RecipesPage'
+import SavedPage from './components/saved/SavedPage'
 
 function ProtectedLayout({ user }) {
   return (
@@ -13,6 +14,7 @@ function ProtectedLayout({ user }) {
         <Routes>
           <Route path="/fridge"  element={<FridgePage  user={user} />} />
           <Route path="/recipes" element={<RecipesPage user={user} />} />
+          <Route path="/saved"   element={<SavedPage   user={user} />} />
           <Route path="*"        element={<Navigate to="/fridge" replace />} />
         </Routes>
       </main>
@@ -35,11 +37,7 @@ export default function App() {
     <BrowserRouter>
       {user
         ? <ProtectedLayout user={user} />
-        : (
-          <Routes>
-            <Route path="*" element={<AuthPage />} />
-          </Routes>
-        )
+        : <Routes><Route path="*" element={<AuthPage />} /></Routes>
       }
     </BrowserRouter>
   )

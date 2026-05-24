@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2 } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/spoonacular'
 import Button from '../ui/Button'
+import SaveButton from './SaveButton'
 
 function NutrientPill({ label, value }) {
   return (
@@ -12,7 +13,7 @@ function NutrientPill({ label, value }) {
   )
 }
 
-export default function RecipeDetail({ recipe, fridgeIngredients, onBack }) {
+export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSaved = false, onSave }) {
   const [detail, setDetail]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState('')
@@ -64,10 +65,15 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack }) {
 
       {/* Title + meta */}
       <div className="mb-8">
-        <h1 className="text-3xl sm:text-4xl mb-4 leading-tight"
-            style={{ fontFamily: 'Playfair Display, serif' }}>
-          {recipe.title}
-        </h1>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <h1 className="text-3xl sm:text-4xl leading-tight"
+              style={{ fontFamily: 'Playfair Display, serif' }}>
+            {recipe.title}
+          </h1>
+          {onSave && (
+            <SaveButton saved={isSaved} onClick={onSave} size="lg" className="flex-shrink-0 mt-1" />
+          )}
+        </div>
 
         <div className="flex flex-wrap items-center gap-4 text-sm" style={{ color: 'var(--ink-muted)' }}>
           {(recipe.readyInMinutes || detail?.readyInMinutes) && (

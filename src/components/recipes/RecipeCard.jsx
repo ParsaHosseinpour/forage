@@ -1,4 +1,5 @@
 import { Clock, Users, ShoppingCart } from 'lucide-react'
+import SaveButton from './SaveButton'
 
 function MatchBadge({ used, missed }) {
   const total = used + missed
@@ -36,7 +37,7 @@ export function RecipeCardSkeleton() {
   )
 }
 
-export default function RecipeCard({ recipe, onClick }) {
+export default function RecipeCard({ recipe, onClick, isSaved = false, onSave }) {
   const used   = recipe.usedIngredientCount   ?? recipe.usedIngredients?.length   ?? 0
   const missed = recipe.missedIngredientCount ?? recipe.missedIngredients?.length ?? 0
 
@@ -73,6 +74,13 @@ export default function RecipeCard({ recipe, onClick }) {
                 {d}
               </span>
             ))}
+          </div>
+        )}
+
+        {/* Save button */}
+        {onSave && (
+          <div className="absolute top-2 right-2">
+            <SaveButton saved={isSaved} onClick={onSave} size="sm" />
           </div>
         )}
       </div>

@@ -70,3 +70,65 @@ export const setCachedRecipes = (ingredientsHash, recipesJson) =>
       { ingredients_hash: ingredientsHash, recipes_json: recipesJson, cached_at: new Date().toISOString() },
       { onConflict: 'ingredients_hash' }
     )
+
+// ─── Saved recipes helpers ───────────────────────────────────────────────────
+
+export const getSavedRecipes = (userId) =>
+  supabase
+    .from('saved_recipes')
+    .select('*')
+    .eq('user_id', userId)
+    .order('saved_at', { ascending: false })
+
+export const saveRecipe = (userId, recipeId, recipeJson) =>
+  supabase
+    .from('saved_recipes')
+    .upsert(
+      { user_id: userId, recipe_id: recipeId, recipe_json: recipeJson },
+      { onConflict: 'user_id,recipe_id' }
+    )
+    .select()
+    .single()
+
+export const unsaveRecipe = (userId, recipeId) =>
+  supabase
+    .from('saved_recipes')
+    .delete()
+    .eq('user_id', userId)
+    .eq('recipe_id', recipeId)
+
+export const getSavedIds = async (userId) => {
+  const { data } = await supabase
+    .from('saved_recipes')
+    .select('recipe_id')
+    .eq('user_id', userId)
+  return new Set((data ?? []).map(r => r.recipe_id))
+}
+
+// ─── Shopping checks helpers ─────────────────────────────────────────────────
+
+export const getShoppingChecks = async (userId) => {
+  const { data } = await supabase
+    .from('shopping_checks')
+    .select('ingredient_name')
+    .eq('user_id', userId)
+  return new Set((data ?? []).map(r => r.ingredient_name))
+}
+
+export const checkShoppingItem = (userId, ingredientName) =>
+  supabase
+    .from('shopping_checks')
+    .upsert({ user_id: userId, ingredient_name: ingredientName })
+
+export const uncheckShoppingItem = (userId, ingredientName) =>
+  supabase
+    .from('shopping_checks')
+    .delete()
+    .eq('user_id', userId)
+    .eq('ingredient_name', ingredientName)
+
+export const clearShoppingChecks = (userId) =>
+  supabase
+    .from('shopping_checks')
+    .delete()
+    .eq('user_id', userId)
