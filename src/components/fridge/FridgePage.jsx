@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, RefrigeratorIcon, ChevronRight, Search } from 'lucide-react'
+import { Plus, ChevronRight, Search } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
+import { usePantry } from '../../hooks/usePantry'
 import IngredientCard from './IngredientCard'
 import AddIngredientForm, { CATEGORIES } from './AddIngredientForm'
+import PantrySection from './PantrySection'
 import Button from '../ui/Button'
 
 const categoryOrder = CATEGORIES.map(c => c.value)
 
 export default function FridgePage({ user }) {
   const { items, loading, add, remove, update } = useFridge(user.id)
+  const { staples, isActive, toggle, loading: pantryLoading } = usePantry(user.id)
   const [showForm, setShowForm] = useState(false)
   const navigate = useNavigate()
 
@@ -25,6 +28,9 @@ export default function FridgePage({ user }) {
   )
 
   const isEmpty = items.length === 0
+  // CTA needs at least 2 ingredients — pantry staples count toward this
+  const totalIngredients = items.length + staples.length
+  const canFindRecipes = totalIngredients >= 2
 
   return (
     <div className="max-w-5xl mx-auto px-5 py-8">
@@ -39,11 +45,11 @@ export default function FridgePage({ user }) {
             {items.length === 0
               ? 'Add ingredients to get started'
               : `${items.length} ingredient${items.length !== 1 ? 's' : ''} logged`}
+            {staples.length > 0 && ` + ${staples.length} pantry staple${staples.length !== 1 ? 's' : ''}`}
           </p>
         </div>
-
         <div className="flex items-center gap-3">
-          {items.length >= 2 && (
+          {canFindRecipes && (
             <Button
               variant="secondary"
               onClick={() => navigate('/recipes')}
@@ -51,7 +57,6 @@ export default function FridgePage({ user }) {
             >
               <Search size={15} />
               Find recipes
-              <ChevronRight size={14} />
             </Button>
           )}
           <Button onClick={() => setShowForm(v => !v)}>
@@ -83,7 +88,7 @@ export default function FridgePage({ user }) {
 
       {/* Empty state */}
       {!loading && isEmpty && !showForm && (
-        <div className="text-center py-24 fade-in">
+        <div className="text-center py-16 fade-in">
           <div className="text-5xl mb-4">🥬</div>
           <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
             Your fridge is empty
@@ -98,9 +103,9 @@ export default function FridgePage({ user }) {
         </div>
       )}
 
-      {/* Ingredient list — grouped by category */}
+      {/* Ingredient list grouped by category */}
       {!loading && !isEmpty && (
-        <div className="space-y-8 fade-in">
+        <div className="space-y-8 mb-8 fade-in">
           {Object.entries(grouped).map(([cat, catItems]) => (
             <section key={cat}>
               <h2 className="text-xs font-medium uppercase tracking-widest mb-3"
@@ -122,19 +127,29 @@ export default function FridgePage({ user }) {
         </div>
       )}
 
-      {/* Sticky CTA if items logged */}
-      {items.length >= 2 && (
+      {/* Pantry staples — always shown below fridge items */}
+      {!loading && (
+        <PantrySection
+          isActive={isActive}
+          onToggle={toggle}
+          loading={pantryLoading}
+        />
+      )}
+
+      {/* Sticky CTA */}
+      {canFindRecipes && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 slide-up">
           <button
             onClick={() => navigate('/recipes')}
             className="flex items-center gap-3 px-6 py-3 rounded-2xl shadow-lg text-white text-sm font-medium transition-transform hover:scale-105 active:scale-100"
             style={{
-              background: 'var(--green)',
-              boxShadow: '0 8px 32px rgba(58,99,73,0.35)',
+              background:  'var(--green)',
+              boxShadow:   '0 8px 32px rgba(58,99,73,0.35)',
+              whiteSpace:  'nowrap',
             }}
           >
             <Search size={16} />
-            Find recipes with these {items.length} ingredients
+            Find recipes with {totalIngredients} ingredient{totalIngredients !== 1 ? 's' : ''}
             <ChevronRight size={16} />
           </button>
         </div>

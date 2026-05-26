@@ -132,3 +132,21 @@ export const clearShoppingChecks = (userId) =>
     .from('shopping_checks')
     .delete()
     .eq('user_id', userId)
+
+// ─── Pantry staples helpers ───────────────────────────────────────────────────
+
+export const getPantryStaples = async (userId) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('pantry_staples')
+    .eq('id', userId)
+    .single()
+  if (error || !data) return []
+  return data.pantry_staples ?? []
+}
+
+export const setPantryStaples = (userId, staples) =>
+  supabase
+    .from('profiles')
+    .update({ pantry_staples: staples })
+    .eq('id', userId)
