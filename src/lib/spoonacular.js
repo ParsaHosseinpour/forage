@@ -1,7 +1,6 @@
 import { getCachedRecipes, setCachedRecipes } from './supabase'
+import { countRecipesInDb, findRecipesInDb, getRecipeFromDb } from './recipeDb'
 import MOCK_RECIPES from './mockRecipes'
-
-// ─── Config ──────────────────────────────────────────────────────────────────
 
 const API_KEY = import.meta.env.VITE_SPOONACULAR_API_KEY
 const BASE    = 'https://api.spoonacular.com'
@@ -18,47 +17,56 @@ const buildHash = (ingredients, filters = {}) => {
   return filterStr ? `${base}__${filterStr}` : base
 }
 
-// ─── Quota-exceeded error type ────────────────────────────────────────────────
-
-export class QuotaError extends Error {
-  constructor() {
-    super('Daily API quota reached')
-    this.name = 'QuotaError'
-  }
+// ─── DB recipe count cache (avoid re-checking on every call) ─────────────────
+let _dbCount = null
+let _dbCountChecked = false
+const getDbCount = async () => {
+  if (_dbCountChecked) return _dbCount
+  _dbCount = await countRecipesInDb()
+  _dbCountChecked = true
+  return _dbCount
 }
 
-// ─── Recipe search ───────────────────────────────────────────────────────────
+// ─── Main search ─────────────────────────────────────────────────────────────
 
 /**
- * Find recipes by fridge ingredients with optional dietary filters.
+ * Find recipes by fridge ingredients.
  *
- * Returns: { recipes: Recipe[], fromMock: boolean }
+ * Priority chain:
+ *   1. Own Supabase recipes table  (unlimited — use this once seeded)
+ *   2. Supabase recipe_cache       (Spoonacular results cached up to 1 hr)
+ *   3. Spoonacular API             (150/day free; degrades gracefully on 402)
+ *   4. Mock data                   (always works; shown with amber banner)
  *
- * fromMock is true when the API quota is exhausted (HTTP 402) and we've
- * fallen back to the local mock dataset — the UI can show a quota banner.
- *
- * filters.diet    → 'vegetarian' | 'vegan' | 'gluten free' | 'dairy free' | 'ketogenic' | 'paleo'
- * filters.sort    → 'min-missing-ingredients' | 'max-used-ingredients' | 'popularity' | 'time'
- * filters.maxTime → number (minutes)
+ * Returns: { recipes: Recipe[], fromMock: boolean, fromDb: boolean }
  */
 export const findRecipes = async (ingredients, filters = {}, number = 12) => {
-  const hash = buildHash(ingredients, filters)
 
-  // 1. Cache check — serves real OR previously-cached mock results
-  const cached = await getCachedRecipes(hash)
-  if (cached) {
-    console.info('[Forage] Cache hit ✓')
-    // Distinguish cached mock vs cached real by a flag we store alongside
-    const fromMock = Array.isArray(cached) && cached[0]?.id >= 9000
-    return { recipes: cached, fromMock }
+  // ── 1. Own DB (unlimited) ──────────────────────────────────────────────────
+  const dbCount = await getDbCount()
+  if (dbCount > 0) {
+    try {
+      const recipes = await findRecipesInDb(ingredients, filters, number)
+      if (recipes.length > 0) {
+        return { recipes, fromDb: true, fromMock: false }
+      }
+      // DB has recipes but none matched — fall through to Spoonacular for coverage
+    } catch (err) {
+      console.warn('[Forage] DB search failed, falling back:', err.message)
+    }
   }
 
-  console.info('[Forage] Cache miss — calling Spoonacular')
+  // ── 2. Spoonacular cache ───────────────────────────────────────────────────
+  const hash = buildHash(ingredients, filters)
+  const cached = await getCachedRecipes(hash)
+  if (cached) {
+    const fromMock = Array.isArray(cached) && cached[0]?.id >= 9000
+    return { recipes: cached, fromDb: false, fromMock }
+  }
 
-  // 2. API call (if no key in env, skip straight to mock)
+  // ── 3. Spoonacular API ─────────────────────────────────────────────────────
   if (!API_KEY) {
-    console.warn('[Forage] VITE_SPOONACULAR_API_KEY not set — using mock data')
-    return { recipes: _applyFilters(MOCK_RECIPES, filters), fromMock: true }
+    return { recipes: _applyFilters(MOCK_RECIPES, filters), fromDb: false, fromMock: true }
   }
 
   try {
@@ -77,53 +85,47 @@ export const findRecipes = async (ingredients, filters = {}, number = 12) => {
 
     const res = await fetch(`${BASE}/recipes/complexSearch?${params}`)
 
-    // 402 = quota exhausted → fall back gracefully
     if (res.status === 402) {
-      console.warn('[Forage] Spoonacular quota exhausted — serving mock data')
-      const mockResults = _applyFilters(MOCK_RECIPES, filters)
-      Promise.resolve(setCachedRecipes(hash, mockResults)).catch(console.error)
-      return { recipes: mockResults, fromMock: true }
+      const mock = _applyFilters(MOCK_RECIPES, filters)
+      Promise.resolve(setCachedRecipes(hash, mock)).catch(console.error)
+      return { recipes: mock, fromDb: false, fromMock: true }
     }
 
-    if (!res.ok) throw new Error(`Spoonacular ${res.status}: ${res.statusText}`)
+    if (!res.ok) throw new Error(`Spoonacular ${res.status}`)
 
     const data    = await res.json()
     const recipes = data.results ?? []
-
-    // Cache real results
     Promise.resolve(setCachedRecipes(hash, recipes)).catch(console.error)
-    return { recipes, fromMock: false }
+    return { recipes, fromDb: false, fromMock: false }
 
   } catch (err) {
-    // Network errors → fall back to mock rather than crashing
-    if (err.name !== 'QuotaError') {
-      console.error('[Forage] Spoonacular fetch failed, using mock data:', err.message)
-      return { recipes: _applyFilters(MOCK_RECIPES, filters), fromMock: true }
-    }
-    throw err
+    console.error('[Forage] Spoonacular error, using mock:', err.message)
+    return { recipes: _applyFilters(MOCK_RECIPES, filters), fromDb: false, fromMock: true }
   }
 }
 
-// ─── Recipe detail ───────────────────────────────────────────────────────────
+// ─── Detail ───────────────────────────────────────────────────────────────────
 
 /**
  * Get full recipe details.
- *
  * Returns: { detail: RecipeDetail, fromMock: boolean }
- *
- * For mock recipe IDs (≥ 9000) we never hit the API — the mock data already
- * contains all the fields needed for the detail view.
  */
 export const getRecipeDetails = async (id, mockRecipe = null) => {
-  // Mock recipe — return embedded detail directly, no API call needed
+  // Mock IDs
   if (id >= 9000 || mockRecipe) {
     const detail = mockRecipe ?? MOCK_RECIPES.find(r => r.id === id)
     if (detail) return { detail, fromMock: true }
   }
 
+  // DB recipes — already have full data from the RPC, but fetch for completeness
+  if (id < 9000) {
+    const dbDetail = await getRecipeFromDb(id)
+    if (dbDetail) return { detail: dbDetail, fromMock: false }
+  }
+
+  // Spoonacular
   if (!API_KEY) {
-    const fallback = MOCK_RECIPES[0]
-    return { detail: fallback, fromMock: true }
+    return { detail: MOCK_RECIPES[0], fromMock: true }
   }
 
   try {
@@ -131,31 +133,28 @@ export const getRecipeDetails = async (id, mockRecipe = null) => {
     const res    = await fetch(`${BASE}/recipes/${id}/information?${params}`)
 
     if (res.status === 402) {
-      console.warn('[Forage] Spoonacular quota (detail) — serving mock detail')
       const fallback = MOCK_RECIPES.find(r => r.id === id) ?? MOCK_RECIPES[0]
       return { detail: fallback, fromMock: true }
     }
 
     if (!res.ok) throw new Error(`Spoonacular ${res.status}`)
-    const detail = await res.json()
-    return { detail, fromMock: false }
+    return { detail: await res.json(), fromMock: false }
 
   } catch (err) {
-    console.error('[Forage] Recipe detail fetch failed, using mock:', err.message)
+    console.error('[Forage] Detail fetch failed:', err.message)
     const fallback = MOCK_RECIPES.find(r => r.id === id) ?? MOCK_RECIPES[0]
     return { detail: fallback, fromMock: true }
   }
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Filter helper ────────────────────────────────────────────────────────────
 
-/** Apply diet + time filters to mock data so filters still "work" in demo mode */
 function _applyFilters(recipes, filters = {}) {
   let result = [...recipes]
   if (filters.diet) {
     const d = filters.diet.toLowerCase()
-    const filtered = result.filter(r => r.diets?.some(diet => diet.toLowerCase().includes(d)))
-    if (filtered.length > 0) result = filtered  // graceful: if nothing matches, show all
+    const filtered = result.filter(r => r.diets?.some(t => t.toLowerCase().includes(d)))
+    if (filtered.length > 0) result = filtered
   }
   if (filters.maxTime) {
     const max = Number(filters.maxTime)

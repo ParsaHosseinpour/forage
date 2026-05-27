@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2 } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/spoonacular'
+import { getMissingTier } from '../../lib/recipeUtils'
 import Button from '../ui/Button'
 import SaveButton from './SaveButton'
 
@@ -175,11 +176,25 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
                         🛒 Need to buy ({need.length})
                       </p>
                       <ul className="space-y-2">
-                        {need.map((ing, i) => (
+                        {need
+                          .map(ing => ({ ...ing, _tier: getMissingTier(ing.name || ing.original) }))
+                          .sort((a, b) => {
+                            const order = { core: 0, supporting: 1, minor: 2 }
+                            return order[a._tier] - order[b._tier]
+                          })
+                          .map((ing, i) => (
                           <li key={i} className="flex items-start gap-2 text-sm">
                             <ShoppingCart size={14} className="mt-0.5 flex-shrink-0"
-                                          style={{ color: 'var(--amber)' }} />
-                            <span style={{ color: 'var(--ink-muted)' }}>{ing.original}</span>
+                                          style={{ color: ing._tier === 'core' ? 'var(--red-soft)' : 'var(--amber)' }} />
+                            <span style={{ color: 'var(--ink-muted)' }}>
+                              {ing.original}
+                              {ing._tier === 'core' && (
+                                <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded"
+                                      style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}>
+                                  essential
+                                </span>
+                              )}
+                            </span>
                           </li>
                         ))}
                       </ul>

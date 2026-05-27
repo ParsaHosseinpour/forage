@@ -1,10 +1,14 @@
 import { Clock, Users, ShoppingCart } from 'lucide-react'
 import SaveButton from './SaveButton'
+import { weightedMatchPct } from '../../lib/recipeUtils'
 
-function MatchBadge({ used, missed }) {
-  const total = used + missed
-  if (total === 0) return null
-  const pct = Math.round((used / total) * 100)
+function MatchBadge({ usedIngredients, missedIngredients, usedCount, missedCount }) {
+  // Prefer rich ingredient arrays for weighted scoring; fall back to counts
+  const pct = (usedIngredients?.length || missedIngredients?.length)
+    ? weightedMatchPct(usedIngredients, missedIngredients)
+    : (usedCount + missedCount > 0 ? Math.round((usedCount / (usedCount + missedCount)) * 100) : null)
+
+  if (pct === null) return null
 
   const style =
     pct >= 80 ? { bg: 'var(--green-light)', color: 'var(--green)'    } :
@@ -136,7 +140,7 @@ export default function RecipeCard({ recipe, onClick, isSaved = false, onSave })
         className="flex items-center justify-between px-4 py-3 border-t"
         style={{ borderColor: 'var(--border)' }}
       >
-        <MatchBadge used={used} missed={missed} />
+        <MatchBadge usedIngredients={recipe.usedIngredients} missedIngredients={recipe.missedIngredients} usedCount={used} missedCount={missed} />
 
         {onSave && (
           <SaveButton
