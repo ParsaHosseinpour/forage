@@ -18,9 +18,10 @@ const DEFAULT_FILTERS = {
 }
 
 export default function RecipesPage({ user }) {
-  const { items, loading: fridgeLoading }    = useFridge(user.id)
+  const fridgeHook                           = useFridge(user.id)
+  const { items, loading: fridgeLoading }    = fridgeHook
   const { isSaved, toggle: toggleSave }      = useSavedRecipes(user.id)
-  const { staples, isActive: isPantry }      = usePantry(user.id)
+  const { staples }                           = usePantry(user.id)
   const navigate = useNavigate()
   const toast    = useToast()
 
@@ -46,6 +47,23 @@ export default function RecipesPage({ user }) {
       duration: 4000,
     })
   }, [isSaved, toggleSave, toast])
+
+  const handleCook = async (plan) => {
+    for (const item of plan) {
+      try {
+        if (item.willDelete) {
+          await fridgeHook.remove(item.fridgeItem.id)
+        } else if (item.canCompute && item.remaining !== null) {
+          await fridgeHook.update(item.fridgeItem.id, {
+            quantity: Math.round(item.remaining * 100) / 100,
+          })
+        }
+      } catch (err) {
+        console.error('Cook deduction error:', err)
+      }
+    }
+    toast({ type: 'success', message: '🍽️ Fridge updated! Enjoy your meal.', duration: 4000 })
+  }
 
   const search = useCallback(async (activeFilters, ingredients) => {
     const ing = ingredients ?? allIngredients
@@ -211,9 +229,12 @@ export default function RecipesPage({ user }) {
         <RecipeDetail
           recipe={selected}
           fridgeIngredients={allIngredients}
+          fridgeItems={items}
+          pantryStaples={staples}
           onBack={() => setSelected(null)}
           isSaved={isSaved(selected.id)}
           onSave={() => handleSave(selected)}
+          onCook={handleCook}
         />
       )}
 

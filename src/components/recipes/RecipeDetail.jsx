@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2 } from 'lucide-react'
+import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2, UtensilsCrossed } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/spoonacular'
 import { getMissingTier } from '../../lib/recipeUtils'
 import Button from '../ui/Button'
 import SaveButton from './SaveButton'
+import CookItModal from './CookItModal'
 
 function NutrientPill({ label, value }) {
   return (
@@ -14,15 +15,24 @@ function NutrientPill({ label, value }) {
   )
 }
 
-export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSaved = false, onSave }) {
-  const [detail, setDetail]   = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
+export default function RecipeDetail({
+  recipe,
+  fridgeIngredients,
+  fridgeItems = [],
+  pantryStaples = [],
+  onBack,
+  isSaved = false,
+  onSave,
+  onCook,
+}) {
+  const [detail, setDetail]           = useState(null)
+  const [loading, setLoading]         = useState(true)
+  const [error, setError]             = useState('')
+  const [showCookModal, setShowCookModal] = useState(false)
 
   useEffect(() => {
     setLoading(true)
     setError('')
-    // Pass full recipe for mock IDs (>=9000) so no second API call fires
     getRecipeDetails(recipe.id, recipe.id >= 9000 ? recipe : null)
       .then(({ detail }) => setDetail(detail))
       .catch(e => setError(e.message))
@@ -34,7 +44,7 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
   const inFridge = (ingName) =>
     fridgeNames.some(f => f.includes(ingName.toLowerCase()) || ingName.toLowerCase().includes(f))
 
-  const steps = detail?.analyzedInstructions?.[0]?.steps ?? []
+  const steps     = detail?.analyzedInstructions?.[0]?.steps ?? []
   const nutrition = detail?.nutrition?.nutrients ?? []
   const calories  = nutrition.find(n => n.name === 'Calories')
   const protein   = nutrition.find(n => n.name === 'Protein')
@@ -65,16 +75,30 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
         </div>
       )}
 
-      {/* Title + meta */}
+      {/* Title + actions */}
       <div className="mb-8">
         <div className="flex items-start justify-between gap-4 mb-4">
           <h1 className="text-3xl sm:text-4xl leading-tight"
               style={{ fontFamily: 'Playfair Display, serif' }}>
             {recipe.title}
           </h1>
-          {onSave && (
-            <SaveButton saved={isSaved} onClick={onSave} size="lg" className="flex-shrink-0 mt-1" />
-          )}
+          <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+            {onSave && <SaveButton saved={isSaved} onClick={onSave} size="lg" />}
+            {onCook && detail && (
+              <button
+                onClick={() => setShowCookModal(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-medium transition-all duration-150 whitespace-nowrap"
+                style={{
+                  background:  'var(--green-light)',
+                  borderColor: 'var(--green-mid)',
+                  color:       'var(--green)',
+                }}
+              >
+                <UtensilsCrossed size={15} />
+                I Cooked This
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-4 text-sm" style={{ color: 'var(--ink-muted)' }}>
@@ -98,7 +122,6 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
           )}
         </div>
 
-        {/* Diet tags */}
         {(recipe.diets ?? detail?.diets ?? []).length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
             {(recipe.diets ?? detail.diets).map(d => (
@@ -114,14 +137,14 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
       {/* Nutrition strip */}
       {calories && (
         <div className="flex gap-3 mb-8 overflow-x-auto pb-1">
-          {calories && <NutrientPill label="Calories" value={Math.round(calories.amount)} />}
-          {protein  && <NutrientPill label="Protein"  value={`${Math.round(protein.amount)}g`} />}
-          {carbs    && <NutrientPill label="Carbs"    value={`${Math.round(carbs.amount)}g`} />}
-          {fat      && <NutrientPill label="Fat"      value={`${Math.round(fat.amount)}g`} />}
+          <NutrientPill label="Calories" value={Math.round(calories.amount)} />
+          {protein && <NutrientPill label="Protein" value={`${Math.round(protein.amount)}g`} />}
+          {carbs   && <NutrientPill label="Carbs"   value={`${Math.round(carbs.amount)}g`} />}
+          {fat     && <NutrientPill label="Fat"     value={`${Math.round(fat.amount)}g`} />}
         </div>
       )}
 
-      {/* Loading state */}
+      {/* Loading */}
       {loading && (
         <div className="flex items-center gap-3 py-12 justify-center" style={{ color: 'var(--ink-muted)' }}>
           <Loader2 size={20} className="animate-spin" />
@@ -139,17 +162,15 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
       {!loading && detail && (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
 
-          {/* ── Ingredients ── */}
+          {/* Ingredients */}
           <aside className="lg:col-span-2">
             <h2 className="text-xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
               Ingredients
             </h2>
-
-            {/* Have / Need split */}
             {(() => {
-              const all   = detail.extendedIngredients ?? []
-              const have  = all.filter(i => inFridge(i.name))
-              const need  = all.filter(i => !inFridge(i.name))
+              const all  = detail.extendedIngredients ?? []
+              const have = all.filter(i => inFridge(i.name))
+              const need = all.filter(i => !inFridge(i.name))
               return (
                 <div className="space-y-5">
                   {have.length > 0 && (
@@ -178,25 +199,22 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
                       <ul className="space-y-2">
                         {need
                           .map(ing => ({ ...ing, _tier: getMissingTier(ing.name || ing.original) }))
-                          .sort((a, b) => {
-                            const order = { core: 0, supporting: 1, minor: 2 }
-                            return order[a._tier] - order[b._tier]
-                          })
+                          .sort((a, b) => ({ core: 0, supporting: 1, minor: 2 }[a._tier] - { core: 0, supporting: 1, minor: 2 }[b._tier]))
                           .map((ing, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm">
-                            <ShoppingCart size={14} className="mt-0.5 flex-shrink-0"
-                                          style={{ color: ing._tier === 'core' ? 'var(--red-soft)' : 'var(--amber)' }} />
-                            <span style={{ color: 'var(--ink-muted)' }}>
-                              {ing.original}
-                              {ing._tier === 'core' && (
-                                <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded"
-                                      style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}>
-                                  essential
-                                </span>
-                              )}
-                            </span>
-                          </li>
-                        ))}
+                            <li key={i} className="flex items-start gap-2 text-sm">
+                              <ShoppingCart size={14} className="mt-0.5 flex-shrink-0"
+                                            style={{ color: ing._tier === 'core' ? 'var(--red-soft)' : 'var(--amber)' }} />
+                              <span style={{ color: 'var(--ink-muted)' }}>
+                                {ing.original}
+                                {ing._tier === 'core' && (
+                                  <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded"
+                                        style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}>
+                                    essential
+                                  </span>
+                                )}
+                              </span>
+                            </li>
+                          ))}
                       </ul>
                     </div>
                   )}
@@ -205,12 +223,11 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
             })()}
           </aside>
 
-          {/* ── Instructions ── */}
+          {/* Instructions */}
           <section className="lg:col-span-3">
             <h2 className="text-xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
               Instructions
             </h2>
-
             {steps.length > 0 ? (
               <ol className="space-y-5">
                 {steps.map(step => (
@@ -225,7 +242,6 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
                       <p className="text-sm leading-relaxed" style={{ color: 'var(--ink)' }}>
                         {step.step}
                       </p>
-                      {/* Equipment used in this step */}
                       {step.equipment?.length > 0 && (
                         <p className="text-xs mt-1.5" style={{ color: 'var(--ink-muted)' }}>
                           🍳 {step.equipment.map(e => e.name).join(', ')}
@@ -239,18 +255,29 @@ export default function RecipeDetail({ recipe, fridgeIngredients, onBack, isSave
               <div className="text-sm" style={{ color: 'var(--ink-muted)' }}>
                 <p className="mb-3">Full step-by-step instructions are on the original recipe page.</p>
                 {detail.sourceUrl && (
-                  <Button
-                    variant="secondary"
-                    onClick={() => window.open(detail.sourceUrl, '_blank')}
-                  >
+                  <Button variant="secondary" onClick={() => window.open(detail.sourceUrl, '_blank')}>
                     <ExternalLink size={14} /> View full recipe
                   </Button>
                 )}
               </div>
             )}
           </section>
-
         </div>
+      )}
+
+      {/* Cook It modal */}
+      {showCookModal && detail && (
+        <CookItModal
+          recipe={recipe}
+          recipeDetail={detail}
+          fridgeItems={fridgeItems}
+          pantryStaples={pantryStaples}
+          onClose={() => setShowCookModal(false)}
+          onConfirm={async (plan) => {
+            await onCook?.(plan)
+            setShowCookModal(false)
+          }}
+        />
       )}
     </div>
   )
