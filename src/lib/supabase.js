@@ -150,3 +150,29 @@ export const setPantryStaples = (userId, staples) =>
     .from('profiles')
     .update({ pantry_staples: staples })
     .eq('id', userId)
+
+// ─── Cook history helpers ─────────────────────────────────────────────────────
+
+export const getCookHistory = (userId) =>
+  supabase
+    .from('cook_history')
+    .select('*')
+    .eq('user_id', userId)
+    .order('cooked_at', { ascending: false })
+
+export const addCookHistory = (userId, recipe) =>
+  supabase
+    .from('cook_history')
+    .insert([{
+      user_id:     userId,
+      recipe_id:   String(recipe.id),
+      recipe_json: recipe,
+    }])
+    .select()
+    .single()
+
+export const deleteCookHistory = (id) =>
+  supabase
+    .from('cook_history')
+    .delete()
+    .eq('id', id)

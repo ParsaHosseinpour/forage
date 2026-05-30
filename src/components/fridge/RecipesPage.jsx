@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, RefreshCw } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
+import { useCookHistory } from '../../hooks/useCookHistory'
 import { usePantry } from '../../hooks/usePantry'
 import { useToast } from '../ui/Toast'
 import { findRecipes } from '../../lib/spoonacular'
@@ -22,6 +23,7 @@ export default function RecipesPage({ user }) {
   const { items, loading: fridgeLoading }    = fridgeHook
   const { isSaved, toggle: toggleSave }      = useSavedRecipes(user.id)
   const { staples }                           = usePantry(user.id)
+  const { logCook }                            = useCookHistory(user.id)
   const navigate = useNavigate()
   const toast    = useToast()
 
@@ -62,6 +64,7 @@ export default function RecipesPage({ user }) {
         console.error('Cook deduction error:', err)
       }
     }
+    try { await logCook(selected ?? {}) } catch { /* non-fatal */ }
     toast({ type: 'success', message: '🍽️ Fridge updated! Enjoy your meal.', duration: 4000 })
   }
 

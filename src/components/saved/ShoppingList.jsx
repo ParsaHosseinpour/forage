@@ -1,20 +1,78 @@
-import { ShoppingCart, Check, Trash2, PackageCheck } from 'lucide-react'
+import { ShoppingCart, Check, Trash2, CheckCircle2 } from 'lucide-react'
 import Button from '../ui/Button'
 
-export default function ShoppingList({ items, isChecked, onToggle, onClearAll, checkedCount, loading }) {
+function IngRow({ item, isChecked, onToggle, inFridgeSection }) {
+  const checked = isChecked(item.name)
+  return (
+    <li
+      onClick={() => !inFridgeSection && onToggle(item.name)}
+      className="flex items-start gap-3 py-3 px-4 rounded-xl transition-all duration-150"
+      style={{
+        background:  inFridgeSection ? 'var(--green-light)'
+                   : checked         ? 'var(--cream-dark)'
+                   :                   'white',
+        cursor:      inFridgeSection ? 'default' : 'pointer',
+        opacity:     checked ? 0.6 : 1,
+        border:      '1px solid var(--border)',
+      }}
+    >
+      {/* Checkbox / check */}
+      <div
+        className="flex-shrink-0 w-5 h-5 rounded-full border flex items-center justify-center mt-0.5 transition-all"
+        style={{
+          background:  inFridgeSection ? 'var(--green)'
+                     : checked         ? 'var(--ink-muted)'
+                     :                   'white',
+          borderColor: inFridgeSection ? 'var(--green)'
+                     : checked         ? 'var(--ink-muted)'
+                     :                   'var(--border)',
+        }}
+      >
+        {(checked || inFridgeSection) && (
+          <Check size={10} strokeWidth={3} style={{ color: 'white' }} />
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p
+          className="text-sm leading-snug"
+          style={{
+            color:          inFridgeSection ? 'var(--green)'
+                          : checked         ? 'var(--ink-muted)'
+                          :                   'var(--ink)',
+            textDecoration: checked && !inFridgeSection ? 'line-through' : 'none',
+            fontWeight:     inFridgeSection ? 500 : 400,
+          }}
+        >
+          {item.original || item.name}
+        </p>
+        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--ink-muted)' }}>
+          {item.recipes.join(', ')}
+        </p>
+      </div>
+    </li>
+  )
+}
+
+export default function ShoppingList({
+  need = [], have = [],
+  isChecked, onToggle, onClearAll, checkedCount, loading,
+}) {
+  const totalItems = need.length
 
   if (loading) {
     return (
       <div className="space-y-3 mt-2">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-12 rounded-xl animate-pulse"
+          <div key={i} className="h-14 rounded-xl animate-pulse"
                style={{ background: 'var(--cream-dark)', animationDelay: `${i * 60}ms` }} />
         ))}
       </div>
     )
   }
 
-  if (items.length === 0) {
+  if (totalItems === 0 && have.length === 0) {
     return (
       <div className="text-center py-16 fade-in">
         <div className="text-5xl mb-4">🛒</div>
@@ -22,14 +80,14 @@ export default function ShoppingList({ items, isChecked, onToggle, onClearAll, c
           Your list is empty
         </h3>
         <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-          Save recipes and their missing ingredients will appear here automatically.
+          Save recipes and their ingredients will appear here, split into what you need
+          to buy and what you already have.
         </p>
       </div>
     )
   }
 
-  // All checked — done state
-  if (checkedCount === items.length) {
+  if (checkedCount === totalItems && totalItems > 0) {
     return (
       <div className="text-center py-16 fade-in">
         <div className="text-5xl mb-4">🎉</div>
@@ -37,8 +95,7 @@ export default function ShoppingList({ items, isChecked, onToggle, onClearAll, c
           You've got everything!
         </h3>
         <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-          All {items.length} ingredient{items.length !== 1 ? 's' : ''} checked off.
-          Time to cook.
+          All {totalItems} ingredient{totalItems !== 1 ? 's' : ''} checked off. Time to cook.
         </p>
         <Button variant="secondary" onClick={onClearAll}>
           <Trash2 size={14} /> Clear list
@@ -47,117 +104,84 @@ export default function ShoppingList({ items, isChecked, onToggle, onClearAll, c
     )
   }
 
-  const pending = items.filter(i => !isChecked(i.name))
-  const done    = items.filter(i => isChecked(i.name))
+  const pending = need.filter(i => !isChecked(i.name))
+  const ticked  = need.filter(i =>  isChecked(i.name))
 
   return (
-    <div className="fade-in">
+    <div className="fade-in space-y-8">
 
       {/* Summary bar */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between">
         <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
           <span className="font-medium" style={{ color: 'var(--ink)' }}>
-            {items.length - checkedCount}
-          </span> item{items.length - checkedCount !== 1 ? 's' : ''} remaining
-          {checkedCount > 0 && ` · ${checkedCount} checked`}
+            {totalItems - checkedCount}
+          </span>
+          {' '}of {totalItems} still needed
+          {have.length > 0 && (
+            <span> · <span style={{ color: 'var(--green)' }}>{have.length} already in fridge</span></span>
+          )}
         </p>
         {checkedCount > 0 && (
           <button
             onClick={onClearAll}
-            className="text-xs flex items-center gap-1 transition-colors"
+            className="text-xs transition-colors"
             style={{ color: 'var(--ink-muted)' }}
           >
-            <Trash2 size={11} /> Clear checked
+            Clear all
           </button>
         )}
       </div>
 
-      {/* Pending items */}
-      <ul className="space-y-2 mb-6">
-        {pending.map(item => (
-          <ShoppingItem key={item.name} item={item} checked={false} onToggle={onToggle} />
-        ))}
-      </ul>
-
-      {/* Done items — visually muted */}
-      {done.length > 0 && (
-        <>
-          <p className="text-xs font-medium uppercase tracking-widest mb-3"
-             style={{ color: 'var(--ink-muted)' }}>
-            In cart ({done.length})
-          </p>
+      {/* Need to buy */}
+      {pending.length > 0 && (
+        <section>
+          <h2 className="text-xs font-medium uppercase tracking-widest mb-3"
+              style={{ color: 'var(--ink-muted)' }}>
+            🛒 Need to buy ({pending.length})
+          </h2>
           <ul className="space-y-2">
-            {done.map(item => (
-              <ShoppingItem key={item.name} item={item} checked={true} onToggle={onToggle} />
+            {pending.map(item => (
+              <IngRow key={item.name} item={item}
+                      isChecked={isChecked} onToggle={onToggle}
+                      inFridgeSection={false} />
             ))}
           </ul>
-        </>
+        </section>
+      )}
+
+      {/* Ticked off */}
+      {ticked.length > 0 && (
+        <section>
+          <h2 className="text-xs font-medium uppercase tracking-widest mb-3"
+              style={{ color: 'var(--ink-muted)' }}>
+            ✅ Got it ({ticked.length})
+          </h2>
+          <ul className="space-y-2">
+            {ticked.map(item => (
+              <IngRow key={item.name} item={item}
+                      isChecked={isChecked} onToggle={onToggle}
+                      inFridgeSection={false} />
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Already in fridge */}
+      {have.length > 0 && (
+        <section>
+          <h2 className="text-xs font-medium uppercase tracking-widest mb-3"
+              style={{ color: 'var(--green)' }}>
+            ✅ Already in your fridge ({have.length})
+          </h2>
+          <ul className="space-y-2">
+            {have.map(item => (
+              <IngRow key={item.name} item={item}
+                      isChecked={isChecked} onToggle={onToggle}
+                      inFridgeSection={true} />
+            ))}
+          </ul>
+        </section>
       )}
     </div>
-  )
-}
-
-function ShoppingItem({ item, checked, onToggle }) {
-  return (
-    <li>
-      <button
-        onClick={() => onToggle(item.name)}
-        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-150"
-        style={{
-          background:   checked ? 'var(--cream-dark)'  : 'white',
-          borderColor:  checked ? 'var(--border)'      : 'var(--border)',
-          opacity:      checked ? 0.65                 : 1,
-        }}
-      >
-        {/* Checkbox */}
-        <div
-          className="flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150"
-          style={{
-            borderColor: checked ? 'var(--green)' : 'var(--border)',
-            background:  checked ? 'var(--green)' : 'white',
-          }}
-        >
-          {checked && <Check size={11} color="white" strokeWidth={3} />}
-        </div>
-
-        {/* Name + amount */}
-        <div className="flex-1 min-w-0">
-          <span
-            className="text-sm font-medium"
-            style={{
-              color:          'var(--ink)',
-              textDecoration: checked ? 'line-through' : 'none',
-            }}
-          >
-            {item.name}
-          </span>
-          {item.amount && (
-            <span className="text-xs ml-2" style={{ color: 'var(--ink-muted)' }}>
-              {item.amount}
-            </span>
-          )}
-        </div>
-
-        {/* Which recipes need this */}
-        <div className="hidden sm:flex gap-1 flex-wrap justify-end max-w-[200px]">
-          {item.recipes.slice(0, 2).map(r => (
-            <span
-              key={r}
-              className="text-xs px-2 py-0.5 rounded-full truncate max-w-[120px]"
-              style={{ background: 'var(--cream-dark)', color: 'var(--ink-muted)' }}
-              title={r}
-            >
-              {r.length > 18 ? r.slice(0, 17) + '…' : r}
-            </span>
-          ))}
-          {item.recipes.length > 2 && (
-            <span className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--cream-dark)', color: 'var(--ink-muted)' }}>
-              +{item.recipes.length - 2}
-            </span>
-          )}
-        </div>
-      </button>
-    </li>
   )
 }
