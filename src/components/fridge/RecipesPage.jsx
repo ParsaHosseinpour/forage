@@ -3,27 +3,23 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, RefreshCw } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
-import { useCookHistory } from '../../hooks/useCookHistory'
 import { usePantry } from '../../hooks/usePantry'
+import { useCookHistory } from '../../hooks/useCookHistory'
 import { useToast } from '../ui/Toast'
-import { findRecipes } from '../../lib/spoonacular'
+import { findRecipes } from '../../lib/recipeEngine'
 import RecipeCard, { RecipeCardSkeleton } from '../recipes/RecipeCard'
 import RecipeDetail from '../recipes/RecipeDetail'
 import FilterBar from '../recipes/FilterBar'
 import Button from '../ui/Button'
 
-const DEFAULT_FILTERS = {
-  diet:    '',
-  maxTime: '',
-  sort:    'min-missing-ingredients',
-}
+const DEFAULT_FILTERS = { diet: '', maxTime: '', sort: 'min-missing-ingredients' }
 
 export default function RecipesPage({ user }) {
-  const fridgeHook                           = useFridge(user.id)
-  const { items, loading: fridgeLoading }    = fridgeHook
-  const { isSaved, toggle: toggleSave }      = useSavedRecipes(user.id)
+  const fridgeHook                            = useFridge(user.id)
+  const { items, loading: fridgeLoading }     = fridgeHook
+  const { isSaved, toggle: toggleSave }       = useSavedRecipes(user.id)
   const { staples }                           = usePantry(user.id)
-  const { logCook }                            = useCookHistory(user.id)
+  const { logCook }                           = useCookHistory(user.id)
   const navigate = useNavigate()
   const toast    = useToast()
 
@@ -32,10 +28,8 @@ export default function RecipesPage({ user }) {
   const [error, setError]       = useState('')
   const [selected, setSelected] = useState(null)
   const [filters, setFilters]   = useState(DEFAULT_FILTERS)
-  const [isDemo, setIsDemo]     = useState(false)
 
-  // Fridge items + pantry staples merged for the API call
-  const fridgeNames  = items.map(i => i.name)
+  const fridgeNames    = items.map(i => i.name)
   const allIngredients = [...new Set([...fridgeNames, ...staples])]
 
   const handleSave = useCallback(async (recipe) => {
@@ -44,95 +38,53 @@ export default function RecipesPage({ user }) {
     toast({
       type:    wasSaved ? 'info' : 'success',
       message: wasSaved
-        ? `Removed "${recipe.title}" from saved recipes.`
-        : `Saved! Missing ingredients added to your shopping list.`,
+        ? `Removed "${recipe.title}" from saved.`
+        : 'Saved! Missing ingredients added to shopping list.',
       duration: 4000,
     })
   }, [isSaved, toggleSave, toast])
 
-  const handleCook = async (plan) => {
+  const handleCook = useCallback(async (plan) => {
     for (const item of plan) {
       try {
-        if (item.willDelete) {
-          await fridgeHook.remove(item.fridgeItem.id)
-        } else if (item.canCompute && item.remaining !== null) {
-          await fridgeHook.update(item.fridgeItem.id, {
-            quantity: Math.round(item.remaining * 100) / 100,
-          })
-        }
-      } catch (err) {
-        console.error('Cook deduction error:', err)
-      }
+        if (item.willDelete)        await fridgeHook.remove(item.fridgeItem.id)
+        else if (item.canCompute)   await fridgeHook.update(item.fridgeItem.id, {
+          quantity: Math.round(item.remaining * 100) / 100,
+        })
+      } catch (err) { console.error('Cook deduction:', err) }
     }
-    try { await logCook(selected ?? {}) } catch { /* non-fatal */ }
+    try { await logCook(selected) } catch { /* non-fatal */ }
     toast({ type: 'success', message: '🍽️ Fridge updated! Enjoy your meal.', duration: 4000 })
-  }
+  }, [fridgeHook, logCook, selected, toast])
 
   const search = useCallback(async (activeFilters, ingredients) => {
     const ing = ingredients ?? allIngredients
-    if (ing.length < 2) return
+    if (ing.length < 1) return
     setLoading(true)
     setError('')
     setSelected(null)
     try {
-      const { recipes: results, fromMock } = await findRecipes(ing, activeFilters)
+      const { recipes: results } = await findRecipes(ing, activeFilters)
       setRecipes(results)
-      setIsDemo(fromMock)
-      if (fromMock) {
-        toast({
-          type:    'warning',
-          message: 'Daily API limit reached — showing sample recipes so you can keep testing the UX.',
-          duration: 8000,
-          action: {
-            label:   'Learn more',
-            onClick: () => window.open('https://spoonacular.com/food-api/pricing', '_blank'),
-          },
-        })
+      if (results.length === 0) {
+        toast({ type: 'info', message: 'No recipes matched. Try adding more ingredients or loosening filters.', duration: 5000 })
       }
     } catch (err) {
       setError(err.message)
     } finally {
       setLoading(false)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allIngredients.join(',')])
+  }, [allIngredients.join(',')])  // eslint-disable-line
 
   useEffect(() => {
-    if (!fridgeLoading && allIngredients.length >= 2) {
-      search(DEFAULT_FILTERS, allIngredients)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fridgeLoading])
+    if (!fridgeLoading && allIngredients.length >= 1) search(DEFAULT_FILTERS, allIngredients)
+  }, [fridgeLoading])  // eslint-disable-line
 
-  const handleFiltersChange = (newFilters) => {
-    setFilters(newFilters)
-    search(newFilters)
-  }
-
-  const tooFewIngredients = !fridgeLoading && allIngredients.length < 2
+  const handleFiltersChange = (newFilters) => { setFilters(newFilters); search(newFilters) }
+  const tooFewIngredients   = !fridgeLoading && allIngredients.length < 1
 
   return (
     <div className="max-w-5xl mx-auto px-5 py-8">
-
-      {/* Demo mode banner */}
-      {isDemo && !loading && (
-        <div className="flex items-start gap-3 rounded-2xl border px-5 py-4 mb-6 fade-in"
-             style={{ background: 'var(--amber-light)', borderColor: '#F5D9B8' }}>
-          <span className="text-lg leading-none mt-0.5">🧪</span>
-          <div>
-            <p className="text-sm font-medium" style={{ color: 'var(--amber)' }}>
-              Showing sample recipes
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: '#A0622A' }}>
-              The Spoonacular daily quota is exhausted. Filters, detail view, saving, and
-              shopping list all work with demo data. Add a fresh API key in your{' '}
-              <a href="https://vercel.com" target="_blank" rel="noopener noreferrer"
-                 className="underline underline-offset-2">Vercel env vars</a>{' '}
-              to restore live data.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Header */}
       {!selected && (
@@ -157,24 +109,18 @@ export default function RecipesPage({ user }) {
             </div>
           </div>
 
-          {/* Ingredient chips — fridge items + pantry staples shown separately */}
+          {/* Ingredient chips */}
           {allIngredients.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
               {fridgeNames.map(name => (
-                <span key={name}
-                      className="text-xs px-3 py-1 rounded-full border"
+                <span key={name} className="text-xs px-3 py-1 rounded-full border"
                       style={{ background: 'white', borderColor: 'var(--border)', color: 'var(--ink)' }}>
                   {name}
                 </span>
               ))}
               {staples.map(name => (
-                <span key={`pantry-${name}`}
-                      className="text-xs px-3 py-1 rounded-full border"
-                      style={{
-                        background:  'var(--amber-light)',
-                        borderColor: '#F5D9B8',
-                        color:       'var(--amber)',
-                      }}>
+                <span key={`pantry-${name}`} className="text-xs px-3 py-1 rounded-full border"
+                      style={{ background: 'var(--amber-light)', borderColor: '#F5D9B8', color: 'var(--amber)' }}>
                   🫙 {name}
                 </span>
               ))}
@@ -182,12 +128,8 @@ export default function RecipesPage({ user }) {
           )}
 
           {!tooFewIngredients && (
-            <FilterBar
-              filters={filters}
-              onChange={handleFiltersChange}
-              resultCount={loading ? null : recipes.length}
-              loading={loading}
-            />
+            <FilterBar filters={filters} onChange={handleFiltersChange}
+                       resultCount={loading ? null : recipes.length} loading={loading} />
           )}
         </div>
       )}
@@ -196,19 +138,19 @@ export default function RecipesPage({ user }) {
       {error && !loading && (
         <div className="rounded-xl p-4 mb-6 text-sm fade-in"
              style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}>
-          <strong>Something went wrong:</strong> {error}
+          <strong>Search failed:</strong> {error}
         </div>
       )}
 
-      {/* Too few ingredients */}
+      {/* Too few */}
       {tooFewIngredients && (
         <div className="text-center py-24 fade-in">
           <div className="text-5xl mb-4">🧅</div>
           <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Add at least 2 ingredients
+            Add at least 1 ingredient
           </h2>
           <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-            Head back to your fridge and log what you have — or activate pantry staples.
+            Head back to your fridge and log what you have.
           </p>
           <Button onClick={() => navigate('/fridge')}>
             <ChevronLeft size={15} /> Go to my fridge
@@ -216,7 +158,7 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
-      {/* Loading skeletons */}
+      {/* Skeletons */}
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(9)].map((_, i) => (
@@ -227,7 +169,7 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
-      {/* Recipe detail */}
+      {/* Detail */}
       {selected && !loading && (
         <RecipeDetail
           recipe={selected}
@@ -241,7 +183,7 @@ export default function RecipesPage({ user }) {
         />
       )}
 
-      {/* Recipe grid */}
+      {/* Grid */}
       {!loading && !selected && recipes.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 fade-in">
           {recipes.map(recipe => (
@@ -264,7 +206,7 @@ export default function RecipesPage({ user }) {
             No recipes found
           </h2>
           <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-            Try loosening the filters or adding more ingredients.
+            Try loosening the filters or seeding the database (run the seed script).
           </p>
           <Button variant="secondary" onClick={() => handleFiltersChange(DEFAULT_FILTERS)}>
             Clear all filters

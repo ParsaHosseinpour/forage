@@ -4,6 +4,7 @@ import Button from '../ui/Button'
 import { Input, Label, Select } from '../ui/Input'
 import IngredientAutocomplete from '../ui/IngredientAutocomplete'
 import { parseBulkIngredients, detectCategory } from '../../lib/ingredientParser'
+import { getIngredientDefaults } from '../../lib/ingredientSuggestions'
 
 export const CATEGORIES = [
   { value: 'produce',   label: '🥦 Produce'   },
@@ -51,11 +52,15 @@ function SingleForm({ onAdd, onClose }) {
           id="ing-name"
           value={form.name}
           onChange={set('name')}
-          onSelect={(name) => setForm(f => ({
-            ...f,
-            name,
-            category: detectCategory(name),
-          }))}
+          onSelect={(name) => {
+            const defaults = getIngredientDefaults(name)
+            setForm(f => ({
+              ...f,
+              name,
+              category: defaults?.category ?? detectCategory(name),
+              unit:     defaults?.default_unit ?? f.unit,
+            }))
+          }}
           autoFocus
         />
       </div>
