@@ -30,7 +30,7 @@ export default function SavedPage({ user }) {
   const { staples }                            = usePantry(user.id)
   const { saved, loading, toggle, isSaved }    = useSavedRecipes(user.id)
   const { logCook }                            = useCookHistory(user.id)
-  const { need, have, isChecked, toggle: checkToggle,
+  const { byRecipe, need, have, isChecked, toggle: checkToggle,
           clearAll, checkedCount, loading: listLoading } = useShoppingList(user.id, saved, fridgeItems)
 
   const fridgeNames = fridgeItems.map(i => i.name)
@@ -169,6 +169,7 @@ export default function SavedPage({ user }) {
       {/* ── SHOPPING LIST TAB ── */}
       {tab === 'shopping' && !selected && (
         <ShoppingList
+          byRecipe={byRecipe}
           need={need}
           have={have}
           isChecked={isChecked}

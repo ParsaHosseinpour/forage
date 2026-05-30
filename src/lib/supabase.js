@@ -160,14 +160,24 @@ export const getCookHistory = (userId) =>
     .eq('user_id', userId)
     .order('cooked_at', { ascending: false })
 
-export const addCookHistory = (userId, recipe) =>
+export const addCookHistory = (userId, recipe, extra = {}) =>
   supabase
     .from('cook_history')
     .insert([{
-      user_id:     userId,
-      recipe_id:   String(recipe.id),
-      recipe_json: recipe,
+      user_id:              userId,
+      recipe_id:            String(recipe.id),
+      recipe_json:          recipe,
+      meal_type:            extra.meal_type            ?? null,
+      calories_per_serving: extra.calories_per_serving ?? null,
     }])
+    .select()
+    .single()
+
+export const updateCookHistoryEntry = (id, updates) =>
+  supabase
+    .from('cook_history')
+    .update(updates)
+    .eq('id', id)
     .select()
     .single()
 

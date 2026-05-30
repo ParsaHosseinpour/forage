@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ChevronLeft, RefreshCw } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
@@ -16,6 +16,7 @@ const DEFAULT_FILTERS = { diet: '', maxTime: '', sort: 'min-missing-ingredients'
 
 export default function RecipesPage({ user }) {
   const fridgeHook                            = useFridge(user.id)
+  const location                               = useLocation()
   const { items, loading: fridgeLoading }     = fridgeHook
   const { isSaved, toggle: toggleSave }       = useSavedRecipes(user.id)
   const { staples }                           = usePantry(user.id)
@@ -79,6 +80,16 @@ export default function RecipesPage({ user }) {
   useEffect(() => {
     if (!fridgeLoading && allIngredients.length >= 1) search(DEFAULT_FILTERS, allIngredients)
   }, [fridgeLoading])  // eslint-disable-line
+
+  // "Cook Again" — navigate back here with a recipe in location state
+  useEffect(() => {
+    const again = location.state?.cookAgain
+    if (again) {
+      setSelected(again)
+      // Clear the state so refreshing doesn't re-open it
+      window.history.replaceState({}, '')
+    }
+  }, [location.state])
 
   const handleFiltersChange = (newFilters) => { setFilters(newFilters); search(newFilters) }
   const tooFewIngredients   = !fridgeLoading && allIngredients.length < 1
