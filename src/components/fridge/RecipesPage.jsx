@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ChevronLeft, RefreshCw } from 'lucide-react'
+import { ChevronLeft, RefreshCw, Users } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
 import { usePantry } from '../../hooks/usePantry'
 import { useCookHistory } from '../../hooks/useCookHistory'
+import { useMealPlan } from '../../hooks/useMealPlan'
 import { useToast } from '../ui/Toast'
 import { findRecipes } from '../../lib/recipeEngine'
 import RecipeCard, { RecipeCardSkeleton } from '../recipes/RecipeCard'
@@ -14,24 +15,118 @@ import Button from '../ui/Button'
 
 const DEFAULT_FILTERS = { diet: '', maxTime: '', sort: 'min-missing-ingredients' }
 
+const SERVING_OPTIONS = [
+  { label: '1 Person',    value: 1 },
+  { label: '2 People',    value: 2 },
+  { label: '4 People',    value: 4 },
+  { label: '6+ Family',   value: 6 },
+]
+
+function QuickServingSelector({ value, onChange }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Users size={14} style={{ color: 'var(--ink-muted)', flexShrink: 0 }} />
+      <span className="text-xs" style={{ color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>
+        Scale for
+      </span>
+      <div className="flex gap-1">
+        {SERVING_OPTIONS.map(opt => {
+          const active = value === opt.value
+          return (
+            <button
+              key={opt.value}
+              onClick={() => onChange(active ? null : opt.value)}
+              className="px-2.5 py-1 rounded-lg text-xs border transition-all duration-150"
+              style={{
+                background:  active ? 'var(--green)'      : 'white',
+                borderColor: active ? 'var(--green)'      : 'var(--border)',
+                color:       active ? 'white'             : 'var(--ink-muted)',
+                fontWeight:  active ? 500                 : 400,
+              }}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function RecipesPage({ user }) {
   const fridgeHook                            = useFridge(user.id)
-  const location                               = useLocation()
+  const location                              = useLocation()
   const { items, loading: fridgeLoading }     = fridgeHook
   const { isSaved, toggle: toggleSave }       = useSavedRecipes(user.id)
-  const { staples }                           = usePantry(user.id)
+  const { staples, loading: pantryLoading }   = usePantry(user.id)
   const { logCook }                           = useCookHistory(user.id)
+  const { addSlot }                            = useMealPlan(user.id)
   const navigate = useNavigate()
   const toast    = useToast()
 
-  const [recipes, setRecipes]   = useState([])
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState('')
-  const [selected, setSelected] = useState(null)
-  const [filters, setFilters]   = useState(DEFAULT_FILTERS)
+  const [recipes, setRecipes]         = useState([])
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [selected, setSelected]       = useState(null)
+  const [filters, setFilters]         = useState(DEFAULT_FILTERS)
+  // BUG 2: global serving override — null = use recipe's own default
+  const [globalServings, setGlobalServings] = useState(null)
 
   const fridgeNames    = items.map(i => i.name)
   const allIngredients = [...new Set([...fridgeNames, ...staples])]
+
+  // BUG 1 FIX: track whether we've already fired the initial search.
+  // The old effect only depended on fridgeLoading, so when pantry arrived
+  // async after fridge it didn't re-fire — ingredients were stale/incomplete.
+  // Solution: fire search once both fridgeLoading AND pantryLoading are false.
+  const hasSearched = useRef(false)
+
+  const search = useCallback(async (activeFilters, ingredients) => {
+    const ing = ingredients ?? allIngredients
+    if (ing.length < 1) return
+    setLoading(true)
+    setError('')
+    setSelected(null)
+    try {
+      const { recipes: results } = await findRecipes(ing, activeFilters)
+      setRecipes(results)
+      if (results.length === 0) {
+        toast({
+          type: 'info',
+          message: 'No recipes matched. Try adding more ingredients or loosening filters.',
+          duration: 5000,
+        })
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [allIngredients.join(',')]) // eslint-disable-line
+
+  // Initial search — waits for BOTH fridge AND pantry to finish loading
+  useEffect(() => {
+    if (fridgeLoading || pantryLoading) return         // still loading
+    if (hasSearched.current) return                    // already fired
+    if (allIngredients.length < 1) return              // nothing to search
+
+    hasSearched.current = true
+    search(DEFAULT_FILTERS, allIngredients)
+  }) // intentionally no dep array — runs after every render until hasSearched fires
+
+  // Cook Again — detect navigation state from HistoryPage
+  useEffect(() => {
+    const again = location.state?.cookAgain
+    if (again) {
+      setSelected(again)
+      window.history.replaceState({}, '')
+    }
+  }, [location.state])
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters)
+    search(newFilters)
+  }
 
   const handleSave = useCallback(async (recipe) => {
     const wasSaved = isSaved(recipe.id)
@@ -48,8 +143,8 @@ export default function RecipesPage({ user }) {
   const handleCook = useCallback(async (plan) => {
     for (const item of plan) {
       try {
-        if (item.willDelete)        await fridgeHook.remove(item.fridgeItem.id)
-        else if (item.canCompute)   await fridgeHook.update(item.fridgeItem.id, {
+        if (item.willDelete) await fridgeHook.remove(item.fridgeItem.id)
+        else if (item.canCompute) await fridgeHook.update(item.fridgeItem.id, {
           quantity: Math.round(item.remaining * 100) / 100,
         })
       } catch (err) { console.error('Cook deduction:', err) }
@@ -58,41 +153,12 @@ export default function RecipesPage({ user }) {
     toast({ type: 'success', message: '🍽️ Fridge updated! Enjoy your meal.', duration: 4000 })
   }, [fridgeHook, logCook, selected, toast])
 
-  const search = useCallback(async (activeFilters, ingredients) => {
-    const ing = ingredients ?? allIngredients
-    if (ing.length < 1) return
-    setLoading(true)
-    setError('')
-    setSelected(null)
-    try {
-      const { recipes: results } = await findRecipes(ing, activeFilters)
-      setRecipes(results)
-      if (results.length === 0) {
-        toast({ type: 'info', message: 'No recipes matched. Try adding more ingredients or loosening filters.', duration: 5000 })
-      }
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [allIngredients.join(',')])  // eslint-disable-line
+  const handleSchedule = async (dayIdx, slotType, recipe) => {
+    await addSlot(dayIdx, slotType, recipe)
+    toast({ type: 'success', message: `📅 ${recipe.title} added to ${slotType} on ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][dayIdx]}.`, duration: 4000 })
+  }
 
-  useEffect(() => {
-    if (!fridgeLoading && allIngredients.length >= 1) search(DEFAULT_FILTERS, allIngredients)
-  }, [fridgeLoading])  // eslint-disable-line
-
-  // "Cook Again" — navigate back here with a recipe in location state
-  useEffect(() => {
-    const again = location.state?.cookAgain
-    if (again) {
-      setSelected(again)
-      // Clear the state so refreshing doesn't re-open it
-      window.history.replaceState({}, '')
-    }
-  }, [location.state])
-
-  const handleFiltersChange = (newFilters) => { setFilters(newFilters); search(newFilters) }
-  const tooFewIngredients   = !fridgeLoading && allIngredients.length < 1
+  const tooFewIngredients = !fridgeLoading && !pantryLoading && allIngredients.length < 1
 
   return (
     <div className="max-w-5xl mx-auto px-5 py-8">
@@ -122,7 +188,7 @@ export default function RecipesPage({ user }) {
 
           {/* Ingredient chips */}
           {allIngredients.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-4">
               {fridgeNames.map(name => (
                 <span key={name} className="text-xs px-3 py-1 rounded-full border"
                       style={{ background: 'white', borderColor: 'var(--border)', color: 'var(--ink)' }}>
@@ -135,6 +201,13 @@ export default function RecipesPage({ user }) {
                   🫙 {name}
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* BUG 2: Quick serving selector */}
+          {recipes.length > 0 && (
+            <div className="mb-4">
+              <QuickServingSelector value={globalServings} onChange={setGlobalServings} />
             </div>
           )}
 
@@ -153,7 +226,7 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
-      {/* Too few */}
+      {/* Too few ingredients */}
       {tooFewIngredients && (
         <div className="text-center py-24 fade-in">
           <div className="text-5xl mb-4">🧅</div>
@@ -169,7 +242,7 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
-      {/* Skeletons */}
+      {/* Loading skeletons */}
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(9)].map((_, i) => (
@@ -180,21 +253,23 @@ export default function RecipesPage({ user }) {
         </div>
       )}
 
-      {/* Detail */}
+      {/* Recipe detail */}
       {selected && !loading && (
         <RecipeDetail
           recipe={selected}
           fridgeIngredients={allIngredients}
           fridgeItems={items}
           pantryStaples={staples}
+          globalServings={globalServings}
           onBack={() => setSelected(null)}
           isSaved={isSaved(selected.id)}
           onSave={() => handleSave(selected)}
           onCook={handleCook}
+          onSchedule={handleSchedule}
         />
       )}
 
-      {/* Grid */}
+      {/* Recipe grid */}
       {!loading && !selected && recipes.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 fade-in">
           {recipes.map(recipe => (
@@ -217,7 +292,7 @@ export default function RecipesPage({ user }) {
             No recipes found
           </h2>
           <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-            Try loosening the filters or seeding the database (run the seed script).
+            Try loosening the filters or adding more ingredients.
           </p>
           <Button variant="secondary" onClick={() => handleFiltersChange(DEFAULT_FILTERS)}>
             Clear all filters

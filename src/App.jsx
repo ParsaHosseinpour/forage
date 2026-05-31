@@ -6,6 +6,7 @@ import FridgePage from './components/fridge/FridgePage'
 import RecipesPage from './components/fridge/RecipesPage'
 import SavedPage from './components/saved/SavedPage'
 import HistoryPage from './components/history/HistoryPage'
+import SchedulePage from './components/schedule/SchedulePage'
 
 function ProtectedLayout({ user }) {
   return (
@@ -16,7 +17,8 @@ function ProtectedLayout({ user }) {
           <Route path="/fridge"  element={<FridgePage  user={user} />} />
           <Route path="/recipes" element={<RecipesPage user={user} />} />
           <Route path="/saved"   element={<SavedPage   user={user} />} />
-          <Route path="/history" element={<HistoryPage user={user} />} />
+          <Route path="/history"  element={<HistoryPage  user={user} />} />
+          <Route path="/schedule" element={<SchedulePage user={user} />} />
           <Route path="*"        element={<Navigate to="/fridge" replace />} />
         </Routes>
       </main>

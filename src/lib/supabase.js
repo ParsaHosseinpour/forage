@@ -186,3 +186,34 @@ export const deleteCookHistory = (id) =>
     .from('cook_history')
     .delete()
     .eq('id', id)
+
+// ─── Meal plan helpers (Step 14) ─────────────────────────────────────────────
+
+/** Get all slots for the current week (Monday-based) */
+export const getMealPlan = (userId, weekStart) =>
+  supabase
+    .from('meal_plan')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('week_start', weekStart)
+    .order('slot_day')
+
+export const addMealPlanSlot = (userId, weekStart, slotDay, slotType, recipe) =>
+  supabase
+    .from('meal_plan')
+    .insert([{
+      user_id:     userId,
+      week_start:  weekStart,
+      slot_day:    slotDay,
+      slot_type:   slotType,
+      recipe_json: recipe,
+      recipe_id:   String(recipe.id),
+    }])
+    .select()
+    .single()
+
+export const deleteMealPlanSlot = (id) =>
+  supabase
+    .from('meal_plan')
+    .delete()
+    .eq('id', id)

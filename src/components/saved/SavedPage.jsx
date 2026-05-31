@@ -7,6 +7,7 @@ import { useFridge } from '../../hooks/useFridge'
 import { usePantry } from '../../hooks/usePantry'
 import { useCookHistory } from '../../hooks/useCookHistory'
 import { useToast } from '../ui/Toast'
+import { useMealPlan } from '../../hooks/useMealPlan'
 import RecipeCard, { RecipeCardSkeleton } from '../recipes/RecipeCard'
 import RecipeDetail from '../recipes/RecipeDetail'
 import CookItModal from '../recipes/CookItModal'
@@ -30,10 +31,16 @@ export default function SavedPage({ user }) {
   const { staples }                            = usePantry(user.id)
   const { saved, loading, toggle, isSaved }    = useSavedRecipes(user.id)
   const { logCook }                            = useCookHistory(user.id)
+  const { slots: scheduledSlots, addSlot }     = useMealPlan(user.id)
   const { byRecipe, need, have, isChecked, toggle: checkToggle,
-          clearAll, checkedCount, loading: listLoading } = useShoppingList(user.id, saved, fridgeItems)
+          clearAll, checkedCount, loading: listLoading } = useShoppingList(user.id, saved, fridgeItems, staples, scheduledSlots)
 
   const fridgeNames = fridgeItems.map(i => i.name)
+
+  const handleSchedule = async (dayIdx, slotType, recipe) => {
+    await addSlot(dayIdx, slotType, recipe)
+    toast({ type: 'success', message: `📅 Added to schedule.`, duration: 3000 })
+  }
 
   // ── Cook It — runs from both the modal (card) and the detail page ──────────
   const executeCook = async (recipe, plan) => {
@@ -191,6 +198,7 @@ export default function SavedPage({ user }) {
           isSaved={isSaved(selected.id)}
           onSave={() => toggle(selected)}
           onCook={handleDetailCook}
+          onSchedule={handleSchedule}
         />
       )}
 

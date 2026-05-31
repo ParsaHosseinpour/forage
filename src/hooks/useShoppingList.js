@@ -7,21 +7,13 @@ import {
 } from '../lib/supabase'
 
 /**
- * Shopping list derived from ALL saved recipe ingredients.
+ * Shopping list derived from ALL saved recipe + scheduled recipe ingredients.
+ * No pre-filtering at insertion — smart hiding is purely client-side.
  *
- * The hook stores EVERYTHING — no pre-filtering at insertion time.
- * The component layer applies the smart hiding (fridge comparison) client-side.
- *
- * Exports:
- *   byRecipe   — Map<recipeTitle, IngredientEntry[]>  (all ings, grouped by recipe)
- *   need       — IngredientEntry[] (not in fridge, deduplicated)
- *   have       — IngredientEntry[] (already in fridge, deduplicated)
- *   isChecked  — (name: string) => boolean
- *   toggle     — (name: string) => void (persists to Supabase)
- *   clearAll   — () => void
- *   checkedCount — number of 'need' items ticked off
+ * BUG 3 FIX: pantryStaples (user's active staples) are treated identically to
+ * fridge items — they're marked _inFridge:true and hidden by default in the view.
  */
-export function useShoppingList(userId, savedRecipes, fridgeItems = []) {
+export function useShoppingList(userId, savedRecipes, fridgeItems = [], pantryStaples = [], scheduledRecipes = []) {
   const [checked, setChecked] = useState(new Set())
   const [loading, setLoading] = useState(true)
 
@@ -33,51 +25,64 @@ export function useShoppingList(userId, savedRecipes, fridgeItems = []) {
     })
   }, [userId])
 
-  // Normalised fridge name set for client-side cross-check
+  // Normalised fridge name set (actual fridge rows)
   const fridgeNameSet = useMemo(
     () => new Set(fridgeItems.map(i => i.name.toLowerCase().trim())),
     [fridgeItems]
   )
 
+  // BUG 3: Normalised pantry staple set — these are always treated as "have it"
+  const pantrySet = useMemo(
+    () => new Set(pantryStaples.map(s => s.toLowerCase().trim())),
+    [pantryStaples]
+  )
+
   const inFridge = useCallback((ingName) => {
     const n = (ingName || '').toLowerCase().trim()
-    return [...fridgeNameSet].some(f => f.includes(n) || n.includes(f))
-  }, [fridgeNameSet])
+    // Match fridge items
+    const matchesFridge = [...fridgeNameSet].some(f => f.includes(n) || n.includes(f))
+    if (matchesFridge) return true
+    // BUG 3: Match pantry staples
+    return [...pantrySet].some(p => p.includes(n) || n.includes(p))
+  }, [fridgeNameSet, pantrySet])
 
   /**
    * byRecipe: all ingredients grouped by recipe title.
-   * Each entry also carries { _inFridge } so the view can filter/style.
-   * No deduplication here — the full list for each recipe is preserved.
+   * Includes both saved recipes and scheduled recipes (prefixed with "Scheduled: ").
+   * Each entry carries _inFridge so the view can filter/style.
    */
   const byRecipe = useMemo(() => {
-    const map = new Map()          // title → IngredientEntry[]
-    for (const row of savedRecipes) {
-      const recipe = row.recipe_json ?? row
-      const title  = recipe.title ?? 'Unknown recipe'
-      const allIngs = recipe.extendedIngredients?.length
-        ? recipe.extendedIngredients
-        : recipe.missedIngredients ?? []
+    const map = new Map()
 
-      const entries = allIngs
-        .map(ing => ({
-          name:      (ing.name || '').trim(),
-          original:  ing.original || ing.name || '',
-          amount:    ing.amount ?? null,
-          unit:      ing.unit   ?? '',
-          _inFridge: inFridge(ing.name || ''),
-          _recipeId: recipe.id,
-        }))
-        .filter(e => e.name)
+    const processRecipes = (recipes, prefix = '') => {
+      for (const row of recipes) {
+        const recipe = row.recipe_json ?? row
+        const title  = `${prefix}${recipe.title ?? 'Unknown recipe'}`
+        const allIngs = recipe.extendedIngredients?.length
+          ? recipe.extendedIngredients
+          : recipe.missedIngredients ?? []
 
-      if (entries.length > 0) map.set(title, entries)
+        const entries = allIngs
+          .map(ing => ({
+            name:      (ing.name || '').trim(),
+            original:  ing.original || ing.name || '',
+            amount:    ing.amount ?? null,
+            unit:      ing.unit   ?? '',
+            _inFridge: inFridge(ing.name || ''),
+            _recipeId: recipe.id,
+          }))
+          .filter(e => e.name)
+
+        if (entries.length > 0) map.set(title, entries)
+      }
     }
-    return map
-  }, [savedRecipes, inFridge])
 
-  /**
-   * Deduplicated need / have lists across all recipes.
-   * Used for the summary badge count.
-   */
+    processRecipes(savedRecipes)
+    processRecipes(scheduledRecipes, 'Scheduled: ')
+    return map
+  }, [savedRecipes, scheduledRecipes, inFridge])
+
+  /** Deduplicated need / have across all recipes — for badge counts */
   const { need, have } = useMemo(() => {
     const needMap = new Map()
     const haveMap = new Map()

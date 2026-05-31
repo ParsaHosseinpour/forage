@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Trash2, ChevronLeft, UtensilsCrossed, Flame, RotateCcw } from 'lucide-react'
 import { useCookHistory } from '../../hooks/useCookHistory'
+import RecipePreviewModal from '../recipes/RecipePreviewModal'
 import Button from '../ui/Button'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -84,6 +85,13 @@ function MealTypePicker({ value, onChange }) {
           {emoji} {key}
         </button>
       ))}
+      {/* Recipe preview modal */}
+      {previewEntry && (
+        <RecipePreviewModal
+          entry={previewEntry}
+          onClose={() => setPreviewEntry(null)}
+        />
+      )}
     </div>
   )
 }
@@ -137,7 +145,7 @@ function WeeklyStats({ weeklyCalories, weekCount }) {
 
 // ── History entry card ────────────────────────────────────────────────────────
 
-function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeChange, onCookAgain }) {
+function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeChange, onCookAgain, onPreview }) {
   const recipe   = entry.recipe_json ?? {}
   const count    = cookCount(entry.recipe_id)
   const [pendingMealType, setPendingMealType] = useState(entry.meal_type ?? null)
@@ -152,8 +160,9 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
   }
 
   return (
-    <div className="rounded-2xl border overflow-hidden transition-shadow hover:shadow-md"
-         style={{ background: 'white', borderColor: 'var(--border)' }}>
+    <div className="rounded-2xl border overflow-hidden transition-shadow hover:shadow-md cursor-pointer"
+         style={{ background: 'white', borderColor: 'var(--border)' }}
+         onClick={(e) => { if (!e.defaultPrevented) onPreview(entry) }}>
 
       {/* Top row: image + title + actions */}
       <div className="flex items-start gap-4 p-4">
@@ -194,7 +203,7 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
         {/* Actions */}
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
-            onClick={() => onCookAgain(recipe)}
+            onClick={(e) => { e.preventDefault(); onCookAgain(recipe) }}
             title="Cook again"
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs border transition-all"
             style={{
@@ -207,7 +216,7 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
             <RotateCcw size={12} /> Cook again
           </button>
           <button
-            onClick={() => onRemove(entry.id)}
+            onClick={(e) => { e.preventDefault(); onRemove(entry.id) }}
             className="p-1.5 rounded-lg transition-colors ml-1"
             style={{ color: 'var(--ink-muted)' }}
             title="Remove"
@@ -245,6 +254,7 @@ export default function HistoryPage({ user }) {
 
   const [mealFilter, setMealFilter] = useState('all')
   const [sortKey, setSortKey]       = useState('recent')
+  const [previewEntry, setPreviewEntry] = useState(null)
 
   // Weekly meal count (regardless of filter)
   const weekCutoff = Date.now() - 7 * 24 * 3600 * 1000
@@ -415,6 +425,7 @@ export default function HistoryPage({ user }) {
                       onRatingChange={handleRatingChange}
                       onMealTypeChange={handleMealTypeChange}
                       onCookAgain={handleCookAgain}
+                      onPreview={setPreviewEntry}
                     />
                   ))}
                 </div>

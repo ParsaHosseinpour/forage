@@ -10,6 +10,7 @@ export default function Navbar({ user }) {
     { label: 'My Fridge', path: '/fridge'  },
     { label: 'Recipes',   path: '/recipes' },
     { label: 'Saved',     path: '/saved'   },
+    { label: 'Planner',   path: '/schedule' },
     { label: 'History',   path: '/history' },
   ]
 

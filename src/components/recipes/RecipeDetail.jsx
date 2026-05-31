@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2, UtensilsCrossed } from 'lucide-react'
+import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2, UtensilsCrossed, CalendarPlus } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/recipeEngine'
 import { getMissingTier } from '../../lib/recipeUtils'
 import { displayQty } from '../../lib/unitNorm'
@@ -7,6 +7,7 @@ import Button from '../ui/Button'
 import SaveButton from './SaveButton'
 import CookItModal from './CookItModal'
 import ServingsScaler from './ServingsScaler'
+import AddToScheduleModal from './AddToScheduleModal'
 
 function NutrientPill({ label, value }) {
   return (
@@ -17,13 +18,40 @@ function NutrientPill({ label, value }) {
   )
 }
 
+// Discrete count units — always round UP to 1 minimum (never "0.3 eggs")
+const DISCRETE_UNITS = new Set(['piece', 'pieces', '', 'egg', 'eggs', 'slice', 'slices',
+  'clove', 'cloves', 'bunch', 'bunches', 'can', 'cans', 'rasher', 'rashers'])
+
+const FRACTIONS = [
+  [1, 1, '1'], [3, 4, '3/4'], [2, 3, '2/3'],
+  [1, 2, '1/2'], [1, 3, '1/3'], [1, 4, '1/4'], [1, 8, '1/8'],
+]
+
+function toFraction(n) {
+  if (n === 0) return '0'
+  const whole = Math.floor(n)
+  const rem   = n - whole
+  if (rem < 0.05) return whole > 0 ? String(whole) : ''
+  for (const [num, den, label] of FRACTIONS) {
+    if (Math.abs(rem - num / den) < 0.08) {
+      return whole > 0 ? `${whole} ${label}` : label
+    }
+  }
+  return parseFloat(n.toFixed(1)).toString()
+}
+
 /** Scale an ingredient's display quantity by `multiplier`, return formatted string */
 function scaledQty(ing, multiplier) {
   if (ing.amount == null) return ''
+  const unit   = (ing.unit || '').toLowerCase()
   const scaled = ing.amount * multiplier
-  if (ing.unit) return displayQty(scaled, ing.unit)
-  const n = Number.isInteger(scaled) ? scaled : parseFloat(scaled.toFixed(1))
-  return String(n)
+
+  // Discrete units: never go below 1
+  const isDiscrete = DISCRETE_UNITS.has(unit)
+  const display    = isDiscrete ? Math.max(1, scaled) : scaled
+
+  if (unit && !isDiscrete) return displayQty(display, unit)
+  return toFraction(display)
 }
 
 export default function RecipeDetail({
@@ -31,15 +59,18 @@ export default function RecipeDetail({
   fridgeIngredients,
   fridgeItems = [],
   pantryStaples = [],
+  globalServings = null,
   onBack,
   isSaved = false,
   onSave,
   onCook,
+  onSchedule,
 }) {
   const [detail, setDetail]                 = useState(null)
   const [loading, setLoading]               = useState(true)
   const [error, setError]                   = useState('')
   const [showCookModal, setShowCookModal]   = useState(false)
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [servings, setServings]             = useState(null)  // null = uninitialized
 
   useEffect(() => {
@@ -65,7 +96,7 @@ export default function RecipeDetail({
   }, [recipe.id])
 
   const defaultServings  = detail?.servings || recipe.servings || 4
-  const currentServings  = servings ?? defaultServings
+  const currentServings  = globalServings ?? servings ?? defaultServings
   const multiplier       = defaultServings > 0 ? currentServings / defaultServings : 1
 
   const fridgeNames = fridgeIngredients.map(n => n.toLowerCase())
@@ -114,6 +145,15 @@ export default function RecipeDetail({
                 style={{ background: 'var(--green-light)', borderColor: 'var(--green-mid)', color: 'var(--green)' }}
               >
                 <UtensilsCrossed size={15} /> I Cooked This
+              </button>
+            )}
+            {onSchedule && (
+              <button
+                onClick={() => setShowScheduleModal(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-medium transition-all whitespace-nowrap"
+                style={{ background: '#EEF0F9', borderColor: '#C7CDE8', color: '#4A52A0' }}
+              >
+                <CalendarPlus size={15} /> Add to Schedule
               </button>
             )}
           </div>
@@ -296,6 +336,18 @@ export default function RecipeDetail({
             )}
           </section>
         </div>
+      )}
+
+      {/* Add to Schedule modal */}
+      {showScheduleModal && (
+        <AddToScheduleModal
+          recipe={detail ?? recipe}
+          onClose={() => setShowScheduleModal(false)}
+          onAdd={async (dayIdx, slotType) => {
+            await onSchedule?.(dayIdx, slotType, detail ?? recipe)
+            setShowScheduleModal(false)
+          }}
+        />
       )}
 
       {/* Cook It modal */}
