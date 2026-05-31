@@ -85,13 +85,6 @@ function MealTypePicker({ value, onChange }) {
           {emoji} {key}
         </button>
       ))}
-      {/* Recipe preview modal */}
-      {previewEntry && (
-        <RecipePreviewModal
-          entry={previewEntry}
-          onClose={() => setPreviewEntry(null)}
-        />
-      )}
     </div>
   )
 }
@@ -440,6 +433,14 @@ export default function HistoryPage({ user }) {
             </p>
           </div>
         </div>
+      )}
+
+      {/* Recipe preview modal — must be here in page scope where previewEntry exists */}
+      {previewEntry && (
+        <RecipePreviewModal
+          entry={previewEntry}
+          onClose={() => setPreviewEntry(null)}
+        />
       )}
     </div>
   )
