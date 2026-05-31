@@ -2,48 +2,84 @@
  * Cook It — quantity deduction utilities.
  *
  * Handles unit conversion so "500g" from a recipe correctly deducts
- * from "1 kg" in the fridge, and "2 pieces" from "5 pieces".
+ * from "1 kg" in the fridge. All unit keys are lowercase-normalised
+ * and aliased so no variant slips through.
  */
 
-// Normalisation to grams
-const TO_GRAMS = { g: 1, kg: 1000, oz: 28.35, lb: 453.6 }
-// Normalisation to ml
-const TO_ML    = { ml: 1, L: 1000, 'fl oz': 29.57, cup: 240, tbsp: 15, tsp: 5 }
+// ── Unit normalisation maps (all keys lowercase) ───────────────────────────────
+
+const TO_GRAMS = {
+  g: 1, gram: 1, grams: 1,
+  kg: 1000, kilogram: 1000, kilograms: 1000,
+  oz: 28.35, ounce: 28.35, ounces: 28.35,
+  lb: 453.6, lbs: 453.6, pound: 453.6, pounds: 453.6,
+}
+
+const TO_ML = {
+  ml: 1, milliliter: 1, millilitre: 1, milliliters: 1, millilitres: 1,
+  l: 1000, liter: 1000, litre: 1000, liters: 1000, litres: 1000,
+  'fl oz': 29.57, 'fluid ounce': 29.57, 'fluid ounces': 29.57,
+  cup: 240, cups: 240,
+  tbsp: 15, tablespoon: 15, tablespoons: 15, tbs: 15,
+  tsp: 5,  teaspoon: 5,  teaspoons: 5,
+}
+
+// Units that are all equivalent "count" — treat as same dimension
+const COUNT_UNITS = new Set([
+  '', 'piece', 'pieces', 'pcs', 'pc', 'count', 'whole',
+  'clove', 'cloves', 'slice', 'slices', 'bunch', 'bunches',
+  'can', 'cans', 'tin', 'tins', 'jar', 'jars', 'bag', 'bags',
+  'head', 'heads', 'stalk', 'stalks', 'sprig', 'sprigs',
+  'handful', 'handfuls', 'pinch', 'pinches', 'dash', 'dashes',
+  'rasher', 'rashers', 'fillet', 'fillets',
+])
+
+// ── Core conversion ───────────────────────────────────────────────────────────
 
 /**
- * Attempt to convert `amount unit` to the `targetUnit` system.
- * Returns null if the units are incompatible (e.g., grams vs pieces).
+ * Convert `amount unit` to `targetUnit` system.
+ *
+ * Returns the converted number, OR the original `amount` when units are
+ * treated as compatible (both count-like, both empty, one empty+one count).
+ * Returns null only for a genuine dimension mismatch (weight vs volume).
  */
 function convertToSameBase(amount, unit, targetUnit) {
-  const u  = (unit || '').toLowerCase()
-  const tu = (targetUnit || '').toLowerCase()
+  const u  = (unit        || '').toLowerCase().trim()
+  const tu = (targetUnit  || '').toLowerCase().trim()
 
-  // Same unit — trivial
+  // ── Identical ──────────────────────────────────────────────────────────────
   if (u === tu) return amount
 
-  // Both in weight system
+  // ── Both count-like ────────────────────────────────────────────────────────
+  // "2 cloves" vs "5 pieces" — treat as same dimension, no scaling needed
+  if (COUNT_UNITS.has(u) && COUNT_UNITS.has(tu)) return amount
+
+  // ── One is empty / count-like, other is a known measurement ───────────────
+  // e.g. recipe says "2 garlic" (no unit), fridge has "200 g" — incompatible
+  // but if fridge also has no unit: treat as compatible
+  if (COUNT_UNITS.has(u) && !TO_GRAMS[tu] && !TO_ML[tu]) return amount
+  if (COUNT_UNITS.has(tu) && !TO_GRAMS[u]  && !TO_ML[u])  return amount
+
+  // ── Both weight ────────────────────────────────────────────────────────────
   if (TO_GRAMS[u] && TO_GRAMS[tu]) {
     return (amount * TO_GRAMS[u]) / TO_GRAMS[tu]
   }
 
-  // Both in volume system
+  // ── Both volume ────────────────────────────────────────────────────────────
   if (TO_ML[u] && TO_ML[tu]) {
     return (amount * TO_ML[u]) / TO_ML[tu]
   }
 
-  // Incompatible — can't convert
+  // ── True dimension mismatch (weight vs volume) ─────────────────────────────
   return null
 }
 
+// ── Ingredient qty extraction ─────────────────────────────────────────────────
+
 /**
- * Parse an ingredient quantity string like "200g chicken breast"
- * or a structured Spoonacular ingredient object into { amount, unit, name }.
- *
- * @param {object} ing — extendedIngredient from Spoonacular or DB
- * @returns {{ amount: number|null, unit: string, name: string }}
+ * Parse a structured ingredient object into { amount, unit, name }.
  */
 export function extractIngredientQty(ing) {
-  // Spoonacular provides .amount and .unit directly
   if (ing.amount !== undefined && ing.amount !== null) {
     return {
       amount: Number(ing.amount) || null,
@@ -52,15 +88,14 @@ export function extractIngredientQty(ing) {
     }
   }
 
-  // DB recipes / mock: parse from the "original" line e.g. "200g chicken"
   const original = (ing.original || ing.name || '').trim()
   const match = original.match(
     /^([\d½¼¾⅓⅔⅛.\/\s]+)\s*(kg|g|ml|l|L|oz|lb|cup|tbsp|tsp|piece|pieces|bunch|clove|cloves|slice|slices|can|cans|handful|pinch)?\s+(.+)/i
   )
   if (match) {
     const rawNum = match[1].trim().replace(/\s/g, '')
-    const num = rawNum.includes('/')
-      ? rawNum.split('/').reduce((a, b) => a / b)
+    const num    = rawNum.includes('/')
+      ? rawNum.split('/').reduce((a, b) => Number(a) / Number(b))
       : parseFloat(rawNum)
     return {
       amount: isNaN(num) ? null : num,
@@ -69,30 +104,19 @@ export function extractIngredientQty(ing) {
     }
   }
 
-  // Fallback: just the name, no quantity
   return { amount: null, unit: '', name: original }
 }
+
+// ── Deduction plan ────────────────────────────────────────────────────────────
 
 /**
  * Build the deduction plan for a recipe against fridge items.
  *
- * For each recipe ingredient that's "in the fridge":
- *   - If quantity is tracked: calculate remaining after deduction
- *   - If no quantity tracked: mark as "will be removed entirely"
- *
- * @param {object[]} recipeIngredients — detail.extendedIngredients
- * @param {object[]} fridgeItems       — from useFridge
- * @param {string[]} pantryStaples     — skip these
- * @returns {DeductionItem[]}
- *
- * DeductionItem: {
- *   fridgeItem:   fridge row (id, name, quantity, unit)
- *   recipeQty:    { amount, unit } from the recipe
- *   deductedQty:  amount to remove (in fridge's unit)
- *   remaining:    fridge.quantity - deductedQty (null if no qty tracked)
- *   willDelete:   boolean — remaining ≤ 0 or no qty tracked
- *   canCompute:   boolean — false if unit mismatch prevented math
- * }
+ * Unit-mismatch policy (Bug 1 fix):
+ *   - Compatible unit systems → compute precise deduction
+ *   - Count-like units on both sides → compatible, use 1:1
+ *   - True dimension mismatch (g vs ml) → canCompute:false, willDelete:true
+ *     so the UI shows the item but asks the user to handle it manually
  */
 export function buildDeductionPlan(recipeIngredients, fridgeItems, pantryStaples = []) {
   const stapleSet = new Set(pantryStaples.map(s => s.toLowerCase()))
@@ -102,23 +126,20 @@ export function buildDeductionPlan(recipeIngredients, fridgeItems, pantryStaples
     const { amount: recipeAmount, unit: recipeUnit, name: ingName } = extractIngredientQty(ing)
     if (!ingName) continue
 
-    // Skip pantry staples
     if (stapleSet.has(ingName.toLowerCase())) continue
 
-    // Find matching fridge item (fuzzy name match)
     const fridgeItem = fridgeItems.find(f => {
       const fn = f.name.toLowerCase()
       const rn = ingName.toLowerCase()
       return fn.includes(rn) || rn.includes(fn)
     })
+    if (!fridgeItem) continue
 
-    if (!fridgeItem) continue // ingredient not in fridge at all
+    const fridgeQty      = fridgeItem.quantity != null ? Number(fridgeItem.quantity) : null
+    const fridgeUnit     = (fridgeItem.unit || '').toLowerCase().trim()
+    const recipeUnitNorm = (recipeUnit        || '').toLowerCase().trim()
 
-    const fridgeQty    = fridgeItem.quantity != null ? Number(fridgeItem.quantity) : null
-    const fridgeUnit   = (fridgeItem.unit || '').toLowerCase().trim()
-    const recipeUnitNorm = (recipeUnit || '').toLowerCase().trim()
-
-    // No quantity tracked in fridge → will just mark for deletion prompt
+    // No quantity on either side — mark for removal, don't block the flow
     if (fridgeQty === null || recipeAmount === null) {
       plan.push({
         fridgeItem,
@@ -131,11 +152,10 @@ export function buildDeductionPlan(recipeIngredients, fridgeItems, pantryStaples
       continue
     }
 
-    // Try unit conversion
     const deductedInFridgeUnits = convertToSameBase(recipeAmount, recipeUnitNorm, fridgeUnit)
 
     if (deductedInFridgeUnits === null) {
-      // Units incompatible (e.g. recipe says "2 cloves", fridge has "150 g")
+      // True dimension mismatch — surface in UI but don't crash
       plan.push({
         fridgeItem,
         recipeQty:   { amount: recipeAmount, unit: recipeUnit },
@@ -148,14 +168,13 @@ export function buildDeductionPlan(recipeIngredients, fridgeItems, pantryStaples
     }
 
     const remaining = fridgeQty - deductedInFridgeUnits
-
     plan.push({
       fridgeItem,
-      recipeQty:      { amount: recipeAmount, unit: recipeUnit },
-      deductedQty:    deductedInFridgeUnits,
-      remaining:      remaining,
-      willDelete:     remaining <= 0,
-      canCompute:     true,
+      recipeQty:   { amount: recipeAmount, unit: recipeUnit },
+      deductedQty: deductedInFridgeUnits,
+      remaining,
+      willDelete:  remaining <= 0,
+      canCompute:  true,
     })
   }
 

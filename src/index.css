@@ -72,3 +72,7 @@ h1, h2, h3 {
   animation: spin 0.7s linear infinite;
   display: inline-block;
 }
+
+/* Hide scrollbar on day-picker strip (mobile) while keeping scroll behaviour */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

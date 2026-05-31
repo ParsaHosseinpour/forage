@@ -1,22 +1,36 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { getMealPlan, addMealPlanSlot, deleteMealPlanSlot } from '../lib/supabase'
 
-/** ISO date string for Monday of the week containing `date` */
+/**
+ * ISO date string (YYYY-MM-DD) for Monday of the week containing `date`.
+ * Uses LOCAL calendar date to avoid UTC-offset timezone bugs.
+ */
 export function getMondayOf(date = new Date()) {
-  const d = new Date(date)
-  const day = d.getDay()                     // 0=Sun, 1=Mon …
-  const diff = day === 0 ? -6 : 1 - day      // shift to Monday
+  const d   = new Date(date)
+  const day = d.getDay()                // 0=Sun, 1=Mon … 6=Sat
+  const diff = day === 0 ? -6 : 1 - day // how many days back to Monday
   d.setDate(d.getDate() + diff)
-  return d.toISOString().slice(0, 10)        // "YYYY-MM-DD"
+  // Format as YYYY-MM-DD using LOCAL date parts (not UTC)
+  const y  = d.getFullYear()
+  const m  = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${dd}`
 }
 
-export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+/** Parse a YYYY-MM-DD string into a local Date object (avoids UTC-midnight offset) */
+export function parseLocalDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+export const DAY_NAMES  = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 export const SLOT_TYPES = ['breakfast', 'lunch', 'dinner', 'snack']
 
 export function useMealPlan(userId) {
-  const weekStart = getMondayOf()
+  // Compute once per mount — weekStart is stable for the lifetime of the session
+  const weekStart = useMemo(() => getMondayOf(), [])
 
-  const [slots, setSlots]   = useState([])  // raw DB rows
+  const [slots,   setSlots]   = useState([])
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
@@ -42,17 +56,17 @@ export function useMealPlan(userId) {
     setSlots(prev => prev.filter(s => s.id !== id))
   }, [])
 
-  /**
-   * Organise slots into a grid: { [slotDay]: { [slotType]: MealPlanRow[] } }
-   * A slot can contain multiple recipes (user might add 2 snacks etc.)
-   */
-  const grid = {}
-  for (let d = 0; d < 7; d++) {
-    grid[d] = {}
-    for (const t of SLOT_TYPES) {
-      grid[d][t] = slots.filter(s => s.slot_day === d && s.slot_type === t)
+  // Grid: { [dayIdx 0-6]: { [slotType]: MealPlanRow[] } }
+  const grid = useMemo(() => {
+    const g = {}
+    for (let d = 0; d < 7; d++) {
+      g[d] = {}
+      for (const t of SLOT_TYPES) {
+        g[d][t] = slots.filter(s => s.slot_day === d && s.slot_type === t)
+      }
     }
-  }
+    return g
+  }, [slots])
 
   return { slots, grid, loading, weekStart, addSlot, removeSlot, reload: load }
 }
