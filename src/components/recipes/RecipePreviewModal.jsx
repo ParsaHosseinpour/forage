@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Clock, Users, CheckCircle2, ShoppingCart, Loader2 } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/recipeEngine'
+import BuyIngredientsButton from '../ui/BuyIngredientsButton'
 
 // ── Fraction formatter (same logic as RecipeDetail/ServingsScaler) ────────────
 
@@ -55,6 +56,12 @@ export default function RecipePreviewModal({ entry, onClose }) {
 
   const steps = detail?.analyzedInstructions?.[0]?.steps ?? []
   const ings  = detail?.extendedIngredients ?? recipe.extendedIngredients ?? []
+
+  // Names of ingredients the user doesn't appear to have (no fridge context here, show all)
+  const missingNames = ings
+    .filter(i => !(i._inFridge))
+    .map(i => (i.name || '').trim())
+    .filter(Boolean)
 
   return (
     <div
@@ -155,6 +162,14 @@ export default function RecipePreviewModal({ entry, onClose }) {
                         </li>
                       ))}
                     </ul>
+                    {missingNames.length > 0 && (
+                      <div className="mt-4">
+                        <BuyIngredientsButton
+                          ingredients={missingNames}
+                          variant="compact"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 

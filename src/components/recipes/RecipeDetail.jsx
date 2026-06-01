@@ -7,6 +7,7 @@ import Button from '../ui/Button'
 import SaveButton from './SaveButton'
 import CookItModal from './CookItModal'
 import ServingsScaler from './ServingsScaler'
+import BuyIngredientsButton from '../ui/BuyIngredientsButton'
 import AddToScheduleModal from './AddToScheduleModal'
 
 function NutrientPill({ label, value }) {
@@ -291,6 +292,13 @@ export default function RecipeDetail({
                             </li>
                           ))}
                       </ul>
+                      {/* Affiliate buy button for missing items */}
+                      <div className="mt-4">
+                        <BuyIngredientsButton
+                          ingredients={need.map(i => i.name)}
+                          variant="inline"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

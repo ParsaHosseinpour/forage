@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Check, Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react'
 import Button from '../ui/Button'
+import BuyIngredientsButton from '../ui/BuyIngredientsButton'
+import { getOrderableItems } from '../../lib/affiliateLinks'
 
 // ── Single ingredient row ─────────────────────────────────────────────────────
 
@@ -136,6 +138,13 @@ export default function ShoppingList({
 }) {
   const [showFridgeItems, setShowFridgeItems] = useState(false)
 
+  // Items that are visible, not checked off, not already in fridge
+  const orderableItems = useMemo(
+    () => getOrderableItems(need, isChecked),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [need, isChecked]
+  )
+
   const totalNeed   = need.length
   const totalHave   = have.length
   const allTicked   = totalNeed > 0 && checkedCount === totalNeed
@@ -232,6 +241,14 @@ export default function ShoppingList({
           />
         ))}
       </div>
+
+      {/* Affiliate buy banner — only shown when there are unchecked, non-fridge items */}
+      {orderableItems.length > 0 && (
+        <BuyIngredientsButton
+          ingredients={orderableItems}
+          variant="banner"
+        />
+      )}
 
     </div>
   )
