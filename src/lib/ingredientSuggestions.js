@@ -34,7 +34,7 @@ const ITEMS = [
   { name: 'Spinach',              default_unit: 'g',     category: 'produce'  },
   { name: 'Baby spinach',         default_unit: 'g',     category: 'produce'  },
   { name: 'Broccoli',             default_unit: 'g',     category: 'produce'  },
-  { name: 'Cauliflower',          default_unit: 'g',     category: 'produce'  },
+  { name: 'Cauliflower',          default_unit: 'piece', category: 'produce'  },
   { name: 'Zucchini',             default_unit: 'piece', category: 'produce'  },
   { name: 'Eggplant',             default_unit: 'piece', category: 'produce'  },
   { name: 'Mushrooms',            default_unit: 'g',     category: 'produce'  },
@@ -109,8 +109,9 @@ const ITEMS = [
   { name: 'Feta',             default_unit: 'g',     category: 'dairy' },
   { name: 'Ricotta',          default_unit: 'g',     category: 'dairy' },
   { name: 'Cream cheese',     default_unit: 'g',     category: 'dairy' },
-  { name: 'Yogurt',           default_unit: 'g',     category: 'dairy' },
-  { name: 'Greek yogurt',     default_unit: 'g',     category: 'dairy' },
+  { name: 'Mascarpone',         default_unit: 'g',     category: 'dairy' },
+  { name: 'Yogurt',           default_unit: 'ml',    category: 'dairy' },
+  { name: 'Greek yogurt',     default_unit: 'ml',    category: 'dairy' },
   { name: 'Coconut milk',     default_unit: 'ml',    category: 'dairy' },
 
   // ── Grains ────────────────────────────────────────────────────────────────────
@@ -123,7 +124,7 @@ const ITEMS = [
   { name: 'Basmati rice',     default_unit: 'g',     category: 'grains' },
   { name: 'Jasmine rice',     default_unit: 'g',     category: 'grains' },
   { name: 'Arborio rice',     default_unit: 'g',     category: 'grains' },
-  { name: 'Bread',            default_unit: 'slice', category: 'grains' },
+  { name: 'Bread',            default_unit: 'piece', category: 'grains' },
   { name: 'Flour',            default_unit: 'g',     category: 'grains' },
   { name: 'Plain flour',      default_unit: 'g',     category: 'grains' },
   { name: 'Oats',             default_unit: 'g',     category: 'grains' },
@@ -134,6 +135,7 @@ const ITEMS = [
   { name: 'Breadcrumbs',      default_unit: 'g',     category: 'grains' },
 
   // ── Pantry ────────────────────────────────────────────────────────────────────
+  { name: 'Water',                default_unit: 'ml',   category: 'pantry' },
   { name: 'Olive oil',            default_unit: 'ml',   category: 'pantry' },
   { name: 'Vegetable oil',        default_unit: 'ml',   category: 'pantry' },
   { name: 'Sesame oil',           default_unit: 'ml',   category: 'pantry' },

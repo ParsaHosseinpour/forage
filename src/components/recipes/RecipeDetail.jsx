@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2, UtensilsCrossed, CalendarPlus } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/recipeEngine'
+import { ingredientMatches } from '../../lib/recipeDb'
 import { getMissingTier } from '../../lib/recipeUtils'
 import { displayQty } from '../../lib/unitNorm'
 import Button from '../ui/Button'
@@ -102,7 +103,7 @@ export default function RecipeDetail({
 
   const fridgeNames = fridgeIngredients.map(n => n.toLowerCase())
   const inFridge = (ingName = '') =>
-    fridgeNames.some(f => f.includes(ingName.toLowerCase()) || ingName.toLowerCase().includes(f))
+    fridgeNames.some(f => ingredientMatches(f, ingName))
 
   const steps     = detail?.analyzedInstructions?.[0]?.steps ?? []
   const nutrition = detail?.nutrition?.nutrients ?? []

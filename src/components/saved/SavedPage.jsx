@@ -7,6 +7,7 @@ import { useFridge } from '../../hooks/useFridge'
 import { usePantry } from '../../hooks/usePantry'
 import { useCookHistory } from '../../hooks/useCookHistory'
 import { useToast } from '../ui/Toast'
+import { refreshRecipeMatch } from '../../lib/recipeDb'
 import { useMealPlan } from '../../hooks/useMealPlan'
 import RecipeCard, { RecipeCardSkeleton } from '../recipes/RecipeCard'
 import RecipeDetail from '../recipes/RecipeDetail'
@@ -144,7 +145,11 @@ export default function SavedPage({ user }) {
           {!loading && saved.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 fade-in">
               {saved.map(row => {
-                const recipe = row.recipe_json ?? row
+                const recipe = refreshRecipeMatch(
+                  row.recipe_json ?? row,
+                  // Include pantry staples so match % is consistent with RecipesPage
+                  [...fridgeItems.map(i => i.name), ...staples]
+                )
                 return (
                   <div key={row.recipe_id ?? recipe.id} className="flex flex-col gap-2">
                     <RecipeCard

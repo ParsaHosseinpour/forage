@@ -1,3 +1,5 @@
+import { normalizeIngredient } from './recipeDb'
+
 /**
  * Tier-based ingredient matching.
  *
@@ -45,14 +47,14 @@ const SUPPORTING = [
   'cheese', 'parmesan', 'mozzarella', 'cheddar', 'feta', 'ricotta',
   'cream', 'heavy cream', 'sour cream', 'creme fraiche',
   'milk', 'yogurt', 'butter',
-  'egg', 'eggs',
+  'egg',  // 'eggs' normalizes to 'egg'
   'coconut milk', 'coconut cream',
 ]
 
 const TIER_WEIGHT = { core: 5, supporting: 2, minor: 0.5 }
 
 function classifyTier(name = '') {
-  const n = name.toLowerCase()
+  const n = normalizeIngredient(name)
   if (CORE_PROTEINS.some(p => n.includes(p))) return 'core'
   if (CORE_CARBS.some(p => n.includes(p))) return 'core'
   if (SUPPORTING.some(p => n.includes(p))) return 'supporting'
