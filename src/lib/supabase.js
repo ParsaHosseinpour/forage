@@ -19,6 +19,26 @@ export const signOut = () =>
 export const getSession = () =>
   supabase.auth.getSession()
 
+/** Send a password-reset email. Supabase redirects the user to redirectTo
+ *  with a recovery token in the URL hash once they click the email link. */
+export const requestPasswordReset = (email) =>
+  supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  })
+
+/** Set a new password — only works while a recovery session is active
+ *  (i.e. right after the user clicks the reset-password email link). */
+export const updatePassword = (newPassword) =>
+  supabase.auth.updateUser({ password: newPassword })
+
+/** Resend the signup confirmation email (e.g. if the first one expired). */
+export const resendConfirmationEmail = (email) =>
+  supabase.auth.resend({
+    type:  'signup',
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/fridge` },
+  })
+
 // ─── Fridge helpers ──────────────────────────────────────────────────────────
 
 export const getFridgeItems = (userId) =>

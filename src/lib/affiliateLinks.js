@@ -1,129 +1,149 @@
 /**
- * Forage — Affiliate Link Engine
+ * Forage — Affiliate Link Engine (v2)
  *
- * Builds affiliate/referral tracking URLs for online grocery platforms.
+ * IMPORTANT FIX vs v1:
+ * v1 joined ALL missing ingredients into a single search query
+ * ("chicken breast garlic onion") and sent that as one literal search term.
+ * Grocery platforms search for an exact product matching that whole phrase,
+ * which almost never exists — so the search returned nothing.
+ *
+ * v2 builds ONE URL PER INGREDIENT. Each ingredient gets its own clean
+ * search link on each platform. This is how every real grocery-affiliate
+ * site does it (you can't deep-link a multi-item cart without the
+ * platform's approved Shoppable/Partner API, which requires a backend
+ * and merchant approval).
  *
  * Architecture:
- *   - Pure functions, no side effects, no React dependency.
- *   - Each PLATFORM entry defines how to turn an ingredient list into a URL.
- *   - The active platform + affiliate ID are read from Vite env vars so
- *     Parsa can swap them from the Vercel dashboard with no code changes.
+ *   - Pure functions, no React dependency.
+ *   - PLATFORMS defines how to build a ONE-ITEM search URL per provider.
+ *   - Enabled platforms + affiliate IDs are read from Vite env vars.
  *
- * To configure:
- *   Add to Vercel environment variables:
- *     VITE_AFFILIATE_PLATFORM  = "instacart" | "amazon_fresh" | "walmart"
- *     VITE_AFFILIATE_ID        = your_affiliate_or_partner_id
+ * Configure in Vercel → Project → Settings → Environment Variables:
+ *   VITE_AFFILIATE_PLATFORMS    = "instacart,amazon"   (comma list, order = display order)
+ *   VITE_INSTACART_AFFILIATE_ID = your_instacart_partner_id
+ *   VITE_AMAZON_AFFILIATE_TAG   = your_amazon_associates_tag
+ *   VITE_WALMART_AFFILIATE_ID   = your_walmart_id
  *
- * How each platform works:
- *   Instacart   — deeplink to /store/search?q=<ingredient>&utm_source=<id>
- *   Amazon Fresh — /fresh/s?k=<ingredients>&tag=<affiliate_id>
- *   Walmart Grocery — /search?q=<ingredient>&affiliateId=<id>
- *
- * For multi-ingredient carts that deep-link directly into a pre-filled
- * cart (Instacart's "shoppable" API requires merchant approval), the
- * fallback is a search page for the first ingredient plus the full list
- * as a query note — this keeps zero backend required.
+ * If unset, defaults to ["instacart", "amazon"] with no tracking ID
+ * (still fully functional search links, just unattributed).
  */
 
 // ── Platform definitions ───────────────────────────────────────────────────────
+// Each buildUrl() takes ONE ingredient name and returns ONE URL.
 
 const PLATFORMS = {
   instacart: {
-    name:    'Instacart',
-    logo:    '🛒',
-    color:   '#43B02A',
-    /**
-     * Instacart deep search link.
-     * One URL per ingredient is ideal but we generate one aggregated search
-     * for the first 3 items (most important) to keep the link short and
-     * shareable. utm_source carries the partner ID for attribution.
-     */
-    buildUrl(ingredients, affiliateId) {
-      if (!ingredients.length) return null
-      // Take up to the first 3 items for the search query
-      const query = ingredients.slice(0, 3).join(' ')
+    key:   'instacart',
+    name:  'Instacart',
+    logo:  '🛒',
+    color: '#43B02A',
+    buildUrl(ingredientName, affiliateId) {
       const params = new URLSearchParams({
-        q:          query,
-        utm_source: affiliateId || 'forage_app',
-        utm_medium: 'affiliate',
-        utm_campaign: 'missing_ingredients',
+        utm_source:   affiliateId || 'forage_app',
+        utm_medium:   'affiliate',
+        utm_campaign: 'missing_ingredient',
       })
-      return `https://www.instacart.com/store/s?${params}`
+      // Instacart's public store search — single term, no login required
+      return `https://www.instacart.com/store/search_v3/term?term=${encodeURIComponent(ingredientName)}&${params}`
     },
   },
 
-  amazon_fresh: {
-    name:  'Amazon Fresh',
+  amazon: {
+    key:   'amazon',
+    name:  'Amazon',
     logo:  '📦',
     color: '#FF9900',
-    buildUrl(ingredients, affiliateId) {
-      if (!ingredients.length) return null
-      const query = ingredients.join(' ')
-      const params = new URLSearchParams({ k: query })
-      // Amazon Associates tag appended separately (must be bare, no encoding)
+    buildUrl(ingredientName, affiliateTag) {
+      const params = new URLSearchParams({
+        k: ingredientName,
+        i: 'grocery', // narrow to grocery department so results are relevant
+      })
       const base = `https://www.amazon.com/s?${params}`
-      return affiliateId ? `${base}&tag=${encodeURIComponent(affiliateId)}` : base
+      // Associates tag must be a bare, unencoded query param
+      return affiliateTag ? `${base}&tag=${encodeURIComponent(affiliateTag)}` : base
     },
   },
 
   walmart: {
-    name:  'Walmart Grocery',
+    key:   'walmart',
+    name:  'Walmart',
     logo:  '🏪',
     color: '#0071CE',
-    buildUrl(ingredients, affiliateId) {
-      if (!ingredients.length) return null
-      const query = ingredients.join(' ')
-      const params = new URLSearchParams({ q: query })
+    buildUrl(ingredientName, affiliateId) {
+      const params = new URLSearchParams({ q: ingredientName })
       if (affiliateId) params.set('affiliateId', affiliateId)
       return `https://www.walmart.com/search?${params}`
     },
   },
 
-  // Generic fallback — Google Shopping search, no affiliate tracking
   google_shopping: {
+    key:   'google_shopping',
     name:  'Google Shopping',
     logo:  '🔍',
     color: '#4285F4',
-    buildUrl(ingredients, _affiliateId) {
-      if (!ingredients.length) return null
-      const query = ingredients.join(' ')
-      const params = new URLSearchParams({ q: query, tbm: 'shop' })
+    buildUrl(ingredientName, _affiliateId) {
+      const params = new URLSearchParams({ q: ingredientName, tbm: 'shop' })
       return `https://www.google.com/search?${params}`
     },
   },
 }
 
-// ── Config (read from env vars) ────────────────────────────────────────────────
+// ── Config (env vars, with sane defaults) ──────────────────────────────────────
 
-const ACTIVE_PLATFORM_KEY = import.meta.env.VITE_AFFILIATE_PLATFORM || 'instacart'
-const AFFILIATE_ID        = import.meta.env.VITE_AFFILIATE_ID        || 'forage_app'
+const ENABLED_KEYS = (import.meta.env.VITE_AFFILIATE_PLATFORMS || 'instacart,amazon')
+  .split(',')
+  .map(s => s.trim())
+  .filter(k => PLATFORMS[k])
 
-export const activePlatform =
-  PLATFORMS[ACTIVE_PLATFORM_KEY] ?? PLATFORMS.instacart
+const AFFILIATE_IDS = {
+  instacart: import.meta.env.VITE_INSTACART_AFFILIATE_ID || '',
+  amazon:    import.meta.env.VITE_AMAZON_AFFILIATE_TAG    || '',
+  walmart:   import.meta.env.VITE_WALMART_AFFILIATE_ID    || '',
+  google_shopping: '',
+}
+
+/** Ordered list of active platform configs (at least one, falls back to Instacart) */
+export const enabledPlatforms =
+  (ENABLED_KEYS.length ? ENABLED_KEYS : ['instacart']).map(k => PLATFORMS[k])
 
 // ── Public API ─────────────────────────────────────────────────────────────────
 
 /**
- * Build the affiliate URL for a list of ingredient name strings.
- *
- * @param {string[]} ingredientNames — plain names, e.g. ['chicken breast', 'garlic']
- * @returns {string | null}          — full URL or null if list is empty
+ * Build a single search URL for ONE ingredient on ONE platform.
+ * @param {string} platformKey — 'instacart' | 'amazon' | 'walmart' | 'google_shopping'
+ * @param {string} ingredientName
+ * @returns {string|null}
  */
-export function buildAffiliateUrl(ingredientNames) {
-  const cleaned = ingredientNames
-    .map(n => n.trim())
+export function buildItemUrl(platformKey, ingredientName) {
+  const name = (ingredientName || '').trim()
+  if (!name) return null
+  const platform = PLATFORMS[platformKey]
+  if (!platform) return null
+  return platform.buildUrl(name, AFFILIATE_IDS[platformKey])
+}
+
+/**
+ * Build per-ingredient link sets across all enabled platforms.
+ *
+ * @param {string[]} ingredientNames
+ * @returns {Array<{ name: string, links: Array<{ platform: object, url: string }> }>}
+ */
+export function buildItemLinks(ingredientNames) {
+  return ingredientNames
+    .map(n => (n || '').trim())
     .filter(Boolean)
-
-  if (!cleaned.length) return null
-
-  return activePlatform.buildUrl(cleaned, AFFILIATE_ID)
+    .map(name => ({
+      name,
+      links: enabledPlatforms.map(platform => ({
+        platform,
+        url: platform.buildUrl(name, AFFILIATE_IDS[platform.key]),
+      })),
+    }))
 }
 
 /**
  * Compute the "actionable missing" items from a ShoppingList `need` array.
- * These are items that:
- *   1. Are not already in the fridge  (_inFridge !== true)
- *   2. Have not been checked off      (isChecked(name) === false)
+ * Items that are not already in the fridge and not checked off.
  *
  * @param {object[]} needItems — from useShoppingList().need
  * @param {Function} isChecked — (name: string) => boolean

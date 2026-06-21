@@ -1,80 +1,125 @@
-import { ShoppingBag, ExternalLink } from 'lucide-react'
-import { buildAffiliateUrl, activePlatform } from '../../lib/affiliateLinks'
+import { useState } from 'react'
+import { ShoppingBag, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
+import { buildItemLinks, enabledPlatforms } from '../../lib/affiliateLinks'
 
 /**
- * BuyIngredientsButton
+ * BuyIngredientsButton (v2)
  *
- * A self-contained affiliate CTA button. Accepts a list of ingredient
- * name strings, builds the affiliate URL, and opens it in a new tab.
+ * Fix: previously this built ONE search query out of ALL ingredients joined
+ * together ("chicken breast garlic onion"), which platforms treat as one
+ * literal phrase and almost never return results for. Now every ingredient
+ * gets its OWN clean one-item search link, on every enabled platform
+ * (Instacart + Amazon by default — configurable via env vars).
  *
  * Props:
  *   ingredients  {string[]}  — plain ingredient names to order
  *   variant      'banner' | 'inline' | 'compact'
- *     banner  — full-width card with description (ShoppingList bottom)
- *     inline  — medium pill button (RecipeDetail missing-items section)
- *     compact — small icon+text (RecipePreviewModal)
- *   label        optional override text
+ *     banner  — full card: platform logos + expandable per-item link list
+ *     inline  — compact card with platform pills (RecipeDetail)
+ *     compact — small expandable list (RecipePreviewModal)
  *   className    extra classes
  */
 export default function BuyIngredientsButton({
   ingredients = [],
   variant = 'inline',
-  label,
   className = '',
 }) {
-  const url = buildAffiliateUrl(ingredients)
+  const [expanded, setExpanded] = useState(variant !== 'banner')
 
-  // Nothing to buy → render nothing (don't show a broken button)
-  if (!url || ingredients.length === 0) return null
+  const itemLinks = buildItemLinks(ingredients)
+  if (itemLinks.length === 0) return null
 
-  const { name, logo, color } = activePlatform
-  const count = ingredients.length
+  const openLink = (url) => window.open(url, '_blank', 'noopener,noreferrer')
+  const count = itemLinks.length
 
-  const handleClick = () => {
-    // rel="noopener noreferrer" is mandatory for security on target="_blank"
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
+  // ── Shared: per-ingredient row with one button per platform ────────────────
+  const ItemRow = ({ item, size = 'sm' }) => (
+    <div
+      className="flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg"
+      style={{ background: 'white', border: '1px solid var(--border)' }}
+    >
+      <span
+        className="truncate"
+        style={{
+          color: 'var(--ink)',
+          fontSize: size === 'sm' ? '0.75rem' : '0.8125rem',
+        }}
+      >
+        {item.name}
+      </span>
+      <div className="flex items-center gap-1 flex-shrink-0">
+        {item.links.map(({ platform, url }) => (
+          <button
+            key={platform.key}
+            onClick={() => openLink(url)}
+            title={`Search "${item.name}" on ${platform.name}`}
+            className="flex items-center justify-center rounded-md transition-transform active:scale-90"
+            style={{
+              width:      size === 'sm' ? 22 : 26,
+              height:     size === 'sm' ? 22 : 26,
+              background: `${platform.color}15`,
+              fontSize:   size === 'sm' ? '0.7rem' : '0.8rem',
+            }}
+          >
+            {platform.logo}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 
   // ── Banner variant (ShoppingList bottom) ───────────────────────────────────
   if (variant === 'banner') {
     return (
       <div
-        className={`rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 ${className}`}
+        className={`rounded-2xl p-5 ${className}`}
         style={{
-          background:   '#F0FDF4',
-          border:       `1px solid #BBF7D0`,
-          boxShadow:    '0 2px 12px rgba(0,0,0,0.04)',
+          background: '#F0FDF4',
+          border:     '1px solid #BBF7D0',
+          boxShadow:  '0 2px 12px rgba(0,0,0,0.04)',
         }}
       >
-        {/* Left: icon + copy */}
-        <div className="flex items-start gap-3 flex-1 min-w-0">
-          <span className="text-2xl flex-shrink-0 mt-0.5">🛒</span>
-          <div className="min-w-0">
+        {/* Header row */}
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="w-full flex items-center gap-3 text-left"
+        >
+          <span className="text-2xl flex-shrink-0">🛒</span>
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
               Order missing ingredients online
             </p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>
-              {count} item{count !== 1 ? 's' : ''} ready to search on{' '}
-              <span style={{ color, fontWeight: 500 }}>{name}</span>
-              {' '}— we earn a small commission at no extra cost to you.
+              {count} item{count !== 1 ? 's' : ''} · click an item below to search it on{' '}
+              {enabledPlatforms.map(p => p.name).join(' or ')}
+              {' '}— we may earn a small commission, at no extra cost to you.
             </p>
           </div>
-        </div>
-
-        {/* CTA button */}
-        <button
-          onClick={handleClick}
-          className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 active:scale-[.98]"
-          style={{
-            background: color,
-            color:      'white',
-            boxShadow:  `0 2px 8px ${color}40`,
-          }}
-        >
-          <ShoppingBag size={15} />
-          {label || `Order on ${name}`}
-          <ExternalLink size={12} style={{ opacity: 0.7 }} />
+          {expanded
+            ? <ChevronUp size={16} style={{ color: 'var(--ink-muted)' }} />
+            : <ChevronDown size={16} style={{ color: 'var(--ink-muted)' }} />}
         </button>
+
+        {/* Platform legend */}
+        {expanded && (
+          <>
+            <div className="flex items-center gap-3 mt-4 mb-2 px-0.5">
+              {enabledPlatforms.map(p => (
+                <span key={p.key} className="flex items-center gap-1.5 text-xs"
+                      style={{ color: p.color, fontWeight: 600 }}>
+                  <span>{p.logo}</span> {p.name}
+                </span>
+              ))}
+            </div>
+
+            {/* Per-ingredient link list */}
+            <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+              {itemLinks.map(item => (
+                <ItemRow key={item.name} item={item} size="md" />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     )
   }
@@ -82,36 +127,45 @@ export default function BuyIngredientsButton({
   // ── Inline variant (RecipeDetail) ──────────────────────────────────────────
   if (variant === 'inline') {
     return (
-      <button
-        onClick={handleClick}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 active:scale-[.98] ${className}`}
-        style={{
-          background: `${color}15`,
-          border:     `1px solid ${color}40`,
-          color:      color,
-        }}
-      >
-        <ShoppingBag size={15} />
-        {label || `Buy ${count} missing item${count !== 1 ? 's' : ''} on ${name}`}
-        <ExternalLink size={12} style={{ opacity: 0.6 }} />
-      </button>
+      <div className={`rounded-xl p-3 ${className}`}
+           style={{ background: 'var(--cream-dark)', border: '1px solid var(--border)' }}>
+        <div className="flex items-center gap-2 mb-2">
+          <ShoppingBag size={13} style={{ color: 'var(--ink-muted)' }} />
+          <span className="text-xs font-medium" style={{ color: 'var(--ink)' }}>
+            Buy {count} missing item{count !== 1 ? 's' : ''}
+          </span>
+          <span className="text-xs ml-auto" style={{ color: 'var(--ink-muted)' }}>
+            {enabledPlatforms.map(p => p.logo).join(' ')}
+          </span>
+        </div>
+        <div className="space-y-1.5">
+          {itemLinks.map(item => (
+            <ItemRow key={item.name} item={item} size="sm" />
+          ))}
+        </div>
+      </div>
     )
   }
 
   // ── Compact variant (RecipePreviewModal) ────────────────────────────────────
   return (
-    <button
-      onClick={handleClick}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 active:scale-[.98] ${className}`}
-      style={{
-        background: `${color}12`,
-        border:     `1px solid ${color}35`,
-        color:      color,
-      }}
-    >
-      <ShoppingBag size={12} />
-      {label || `Order ${count} item${count !== 1 ? 's' : ''}`}
-      <ExternalLink size={10} style={{ opacity: 0.6 }} />
-    </button>
+    <div className={className}>
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+        style={{ background: 'var(--cream-dark)', color: 'var(--ink)' }}
+      >
+        <ShoppingBag size={12} />
+        Buy {count} item{count !== 1 ? 's' : ''}
+        {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+      </button>
+      {expanded && (
+        <div className="space-y-1 mt-2">
+          {itemLinks.map(item => (
+            <ItemRow key={item.name} item={item} size="sm" />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
