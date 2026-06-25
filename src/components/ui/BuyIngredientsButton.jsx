@@ -1,22 +1,22 @@
 import { useState } from 'react'
-import { ShoppingBag, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
-import { buildItemLinks, enabledPlatforms } from '../../lib/affiliateLinks'
+import { ShoppingBag, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react'
+import { buildItemLinks, enabledPlatforms, copyIngredientName } from '../../lib/affiliateLinks'
 
 /**
- * BuyIngredientsButton (v2)
+ * BuyIngredientsButton (v3)
  *
- * Fix: previously this built ONE search query out of ALL ingredients joined
- * together ("chicken breast garlic onion"), which platforms treat as one
- * literal phrase and almost never return results for. Now every ingredient
- * gets its OWN clean one-item search link, on every enabled platform
- * (Instacart + Amazon by default — configurable via env vars).
+ * Each platform button now respects platform.deepLinkable:
+ *   true  (Amazon, Walmart, Google Shopping) → click opens a pre-filled
+ *         search for that exact ingredient, directly.
+ *   false (Instacart, for now) → no reliable pre-filled search exists
+ *         without Instacart's currently-closed Developer Platform API.
+ *         Click copies the ingredient name to the clipboard AND opens
+ *         Instacart's homepage, with a brief "Copied!" confirmation so
+ *         the user can just paste it into Instacart's own search bar.
  *
  * Props:
  *   ingredients  {string[]}  — plain ingredient names to order
  *   variant      'banner' | 'inline' | 'compact'
- *     banner  — full card: platform logos + expandable per-item link list
- *     inline  — compact card with platform pills (RecipeDetail)
- *     compact — small expandable list (RecipePreviewModal)
  *   className    extra classes
  */
 export default function BuyIngredientsButton({
@@ -25,12 +25,28 @@ export default function BuyIngredientsButton({
   className = '',
 }) {
   const [expanded, setExpanded] = useState(variant !== 'banner')
+  const [copiedKey, setCopiedKey] = useState(null) // `${itemName}-${platformKey}`
 
   const itemLinks = buildItemLinks(ingredients)
   if (itemLinks.length === 0) return null
 
-  const openLink = (url) => window.open(url, '_blank', 'noopener,noreferrer')
   const count = itemLinks.length
+
+  const handleClick = async (platform, url, itemName) => {
+    if (platform.deepLinkable) {
+      window.open(url, '_blank', 'noopener,noreferrer')
+      return
+    }
+    // Non-deep-linkable: copy the name, show feedback, then open the
+    // platform's safe homepage so the user can paste it into search.
+    const ok = await copyIngredientName(itemName)
+    if (ok) {
+      const key = `${itemName}-${platform.key}`
+      setCopiedKey(key)
+      setTimeout(() => setCopiedKey(prev => (prev === key ? null : prev)), 1800)
+    }
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   // ── Shared: per-ingredient row with one button per platform ────────────────
   const ItemRow = ({ item, size = 'sm' }) => (
@@ -40,30 +56,39 @@ export default function BuyIngredientsButton({
     >
       <span
         className="truncate"
-        style={{
-          color: 'var(--ink)',
-          fontSize: size === 'sm' ? '0.75rem' : '0.8125rem',
-        }}
+        style={{ color: 'var(--ink)', fontSize: size === 'sm' ? '0.75rem' : '0.8125rem' }}
       >
         {item.name}
       </span>
       <div className="flex items-center gap-1 flex-shrink-0">
-        {item.links.map(({ platform, url }) => (
-          <button
-            key={platform.key}
-            onClick={() => openLink(url)}
-            title={`Search "${item.name}" on ${platform.name}`}
-            className="flex items-center justify-center rounded-md transition-transform active:scale-90"
-            style={{
-              width:      size === 'sm' ? 22 : 26,
-              height:     size === 'sm' ? 22 : 26,
-              background: `${platform.color}15`,
-              fontSize:   size === 'sm' ? '0.7rem' : '0.8rem',
-            }}
-          >
-            {platform.logo}
-          </button>
-        ))}
+        {item.links.map(({ platform, url }) => {
+          const key      = `${item.name}-${platform.key}`
+          const isCopied = copiedKey === key
+          return (
+            <button
+              key={platform.key}
+              onClick={() => handleClick(platform, url, item.name)}
+              title={
+                platform.deepLinkable
+                  ? `Search "${item.name}" on ${platform.name}`
+                  : `Copy "${item.name}" and open ${platform.name}`
+              }
+              className="flex items-center justify-center gap-1 rounded-md transition-transform active:scale-90"
+              style={{
+                width:      isCopied ? 'auto' : (size === 'sm' ? 22 : 26),
+                height:     size === 'sm' ? 22 : 26,
+                padding:    isCopied ? '0 6px' : 0,
+                background: isCopied ? 'var(--green-light)' : `${platform.color}15`,
+                fontSize:   size === 'sm' ? '0.7rem' : '0.8rem',
+              }}
+            >
+              {isCopied
+                ? <><Check size={11} style={{ color: 'var(--green)' }} />
+                    <span style={{ color: 'var(--green)', fontSize: '0.65rem' }}>Copied</span></>
+                : platform.logo}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
@@ -73,26 +98,17 @@ export default function BuyIngredientsButton({
     return (
       <div
         className={`rounded-2xl p-5 ${className}`}
-        style={{
-          background: '#F0FDF4',
-          border:     '1px solid #BBF7D0',
-          boxShadow:  '0 2px 12px rgba(0,0,0,0.04)',
-        }}
+        style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
       >
-        {/* Header row */}
-        <button
-          onClick={() => setExpanded(v => !v)}
-          className="w-full flex items-center gap-3 text-left"
-        >
+        <button onClick={() => setExpanded(v => !v)} className="w-full flex items-center gap-3 text-left">
           <span className="text-2xl flex-shrink-0">🛒</span>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
               Order missing ingredients online
             </p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>
-              {count} item{count !== 1 ? 's' : ''} · click an item below to search it on{' '}
-              {enabledPlatforms.map(p => p.name).join(' or ')}
-              {' '}— we may earn a small commission, at no extra cost to you.
+              {count} item{count !== 1 ? 's' : ''} · Amazon searches open pre-filled · Instacart copies
+              the name for you to paste — we may earn a small commission, at no extra cost to you.
             </p>
           </div>
           {expanded
@@ -100,19 +116,18 @@ export default function BuyIngredientsButton({
             : <ChevronDown size={16} style={{ color: 'var(--ink-muted)' }} />}
         </button>
 
-        {/* Platform legend */}
         {expanded && (
           <>
             <div className="flex items-center gap-3 mt-4 mb-2 px-0.5">
               {enabledPlatforms.map(p => (
-                <span key={p.key} className="flex items-center gap-1.5 text-xs"
-                      style={{ color: p.color, fontWeight: 600 }}>
+                <span key={p.key} className="flex items-center gap-1.5 text-xs" style={{ color: p.color, fontWeight: 600 }}>
                   <span>{p.logo}</span> {p.name}
+                  {!p.deepLinkable && (
+                    <Copy size={10} style={{ color: 'var(--ink-muted)' }} />
+                  )}
                 </span>
               ))}
             </div>
-
-            {/* Per-ingredient link list */}
             <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
               {itemLinks.map(item => (
                 <ItemRow key={item.name} item={item} size="md" />
