@@ -24,7 +24,10 @@ export function normalizeIngredient(name) {
   n = n.replace(/berries$/,  'berry')
   // Simple plural: strip trailing s when stem ≥ 4 chars and not already ending in ss
   // >= 4 so 'eggs'(4) → 'egg', 'peas'(4) → 'pea', 'oils'(4) → 'oil'
-  if (n.length >= 4 && n.endsWith('s') && !n.endsWith('ss')) {
+  // Exclude '-us' endings — these are singular Latin-derived nouns, not
+  // plurals (octopus, asparagus, couscous, hummus, citrus), so stripping
+  // their trailing 's' produced a nonexistent word ('asparagu').
+  if (n.length >= 4 && n.endsWith('s') && !n.endsWith('ss') && !n.endsWith('us')) {
     n = n.slice(0, -1)
   }
   return n.trim()
