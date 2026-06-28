@@ -6,32 +6,14 @@
  */
 
 import { supabase } from './supabase'
+import { normalizeIngredient } from './ingredientNormalize'
+import { weightedMatchPct } from './recipeUtils'
+
+// Re-exported so any existing `import { normalizeIngredient } from './recipeDb'`
+// keeps working unchanged.
+export { normalizeIngredient }
 
 // ─── Ingredient normalization ─────────────────────────────────────────────────
-
-const LEADING_ADJECTIVES = /^\s*(fresh|dried|frozen|organic|raw|cooked|large|small|medium|big|ripe|whole|chopped|sliced|diced|minced|grated|crushed|ground|shredded|peeled|canned|tinned|boneless|skinless|lean|extra|fine|coarse|flat-leaf|flat leaf|roughly|finely|thinly|thickly|lightly|smoked|roasted|toasted|softened|melted|beaten|whisked)\s+/gi
-
-export function normalizeIngredient(name) {
-  if (!name) return ''
-  let n = name.toLowerCase().trim()
-  let prev
-  do {
-    prev = n
-    n = n.replace(LEADING_ADJECTIVES, '')
-  } while (n !== prev)
-  n = n.replace(/tomatoes$/, 'tomato')
-  n = n.replace(/potatoes$/, 'potato')
-  n = n.replace(/berries$/,  'berry')
-  // Simple plural: strip trailing s when stem ≥ 4 chars and not already ending in ss
-  // >= 4 so 'eggs'(4) → 'egg', 'peas'(4) → 'pea', 'oils'(4) → 'oil'
-  // Exclude '-us' endings — these are singular Latin-derived nouns, not
-  // plurals (octopus, asparagus, couscous, hummus, citrus), so stripping
-  // their trailing 's' produced a nonexistent word ('asparagu').
-  if (n.length >= 4 && n.endsWith('s') && !n.endsWith('ss') && !n.endsWith('us')) {
-    n = n.slice(0, -1)
-  }
-  return n.trim()
-}
 
 /**
  * Word-boundary ingredient match — mirrors ingredient_matches() Postgres function.
@@ -299,32 +281,45 @@ function _parseInstructions(text) {
   return []
 }
 
-// ─── Sort (runs on transformed recipes using client-side counts) ──────────────
+// ─── Sort (runs on transformed recipes, primary key = weighted match %) ───────
+//
+// FIX: the displayed match % on each card (RecipeCard.jsx) comes from
+// weightedMatchPct() — tier-weighted (core ×5, supporting ×2, minor ×0.5).
+// This sort previously used only raw used/missed COUNTS, completely
+// independent of that weighting. A recipe could show a higher % on its
+// card than the recipe above it in the list, because the order and the
+// number were computed by two unrelated formulas.
+//
+// Fix: every sort mode now uses the SAME weightedMatchPct() as the primary
+// sort key, so the list order and the displayed percentage always agree.
+// Each mode's original signal (fewest missing, most used, quickest) is kept
+// as the tiebreaker for recipes that land on the exact same percentage.
 
 function _clientSortFn(a, b, sort) {
+  const aPct = weightedMatchPct(a.usedIngredients, a.missedIngredients) ?? 0
+  const bPct = weightedMatchPct(b.usedIngredients, b.missedIngredients) ?? 0
+
   const aUsed   = a.usedIngredientCount   ?? 0
   const bUsed   = b.usedIngredientCount   ?? 0
   const aMissed = a.missedIngredientCount ?? 0
   const bMissed = b.missedIngredientCount ?? 0
-  const aTotal  = aUsed + aMissed
-  const bTotal  = bUsed + bMissed
 
+  // "Quickest" is genuinely a different dimension (cook time) — sort by
+  // time first, but still break ties using match % so two equally-quick
+  // recipes show the better match first.
   if (sort === 'time') {
-    return (a.readyInMinutes ?? 999) - (b.readyInMinutes ?? 999)
-  }
-  if (sort === 'max-used-ingredients') {
-    return bUsed - aUsed || aMissed - bMissed
-  }
-  if (sort === 'min-missing-ingredients') {
-    return aMissed - bMissed || bUsed - aUsed
+    const aTime = a.readyInMinutes ?? 999
+    const bTime = b.readyInMinutes ?? 999
+    if (aTime !== bTime) return aTime - bTime
+    return bPct - aPct
   }
 
-  // Default: combined score that rewards both high coverage AND high completeness.
-  // Score = (used_count * 3) - (missed_count * 1)
-  // This ensures a recipe using 8 of 9 fridge items beats a 1-of-1 perfect-ratio recipe.
-  // Within the same score, prefer the recipe with fewest missing items.
-  const aScore = (aUsed * 3) - aMissed
-  const bScore = (bUsed * 3) - bMissed
-  if (bScore !== aScore) return bScore - aScore
+  // Every other mode: weighted match % is the primary key.
+  if (bPct !== aPct) return bPct - aPct
+
+  // Tiebreak by each mode's original distinguishing signal.
+  if (sort === 'max-used-ingredients') return bUsed - aUsed || aMissed - bMissed
+  if (sort === 'min-missing-ingredients') return aMissed - bMissed || bUsed - aUsed
+  // 'popularity' or anything unrecognised: fewest missing as the tiebreak.
   return aMissed - bMissed || bUsed - aUsed
 }

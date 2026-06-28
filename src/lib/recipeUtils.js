@@ -1,4 +1,4 @@
-import { normalizeIngredient } from './recipeDb'
+import { normalizeIngredient } from './ingredientNormalize'
 
 /**
  * Tier-based ingredient matching.
