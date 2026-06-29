@@ -18,7 +18,7 @@ const TIME_OPTIONS = [
 const SORTS = [
   { value: 'min-missing-ingredients', label: 'Fewest missing' },
   { value: 'max-used-ingredients',    label: 'Most matching'  },
-  { value: 'popularity',              label: 'Popular'        },
+  { value: 'popularity',              label: 'Best match'     },
   { value: 'time',                    label: 'Quickest'       },
 ]
 

@@ -91,13 +91,25 @@ export const findRecipesInDb = async (ingredients, filters = {}, limit = 20) => 
     p_ingredients: ingredients.map(i => normalizeIngredient(i.trim())).filter(Boolean),
     p_limit:       limit * 2, // fetch extra so we can quality-filter client-side
     p_diet:        filters.diet    ? filters.diet.toLowerCase() : null,
-    p_max_time:    filters.maxTime ? parseInt(filters.maxTime)  : null,
+    // Not passing p_max_time to the RPC — the DB's cook_time column is
+    // always null (TheMealDB doesn't supply it), so the SQL-side filter
+    // has nothing real to compare against and is effectively a no-op.
+    // The time filter is applied below instead, against the estimated
+    // readyInMinutes computed in dbRowToRecipe — the same number shown
+    // on the card and used by the "Quickest" sort, so filter/sort/display
+    // all agree.
   })
 
   if (error) throw new Error(`DB search failed: ${error.message}`)
 
-  // Transform first (computes client-side match counts), then quality-filter, then sort.
-  const allRecipes = (data ?? []).map(row => dbRowToRecipe(row, ingredients))
+  // Transform first (computes client-side match counts + time estimate).
+  let allRecipes = (data ?? []).map(row => dbRowToRecipe(row, ingredients))
+
+  // Apply the time filter here, client-side, using the same estimated value.
+  if (filters.maxTime) {
+    const maxMinutes = parseInt(filters.maxTime)
+    allRecipes = allRecipes.filter(r => (r.readyInMinutes ?? 999) <= maxMinutes)
+  }
 
   // Exclude quality_score=0 recipes (no instructions AND few ingredients)
   // unless they still have a high match — in that case, show them but at the end.
@@ -137,6 +149,7 @@ export function dbRowToRecipe(row, searchIngredients = []) {
 
   const usedIngs   = extendedIngredients.filter(i => i._inFridge)
   const missedIngs = extendedIngredients.filter(i => !i._inFridge)
+  const instructions = _parseInstructions(row.instructions)
 
   return {
     id:    row.id,
@@ -144,7 +157,12 @@ export function dbRowToRecipe(row, searchIngredients = []) {
 
     title:          row.title,
     image:          row.image_url  || null,
-    readyInMinutes: row.cook_time  || null,
+    // TheMealDB (our seed source) doesn't provide cook time, so row.cook_time
+    // is always null today. Without a real number, the Time filter has
+    // nothing to compare against and "Quickest" sort can't tell recipes
+    // apart. Fall back to a rough estimate from the instruction step count
+    // so both features have real, differentiated data to work with.
+    readyInMinutes: row.cook_time || _estimateCookTime(instructions),
     servings:       row.servings   || 4,
     sourceUrl:      row.source_url || null,
     diets:          row.tags       ?? [],
@@ -156,11 +174,25 @@ export function dbRowToRecipe(row, searchIngredients = []) {
     missedIngredients:     missedIngs,
     extendedIngredients,
 
-    analyzedInstructions: _parseInstructions(row.instructions),
+    analyzedInstructions: instructions,
 
     _qualityScore: row.quality_score ?? 1,
     _source: 'db',
   }
+}
+
+/**
+ * Rough cook-time estimate used only when the DB has no real cook_time
+ * (currently always, since TheMealDB doesn't supply it). ~5 min per
+ * instruction step plus a 10 min base, clamped to a sane range and
+ * rounded to the nearest 5 minutes for a cleaner display number.
+ */
+function _estimateCookTime(instructions) {
+  const steps = instructions?.[0]?.steps?.length ?? 0
+  if (steps === 0) return null
+  const raw = 10 + steps * 5
+  const clamped = Math.min(90, Math.max(10, raw))
+  return Math.round(clamped / 5) * 5
 }
 
 /**
@@ -295,6 +327,23 @@ function _parseInstructions(text) {
 // Each mode's original signal (fewest missing, most used, quickest) is kept
 // as the tiebreaker for recipes that land on the exact same percentage.
 
+// ─── Sort ──────────────────────────────────────────────────────────────────────
+//
+// v1 bug: sort used only raw used/missed COUNTS, completely independent of
+// the tier-weighted match % shown on each card — list order and the
+// displayed number could flatly disagree.
+//
+// v2 bug: making weighted match % the primary key for EVERY mode fixed that,
+// but collapsed "Fewest missing", "Most matching", and "Popular" into nearly
+// identical orderings — clicking between them stopped visibly changing
+// anything, which looked just as broken from the other direction.
+//
+// v3: each named mode keeps its OWN distinct primary signal (so the buttons
+// are visibly different again), with weighted match % as the tiebreaker
+// everywhere. "Popular" has no real data behind it (our recipe DB has no
+// popularity signal) — repurposed as the genuine "best match %" option,
+// since that's the single most useful generic ranking we have.
+
 function _clientSortFn(a, b, sort) {
   const aPct = weightedMatchPct(a.usedIngredients, a.missedIngredients) ?? 0
   const bPct = weightedMatchPct(b.usedIngredients, b.missedIngredients) ?? 0
@@ -304,22 +353,27 @@ function _clientSortFn(a, b, sort) {
   const aMissed = a.missedIngredientCount ?? 0
   const bMissed = b.missedIngredientCount ?? 0
 
-  // "Quickest" is genuinely a different dimension (cook time) — sort by
-  // time first, but still break ties using match % so two equally-quick
-  // recipes show the better match first.
+  if (sort === 'max-used-ingredients') {
+    // "Most matching" — most ingredients you already have, first.
+    if (bUsed !== aUsed) return bUsed - aUsed
+    return bPct - aPct
+  }
+
+  if (sort === 'min-missing-ingredients') {
+    // "Fewest missing" — closest to complete by absolute count, first.
+    if (aMissed !== bMissed) return aMissed - bMissed
+    return bPct - aPct
+  }
+
   if (sort === 'time') {
+    // "Quickest" — shortest estimated cook time, first.
     const aTime = a.readyInMinutes ?? 999
     const bTime = b.readyInMinutes ?? 999
     if (aTime !== bTime) return aTime - bTime
     return bPct - aPct
   }
 
-  // Every other mode: weighted match % is the primary key.
+  // "Popular" (repurposed: best weighted match %, first).
   if (bPct !== aPct) return bPct - aPct
-
-  // Tiebreak by each mode's original distinguishing signal.
-  if (sort === 'max-used-ingredients') return bUsed - aUsed || aMissed - bMissed
-  if (sort === 'min-missing-ingredients') return aMissed - bMissed || bUsed - aUsed
-  // 'popularity' or anything unrecognised: fewest missing as the tiebreak.
   return aMissed - bMissed || bUsed - aUsed
 }

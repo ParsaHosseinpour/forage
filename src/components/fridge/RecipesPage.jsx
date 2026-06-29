@@ -13,7 +13,11 @@ import RecipeDetail from '../recipes/RecipeDetail'
 import FilterBar from '../recipes/FilterBar'
 import Button from '../ui/Button'
 
-const DEFAULT_FILTERS = { diet: '', maxTime: '', sort: 'min-missing-ingredients' }
+// 'popularity' is the best-match-% sort mode (see recipeDb.js) — used as the
+// default so the initial view's order always agrees with the % shown on
+// each card. The other three named modes remain available and distinct
+// for anyone who explicitly wants "fewest missing" or "most matching" etc.
+const DEFAULT_FILTERS = { diet: '', maxTime: '', sort: 'popularity' }
 
 const SERVING_OPTIONS = [
   { label: '1 Person',    value: 1 },
