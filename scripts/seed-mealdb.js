@@ -45,6 +45,54 @@ async function fetchJSON(url, retries = 3) {
 }
 
 /**
+ * Derive diet tags from the ingredient list — mirrors derive_diet_tags()
+ * in supabase_step17_migration.sql. TheMealDB's own category field can
+ * only ever produce 'vegetarian'/'vegan' (and only for the small subset
+ * explicitly categorized that way), leaving gluten free/dairy free/
+ * ketogenic/paleo with no possible source. Ingredient keyword exclusion
+ * is an approximation, not medically authoritative, but it's real data
+ * instead of a filter that always returns nothing.
+ */
+function deriveDietTags(ingredients) {
+  const MEAT   = ['chicken','beef','pork','lamb','turkey','duck','bacon','sausage','ham','veal','venison','goat','rabbit','quail','chorizo','pancetta','gelatin']
+  const FISH   = ['fish','salmon','tuna','cod','shrimp','prawn','crab','lobster','clam','mussel','scallop','anchovy','tilapia','trout','halibut','squid','octopus']
+  const DAIRY  = ['milk','cheese','butter','cream','yogurt','yoghurt','ghee']
+  const EGG    = ['egg']
+  const GLUTEN = ['flour','wheat','bread','pasta','spaghetti','noodle','barley','rye','couscous','breadcrumbs','tortilla','bun','bagel','cracker','beer','malt']
+  const CARB   = ['rice','pasta','bread','potato','sugar','flour','noodle','tortilla','corn','oats','honey']
+  const LEGUME = ['bean','lentil','chickpea','pea','peanut','soy','tofu','tempeh']
+  // Plant-based substitutes that contain a dairy WORD ('milk'/'cream'/
+  // 'butter') but aren't dairy at all — same false-positive class as
+  // 'cream' matching 'ice cream' that we fixed in recipeDb.js.
+  const NON_DAIRY_SUBS = ['coconut milk','coconut cream','almond milk','soy milk','oat milk','rice milk','cashew milk','peanut butter','almond butter','cashew butter','cocoa butter','shea butter']
+
+  const hasAny = (keywords) =>
+    ingredients.some(ing => keywords.some(kw => ing.includes(kw)))
+  const hasDairyReal = (ing) =>
+    !NON_DAIRY_SUBS.some(sub => ing.includes(sub)) && DAIRY.some(kw => ing.includes(kw))
+
+  const hasMeat   = hasAny(MEAT)
+  const hasFish   = hasAny(FISH)
+  const hasDairy  = ingredients.some(hasDairyReal)
+  const hasEgg    = hasAny(EGG)
+  const hasGluten = hasAny(GLUTEN)
+  const hasCarb   = hasAny(CARB)
+  const hasLegume = hasAny(LEGUME)
+
+  const tags = []
+  if (!hasMeat && !hasFish) {
+    tags.push('vegetarian')
+    if (!hasDairy && !hasEgg) tags.push('vegan')
+  }
+  if (!hasGluten) tags.push('gluten free')
+  if (!hasDairy)  tags.push('dairy free')
+  if (!hasCarb && !hasLegume) tags.push('ketogenic')
+  if (!hasGluten && !hasDairy && !hasLegume && !hasCarb) tags.push('paleo')
+
+  return tags
+}
+
+/**
  * Transform a raw TheMealDB meal object into our Supabase recipe schema.
  */
 function parseMeal(meal) {
@@ -64,11 +112,18 @@ function parseMeal(meal) {
   if (meal.strTags) {
     tags.push(...meal.strTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean))
   }
-  // Derive vegetarian/vegan tags from category
+  // Derive vegetarian/vegan tags from category (covers the small subset
+  // TheMealDB explicitly categorized that way)
   const cat = (meal.strCategory || '').toLowerCase()
   if (['vegetarian', 'vegan', 'pasta', 'dessert', 'side', 'breakfast', 'miscellaneous'].includes(cat)) {
     if (cat === 'vegetarian' && !tags.includes('vegetarian')) tags.push('vegetarian')
     if (cat === 'vegan'      && !tags.includes('vegan'))      tags.push('vegan')
+  }
+  // Merge in ingredient-derived tags (the only source for gluten free/
+  // dairy free/ketogenic/paleo, and a fallback for vegetarian/vegan when
+  // the category didn't already cover it), deduplicated.
+  for (const t of deriveDietTags(ingredients)) {
+    if (!tags.includes(t)) tags.push(t)
   }
 
   return {
