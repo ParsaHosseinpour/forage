@@ -27,7 +27,7 @@
 -- the query before it could finish. The 320-recipe database was hiding
 -- a real architectural scaling problem, not causing a new one.
 --
--- FIX (three changes, applied together):
+-- FIX (two changes, applied together):
 --   1. Cap the CANDIDATE set with a LIMIT before the expensive matching
 --      pass runs, instead of matching against every GIN-filtered row and
 --      only limiting at the very end. The GIN filter can still return
@@ -37,9 +37,22 @@
 --      instead of re-normalizing every recipe ingredient on every
 --      single fridge-ingredient comparison inside ingredient_matches().
 --      This removes the dominant source of redundant work.
---   3. Raise this function's statement_timeout as a safety margin for
---      any remaining large fridges/large recipes, scoped to this
---      function call only, not the whole database.
+--
+-- NOTE ON A MISTAKE IN THE FIRST VERSION OF THIS FILE:
+-- An earlier version of this migration also added
+-- `set local statement_timeout = '20s'` as an extra safety margin. That
+-- was wrong: the function is declared `stable` (it only reads data, a
+-- true statement), but SET modifies session configuration, which
+-- Postgres forbids inside any `stable` or `immutable` function --
+-- failing with "SET is not allowed in a non-volatile function". Marking
+-- the function `volatile` instead would have "fixed" the error but was
+-- the wrong trade-off: it would stop Postgres from optimizing/caching a
+-- function that is, in fact, read-only, undermining the actual
+-- performance fix. The correct resolution was simply to remove the SET
+-- line -- changes 1 and 2 above are what actually eliminate the
+-- timeout; the SET was speculative "just in case" padding that was
+-- never load-bearing and directly contradicted the function's own
+-- `stable` contract.
 -- ──────────────────────────────────────────────────────────────────────────────
 
 drop function if exists public.search_by_ingredients(text[], integer, text, integer);
@@ -73,10 +86,6 @@ returns table (
 language plpgsql stable
 as $$
 begin
-  -- Safety margin for large fridges / large recipe result sets.
-  -- Scoped to this function call only.
-  set local statement_timeout = '20s';
-
   return query
   with
     norm_input as (
