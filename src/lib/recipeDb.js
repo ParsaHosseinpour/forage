@@ -176,6 +176,20 @@ export function dbRowToRecipe(row, searchIngredients = []) {
 
     analyzedInstructions: instructions,
 
+    // Populated only for recipes with real nutrition data (currently the
+    // Food.com import — TheMealDB has none). RecipeDetail.jsx reads
+    // detail.nutrition.nutrients as an array of {name, amount} — this
+    // mirrors the shape Forage originally used for Spoonacular results,
+    // kept for compatibility so the UI needed zero changes.
+    nutrition: row.calories != null ? {
+      nutrients: [
+        { name: 'Calories',      amount: Number(row.calories)  },
+        { name: 'Protein',       amount: Number(row.protein_g ?? 0) },
+        { name: 'Carbohydrates', amount: Number(row.carbs_g   ?? 0) },
+        { name: 'Fat',           amount: Number(row.fat_g     ?? 0) },
+      ],
+    } : null,
+
     _qualityScore: row.quality_score ?? 1,
     _source: 'db',
   }

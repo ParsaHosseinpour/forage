@@ -27,7 +27,7 @@ Log what's in your fridge, find recipes you can actually cook with it, close the
 |---|---|
 | Frontend | React 18 + Vite + Tailwind CSS v4 |
 | Backend | Supabase (Postgres + Auth + Row Level Security + RPC functions) |
-| Recipe data | Self-hosted in our own `recipes` table — seeded once from [TheMealDB](https://www.themealdb.com/) (free, no key) |
+| Recipe data | Self-hosted in our own `recipes` table — seeded from [TheMealDB](https://www.themealdb.com/) (free, ~320 recipes) and/or [Food.com via Hugging Face](https://huggingface.co/datasets/AkashPS11/recipes_data_food.com) (MIT licensed, 522k+ recipes with real nutrition data) |
 | Hosting | Vercel, auto-deploys from `main` |
 | Affiliate links | Instacart + Amazon search links, per-ingredient, configurable |
 
@@ -52,17 +52,40 @@ supabase_step13_14_migration.sql    # meal_plan table
 supabase_matching_migration.sql     # ingredient normalization (draft)
 supabase_quality_migration.sql      # ingredient normalization (draft)
 supabase_step15_migration.sql       # ingredient normalization (final) + recipe quality_score
+supabase_step16_migration.sql       # normalize_ingredient() fix: '-us' words (octopus, asparagus)
+supabase_step17_migration.sql       # derive real diet tags from ingredients + backfill
+supabase_step18_migration.sql       # nutrition columns (required before scripts/import-foodcom.py)
 ```
 
 > The last three all define the same `normalize_ingredient()` function — they were iterated on in the same pass and are all safe to run (`create or replace`), but `supabase_step15_migration.sql` is the authoritative final version.
 
-### 2. Seed the recipe database (one-time)
+### 2. Seed the recipe database
+
+**Option A — TheMealDB (quick start, ~320 recipes, no nutrition data)**
 
 ```bash
 SUPABASE_SERVICE_KEY=your_service_role_key node scripts/seed-mealdb.js
 ```
 
-Get the service role key from **Supabase Dashboard → Project Settings → API → service_role**. This pulls ~320 recipes from TheMealDB's free API and inserts them into your `recipes` table. Safe to re-run (upserts by source ID).
+Pulls from TheMealDB's free public API. No account or key needed on their end. Good for getting the app running in a few minutes; not enough recipes for daily real-world use.
+
+**Option B — Food.com via Hugging Face (recommended, 522k+ recipes, real nutrition data)**
+
+First run `supabase_step18_migration.sql` (adds the nutrition columns this import populates), then:
+
+```bash
+pip install pandas pyarrow supabase requests
+SUPABASE_SERVICE_KEY=your_service_role_key python3 scripts/import-foodcom.py
+```
+
+Streams the [Food.com recipes dataset](https://huggingface.co/datasets/AkashPS11/recipes_data_food.com) (MIT licensed) directly from Hugging Face — no manual download. Expect 20–40 minutes for the full dataset. Useful flags:
+
+```bash
+python3 scripts/import-foodcom.py --dry-run --limit 500   # test without writing anything
+python3 scripts/import-foodcom.py --limit 20000            # import a smaller slice
+```
+
+This was chosen after an architectural evaluation of scraping Allrecipes vs. licensed alternatives — see the project history for the full writeup. Both seed scripts are safe to run together or independently; they upsert by `source_id` so re-running never creates duplicates.
 
 ### 3. Configure Supabase Auth redirect URLs
 
@@ -126,18 +149,19 @@ src/
 ├── App.jsx
 └── main.jsx
 scripts/
-└── seed-mealdb.js   # One-time recipe database seed script
+├── seed-mealdb.js       # TheMealDB seed script (quick start, ~320 recipes)
+└── import-foodcom.py    # Food.com import (recommended, 522k+ recipes + nutrition)
 ```
 
 ---
 
 ## Known limitations
 
-- ~320 recipes seeded — enough to demo, not enough for daily real-world use. Architecture supports a larger seed with no code changes.
-- No nutrition data on most recipes (TheMealDB doesn't provide it).
+- Recipe count and nutrition data depend on which seed you run — TheMealDB alone (~320 recipes, no nutrition) is enough to demo but not for daily use; `scripts/import-foodcom.py` (522k+ recipes, real nutrition on the majority) is the recommended source for a real deployment. See "Seed the recipe database" above.
 - Meal planner only shows the current week — no past/future week navigation yet.
 - No error boundaries around page components.
 - Affiliate links open a single-item search per ingredient (platforms don't allow multi-item cart deep-linking without an approved Shoppable/Partner API).
+- Food.com's `CookTime` field sometimes bundles passive time (freezing, marinating) with active cooking, with no way to separate them at the data level. `scripts/import-foodcom.py` clamps anything over 4 hours to null rather than show a misleading "1440 min" badge, so a small number of recipes show no time estimate.
 
 ---
 
@@ -154,7 +178,7 @@ scripts/
 - [x] Cooking history with ratings, meal-type tags, weekly summary
 - [x] Weekly meal planner
 - [x] Affiliate grocery ordering (Instacart + Amazon)
-- [ ] Larger recipe dataset
-- [ ] Nutrition data
+- [x] Larger recipe dataset (Food.com, 522k+ recipes, MIT licensed)
+- [x] Nutrition data (real macros on the majority of Food.com recipes)
 - [ ] Multi-week meal planning
 - [ ] PWA / offline support
