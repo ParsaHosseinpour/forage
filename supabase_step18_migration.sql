@@ -39,6 +39,17 @@ create index if not exists recipes_calories_idx
 -- Update search_by_ingredients to also return the new nutrition columns,
 -- so RecipeDetail's nutrition strip has real data to render without a
 -- second round-trip per recipe.
+--
+-- IMPORTANT: Postgres cannot CREATE OR REPLACE a function if its return
+-- columns change shape (this function is adding 4 new output columns:
+-- calories, protein_g, carbs_g, fat_g). Attempting that fails with:
+--   ERROR: 42P13: cannot change return type of existing function
+--   DETAIL: Row type defined by OUT parameters is different.
+-- The old version must be dropped first. This DROP is safe to run even
+-- if the function doesn't exist yet (fresh database) or was already
+-- dropped by a previous run of this migration.
+drop function if exists public.search_by_ingredients(text[], integer, text, integer);
+
 create or replace function public.search_by_ingredients(
   p_ingredients text[],
   p_limit       integer default 20,
