@@ -196,9 +196,147 @@ def derive_diet_tags(ingredients):
 # ─── Ingredient line builder ─────────────────────────────────────────────────
 #
 # recipes.ingredients (normalised lowercase names, for the GIN-indexed
-# search) and recipes.ingredient_lines (human-readable "qty unit name"
-# strings, e.g. "1 cup flour") are both derived from the paired
-# RecipeIngredientQuantities / RecipeIngredientParts columns.
+# search) and recipes.ingredient_lines (human-readable display strings)
+# are both derived from the paired RecipeIngredientQuantities /
+# RecipeIngredientParts columns.
+#
+# THREE REAL PROBLEMS FOUND IN THE RAW DATA (confirmed against live
+# samples of the actual dataset):
+#
+# 1. Food.com has NO separate units column anywhere in this dataset.
+#    RecipeIngredientQuantities is a bare number ("1/4", "1 1/2");
+#    RecipeIngredientParts is the ingredient name only. Pairing them
+#    literally produces meaningless lines like "1/4 sweet butter" or
+#    "1 salt". Fixed with a small reference table of common ingredients
+#    where a standard unit can be reasonably guessed, plus a rule that
+#    whole-number quantities (not fractions) are almost always counts
+#    ("1 onion", "12 mushrooms") and need no unit at all.
+#
+# 2. Food.com stores descriptive qualifiers as a COMMA SUFFIX inside the
+#    ingredient name itself, e.g. "lemons, rind of", "tomatoes, whole".
+#    Fixed by parsing the "name, qualifier" pattern and re-composing it
+#    in natural reading order ("whole tomatoes") before it reaches the
+#    ingredients array.
+#
+# 3. Some recipes' instructions reference an ingredient that never
+#    appears in the parsed ingredient list (e.g. "tarragon" used in a
+#    step but absent from Ingredients) — a sign of a misaligned/
+#    incomplete source row. Detected and used to deprioritise (not
+#    reject) the recipe's quality_score. See flag_orphaned_ingredients().
+
+# Reference table of common ingredients where a bare fractional quantity
+# is almost always meaningless and a standard unit can be reasonably
+# inferred. Deliberately conservative — only ingredients where guessing
+# is low-risk.
+_GUESSED_UNIT = {
+    'flour': 'cup', 'sugar': 'cup', 'brown sugar': 'cup', 'powdered sugar': 'cup',
+    'salt': 'tsp', 'black pepper': 'tsp', 'pepper': 'tsp', 'baking powder': 'tsp',
+    'baking soda': 'tsp', 'vanilla': 'tsp', 'vanilla extract': 'tsp',
+    'cinnamon': 'tsp', 'nutmeg': 'tsp', 'paprika': 'tsp', 'cumin': 'tsp',
+    'oregano': 'tsp', 'basil': 'tsp', 'garlic powder': 'tsp', 'onion powder': 'tsp',
+    'butter': 'tbsp', 'oil': 'tbsp', 'olive oil': 'tbsp', 'vegetable oil': 'tbsp',
+    'soy sauce': 'tbsp', 'lemon juice': 'tbsp', 'lime juice': 'tbsp',
+    'milk': 'cup', 'water': 'cup', 'cream': 'cup', 'heavy cream': 'cup',
+    'broth': 'cup', 'chicken broth': 'cup', 'beef broth': 'cup', 'stock': 'cup',
+    'rice': 'cup', 'wine': 'cup',
+}
+
+# Words that are ALWAYS units/measures on their own — if an ingredient
+# name already starts with one (rare, but happens), a preceding number
+# is safe regardless of whole/fraction.
+_ALREADY_HAS_UNIT = (
+    'cup', 'tbsp', 'tablespoon', 'tsp', 'teaspoon', 'oz', 'ounce', 'lb',
+    'pound', 'gram', 'kg', 'ml', 'liter', 'litre', 'pint', 'quart', 'gallon',
+    'pinch', 'dash', 'clove', 'slice', 'can', 'jar', 'package', 'stalk',
+    'sprig', 'head', 'bunch',
+)
+
+
+def _is_whole_number(qty):
+    """
+    True for plain whole-number quantities ("1", "2", "12") vs
+    fractional ones ("1/4", "1 1/2"). This is the reliable signal for
+    whether a bare number reads naturally in front of a food noun:
+    whole numbers overwhelmingly mean "count of this many" ("1 onion",
+    "8 chicken thighs"), while fractions overwhelmingly mean "a fraction
+    of a measuring unit" ("1/4 [cup] sugar").
+    """
+    qty = qty.strip()
+    if not qty or '/' in qty:
+        return False
+    try:
+        int(qty)
+        return True
+    except ValueError:
+        return False
+
+
+def _looks_countable(name_lower):
+    """True if this ingredient name already carries its own unit word."""
+    return any(name_lower.startswith(u) for u in _ALREADY_HAS_UNIT)
+
+
+def _split_qualifier(name):
+    """
+    Food.com stores descriptors as a comma suffix: "lemons, rind of",
+    "tomatoes, whole", "onion, finely chopped". Re-compose into natural
+    reading order: "whole tomatoes", "finely chopped onion".
+
+    Returns (display_name, countable_base) — countable_base is the
+    ORIGINAL base noun before recomposition, so the caller can check
+    plurality consistently regardless of qualifier position.
+    """
+    if ',' not in name:
+        return name, name
+    base, _, qualifier = name.partition(',')
+    base = base.strip()
+    qualifier = qualifier.strip()
+    if not qualifier or not base:
+        cleaned = name.strip()
+        return cleaned, cleaned
+    if qualifier.endswith(' of'):
+        qualifier = qualifier[:-3].strip()
+        return f"{base} {qualifier}".strip(), base
+    return f"{qualifier} {base}".strip(), base
+
+
+def _guess_display_line(qty, name_clean, countable_base_lower):
+    """
+    Build the human-readable ingredient line, choosing the least
+    misleading representation given that Food.com has no units column:
+      - known guessable ingredient -> "1/4 cup sugar" (inferred unit)
+      - whole-number quantity -> "1 onion", "12 mushrooms" (bare number
+        is correct and unambiguous regardless of singular/plural)
+      - fractional quantity, no confident unit guess -> drop the number,
+        show just the name: "sugar" reads as intentional; "1/4 sugar"
+        does not
+      - no qty at all -> just the name
+    """
+    if not qty:
+        return name_clean
+
+    name_lower = name_clean.lower()
+
+    # Narrow grammar guard: Food.com sometimes pairs a plural qualifier
+    # with quantity "1" (e.g. "1" + "tomatoes, whole" -> "whole
+    # tomatoes"), which is already contradictory in the SOURCE data
+    # ("1 whole tomatoes" is not valid English). Drop a bare "1" in
+    # front of an already-plural noun rather than build general grammar
+    # correction for a narrow mismatch.
+    last_word = name_lower.rsplit(' ', 1)[-1]
+    is_plural_noun = len(last_word) > 3 and last_word.endswith('s') and not last_word.endswith('ss')
+    if qty.strip() == '1' and is_plural_noun:
+        return name_clean
+
+    for key, unit in _GUESSED_UNIT.items():
+        if key in name_lower:
+            return f"{qty} {unit} {name_clean}"
+
+    if _is_whole_number(qty) or _looks_countable(countable_base_lower):
+        return f"{qty} {name_clean}"
+
+    return name_clean
+
 
 def build_ingredient_lines(quantities, parts):
     lines = []
@@ -206,26 +344,59 @@ def build_ingredient_lines(quantities, parts):
     n = max(len(quantities), len(parts))
     for i in range(n):
         qty = quantities[i] if i < len(quantities) else ''
-        name = parts[i] if i < len(parts) else ''
-        name = (name or '').strip()
-        if not name or name.lower() in ('na', 'nan', 'none'):
+        raw_name = parts[i] if i < len(parts) else ''
+        raw_name = (raw_name or '').strip()
+        if not raw_name or raw_name.lower() in ('na', 'nan', 'none'):
             continue
+
+        name_clean, countable_base = _split_qualifier(raw_name)
+        name_lower = name_clean.lower()
+
         qty = (qty or '').strip()
         qty = '' if qty.lower() in ('na', 'nan', 'none') else qty
-        line = f"{qty} {name}".strip() if qty else name
+
+        line = _guess_display_line(qty, name_clean, countable_base.lower())
         lines.append(line)
-        names_lower.append(name.lower())
+        names_lower.append(name_lower)
     return lines, names_lower
+
+
+def flag_orphaned_ingredients(instructions_text, ingredient_names_lower):
+    """
+    Detect ingredients mentioned in the instructions that never appear
+    in the parsed ingredient list — a sign the source row's ingredient/
+    quantity arrays were incomplete or misaligned. A quality SIGNAL,
+    not a hard filter — checks a short list of easily-detected named
+    herbs/spices rather than every word, to avoid false-positiving on
+    common words.
+    """
+    if not instructions_text:
+        return False
+    instructions_lower = instructions_text.lower()
+    named_check = (
+        'tarragon', 'thyme', 'rosemary', 'basil', 'oregano', 'cilantro',
+        'parsley', 'dill', 'sage', 'mint', 'chives', 'saffron',
+    )
+    for herb in named_check:
+        if re.search(rf'\b{herb}\b', instructions_lower):
+            if not any(herb in n for n in ingredient_names_lower):
+                return True
+    return False
 
 
 # ─── Quality scoring (mirrors supabase_step15_migration.sql) ────────────────
 
-def compute_quality_score(ingredient_count, instructions_text):
+def compute_quality_score(ingredient_count, instructions_text, has_orphaned_ingredient=False):
     instr_len = len(instructions_text or '')
     if instr_len < 100 and ingredient_count < 3:
         return 0  # low: no real instructions AND too few ingredients
     if instr_len < 100:
         return 1  # ok: short instructions but enough ingredients
+    if has_orphaned_ingredient:
+        # Instructions reference an ingredient absent from the parsed
+        # list — deprioritised in search rather than ranked equal to a
+        # fully consistent recipe, but still importable.
+        return 1
     if ingredient_count >= 4 and instr_len >= 200:
         return 2  # good
     return 1
@@ -299,7 +470,8 @@ def transform_row(row):
             return None
         return float(v)
 
-    quality = compute_quality_score(len(names_lower), instructions_text)
+    has_orphan = flag_orphaned_ingredients(instructions_text, names_lower)
+    quality = compute_quality_score(len(names_lower), instructions_text, has_orphan)
 
     return {
         "source_id": source_id,
