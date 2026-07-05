@@ -69,11 +69,44 @@ function round(n, decimals = 1) {
 
 // ─── Display helper ───────────────────────────────────────────────────────────
 
-/** "500 g", "1.5 kg", "2 cups" */
+// Common cooking-fraction lookup — matches the decimal remainder of a
+// quantity to its readable fraction form. Kept intentionally small:
+// these are the fractions that actually occur in recipe measurements.
+const _DISPLAY_FRACTIONS = [
+  [3, 4, '¾'], [2, 3, '⅔'], [1, 2, '½'], [1, 3, '⅓'], [1, 4, '¼'], [1, 8, '⅛'],
+]
+
+/**
+ * Format a number for display, converting common decimal fractions
+ * (0.5, 0.25, 0.75...) into readable Unicode fractions (½, ¼, ¾...)
+ * instead of showing raw decimals like "0.5 tsp" or "1.5 cup".
+ *
+ * This was previously only applied to unit-less quantities (via a local
+ * toFraction() in RecipeDetail.jsx) — displayQty(), which handles the
+ * far more common case of a quantity WITH a unit (tsp, tbsp, cup), had
+ * no fraction formatting at all and just returned the raw rounded
+ * decimal, producing "0.5 tsp black pepper" instead of "½ tsp black
+ * pepper".
+ */
+function formatFraction(n) {
+  const whole = Math.floor(n)
+  const rem   = n - whole
+  if (rem < 0.05) return whole > 0 ? String(whole) : '0'
+  for (const [num, den, label] of _DISPLAY_FRACTIONS) {
+    if (Math.abs(rem - num / den) < 0.06) {
+      return whole > 0 ? `${whole} ${label}` : label
+    }
+  }
+  // No clean fraction match — fall back to a rounded decimal
+  return whole > 0 ? String(n) : String(n)
+}
+
+/** "500 g", "1½ kg", "2 cups", "½ tsp" */
 export function displayQty(amount, unit) {
   if (amount == null || amount === '') return ''
   const { amount: a, unit: u } = fromBaseUnit(Number(amount), unit)
-  return u ? `${a} ${u}` : String(a)
+  const formatted = formatFraction(a)
+  return u ? `${formatted} ${u}` : formatted
 }
 
 // ─── Domain classification (for unit sanitisation) ────────────────────────────

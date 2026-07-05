@@ -248,14 +248,41 @@ function _parseLine(line) {
   const m   = raw.match(UNIT_RE)
 
   if (m) {
-    let rawNum = m[1].trim().replace(/\s/g, '')
+    // rawNum can be a plain number ("2"), a simple fraction ("1/2"), or
+    // a MIXED number with a space ("1 1/2" meaning one-and-a-half).
+    // Stripping all whitespace before parsing (the previous approach)
+    // collapses "1 1/2" into "11/2", which divides to 5.5 instead of
+    // the correct 1.5 — silently multiplying the true quantity by
+    // roughly 3.7x for any mixed-number ingredient line. Parse whole
+    // and fractional parts SEPARATELY instead, so a genuine space
+    // between them means "add these together", not "delete the space
+    // and treat as one number".
+    const rawNum = m[1].trim()
     const FRACS = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.667, '⅛': 0.125 }
-    for (const [f, v] of Object.entries(FRACS)) {
-      if (rawNum.includes(f)) { rawNum = String((parseFloat(rawNum) || 0) + v); break }
+
+    let amount
+    const parts = rawNum.split(/\s+/).filter(Boolean) // e.g. "1 1/2" -> ["1", "1/2"]
+
+    const parsePart = (p) => {
+      for (const [f, v] of Object.entries(FRACS)) {
+        if (p.includes(f)) return v
+      }
+      if (p.includes('/')) {
+        const [num, den] = p.split('/').map(Number)
+        return den ? num / den : NaN
+      }
+      return parseFloat(p)
     }
-    const amount = rawNum.includes('/')
-      ? rawNum.split('/').reduce((a, b) => Number(a) / Number(b))
-      : parseFloat(rawNum)
+
+    if (parts.length === 2) {
+      // Mixed number: "1 1/2" -> whole (1) + fraction (0.5) = 1.5
+      const whole = parsePart(parts[0])
+      const frac  = parsePart(parts[1])
+      amount = (isNaN(whole) ? 0 : whole) + (isNaN(frac) ? 0 : frac)
+    } else {
+      amount = parsePart(rawNum)
+    }
+
     const unit = m[2].replace(/s$/, '').toLowerCase()
     let name = raw.slice(m[0].length)
     let prev
