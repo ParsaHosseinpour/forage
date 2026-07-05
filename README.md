@@ -69,7 +69,7 @@ SUPABASE_SERVICE_KEY=your_service_role_key node scripts/seed-mealdb.js
 
 Pulls from TheMealDB's free public API. No account or key needed on their end. Good for getting the app running in a few minutes; not enough recipes for daily real-world use.
 
-**Option B — Food.com via Hugging Face (recommended, 522k+ recipes, real nutrition data)**
+**Option B — Food.com via Hugging Face (recommended, real nutrition data, strict quality filtering)**
 
 First run `supabase_step18_migration.sql` (adds the nutrition columns this import populates), then:
 
@@ -78,12 +78,17 @@ pip install pandas pyarrow supabase requests
 SUPABASE_SERVICE_KEY=your_service_role_key python3 scripts/import-foodcom.py
 ```
 
-Streams the [Food.com recipes dataset](https://huggingface.co/datasets/AkashPS11/recipes_data_food.com) (MIT licensed) directly from Hugging Face — no manual download. Expect 20–40 minutes for the full dataset. Useful flags:
+Streams the [Food.com recipes dataset](https://huggingface.co/datasets/AkashPS11/recipes_data_food.com) (MIT licensed, 522k+ raw recipes) directly from Hugging Face — no manual download. By default the importer prioritises **clean data over raw count** and rejects any recipe that doesn't have all of: a real image, at least 3 ingredients, and at least 150 characters of real instructions. Since only about half of Food.com's community-submitted recipes have any image at all, expect the final imported count to be well under the 522k raw total — the exact number depends on how strict a bar you want; run with `--dry-run` first to see the real numbers before committing to a full import. Expect 20–40 minutes for the full dataset scan either way.
+
+Useful flags:
 
 ```bash
-python3 scripts/import-foodcom.py --dry-run --limit 500   # test without writing anything
-python3 scripts/import-foodcom.py --limit 20000            # import a smaller slice
+python3 scripts/import-foodcom.py --dry-run --limit 500     # test without writing anything
+python3 scripts/import-foodcom.py --limit 20000              # import a smaller slice
+python3 scripts/import-foodcom.py --allow-no-image           # prioritise dataset size over image coverage
 ```
+
+The final summary printout breaks down exactly why recipes were rejected (no image / short instructions / too few ingredients / etc.) so you can see the quality/quantity trade-off directly rather than guessing at it.
 
 This was chosen after an architectural evaluation of scraping Allrecipes vs. licensed alternatives — see the project history for the full writeup. Both seed scripts are safe to run together or independently; they upsert by `source_id` so re-running never creates duplicates.
 

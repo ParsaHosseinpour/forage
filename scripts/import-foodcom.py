@@ -72,7 +72,22 @@ HF_PARQUET_API = f"https://datasets-server.huggingface.co/parquet?dataset={HF_DA
 
 BATCH_SIZE = 200          # rows per Supabase upsert call
 MIN_INGREDIENTS = 3        # recipes below this are almost always junk/incomplete
-MIN_INSTRUCTION_CHARS = 40  # filters out placeholder/empty instructions
+
+# Raised from 40 -> 150. 40 characters is barely one short sentence
+# ("Mix well and serve." is 20 chars) and was letting through recipes
+# with essentially no real instructions. 150 chars is roughly 2-3
+# genuine sentences — enough to actually be a usable recipe step.
+MIN_INSTRUCTION_CHARS = 150
+
+# When True (the default, per an explicit decision to prioritise a
+# smaller CLEAN dataset over a larger one with broken-looking cards),
+# recipes with no image are skipped entirely rather than imported with
+# a generic placeholder. Roughly half of Food.com's community-submitted
+# recipes have no image at all (confirmed against real sample data),
+# so this materially shrinks the imported set — that's the intended
+# trade-off. Set to False (or pass --allow-no-image) to import
+# image-less recipes anyway if dataset size becomes the priority later.
+REQUIRE_IMAGE = True
 
 # ─── R-vector string parser (defensive fallback) ────────────────────────────
 #
@@ -404,31 +419,61 @@ def compute_quality_score(ingredient_count, instructions_text, has_orphaned_ingr
 
 # ─── Row transform: Food.com DataFrame row → Forage `recipes` row ──────────
 
+# Tracks WHY recipes were rejected, for the end-of-run summary. Populated
+# by transform_row() as it filters rows; read by main() when printing
+# final stats. A plain module-level dict rather than changing
+# transform_row's return type, to avoid touching its existing contract.
+REJECTION_COUNTS = {
+    'too_few_ingredients': 0,
+    'short_instructions': 0,
+    'no_title': 0,
+    'invalid_id': 0,
+    'no_image': 0,
+}
+
+
 def transform_row(row):
     quantities = parse_r_vector(row.get('RecipeIngredientQuantities'))
     parts = parse_r_vector(row.get('RecipeIngredientParts'))
     lines, names_lower = build_ingredient_lines(quantities, parts)
 
     if len(names_lower) < MIN_INGREDIENTS:
+        REJECTION_COUNTS['too_few_ingredients'] += 1
         return None  # filtered: too few ingredients to be a usable recipe
 
     instructions_list = parse_r_vector(row.get('RecipeInstructions'))
     instructions_text = ' '.join(instructions_list).strip()
 
     if len(instructions_text) < MIN_INSTRUCTION_CHARS:
+        REJECTION_COUNTS['short_instructions'] += 1
         return None  # filtered: no meaningful instructions
 
     title = str(row.get('Name') or '').strip()
     if not title:
+        REJECTION_COUNTS['no_title'] += 1
         return None
 
     recipe_id = row.get('RecipeId')
     if recipe_id is None or (isinstance(recipe_id, float) and math.isnan(recipe_id)):
+        REJECTION_COUNTS['invalid_id'] += 1
         return None
     source_id = f"foodcom-{int(recipe_id)}"
 
     images = parse_r_vector(row.get('Images'))
-    image_url = images[0] if images else None
+    # Filter out empty strings, whitespace-only, and Food.com's known
+    # placeholder/broken-link patterns before treating "has an image" as
+    # true — otherwise a junk URL could count as "has image" and defeat
+    # the whole point of this filter.
+    valid_images = [
+        img for img in images
+        if img and img.strip() and img.strip().lower() not in ('character(0)', 'na', 'nan')
+        and img.strip().startswith('http')
+    ]
+    image_url = valid_images[0] if valid_images else None
+
+    if REQUIRE_IMAGE and image_url is None:
+        REJECTION_COUNTS['no_image'] += 1
+        return None  # filtered: no real image — see REQUIRE_IMAGE comment above
 
     # Deliberately NOT using TotalTime: Food.com's TotalTime includes
     # marinating/freezing/rising time, which can run into DAYS for many
@@ -524,7 +569,13 @@ def main():
     parser.add_argument("--limit", type=int, default=None, help="Import at most N recipes (for testing)")
     parser.add_argument("--min-quality", type=int, default=1, help="Skip recipes below this quality_score (0-2)")
     parser.add_argument("--dry-run", action="store_true", help="Parse and report stats without writing to Supabase")
+    parser.add_argument("--allow-no-image", action="store_true",
+                         help="Import recipes with no image instead of skipping them (default: image required)")
     args = parser.parse_args()
+
+    global REQUIRE_IMAGE
+    if args.allow_no_image:
+        REQUIRE_IMAGE = False
 
     if not args.dry_run and not SUPABASE_SERVICE_KEY:
         print("Error: SUPABASE_SERVICE_KEY environment variable is required (unless --dry-run).")
@@ -605,6 +656,13 @@ def main():
     print(f"  Recipes written:     {total_written:,}")
     print(f"  With nutrition data: {nutrition_present:,} ({100 * nutrition_present / max(total_kept, 1):.1f}%)")
     print(f"  Quality breakdown:   low={quality_counts[0]:,}  ok={quality_counts[1]:,}  good={quality_counts[2]:,}")
+    print(f"\n  Rejected recipes (why they were skipped):")
+    print(f"    No real image:          {REJECTION_COUNTS['no_image']:,}"
+          + ("  (REQUIRE_IMAGE is on)" if REQUIRE_IMAGE else "  (image not required, this should be 0)"))
+    print(f"    Instructions too short: {REJECTION_COUNTS['short_instructions']:,}  (< {MIN_INSTRUCTION_CHARS} chars)")
+    print(f"    Too few ingredients:    {REJECTION_COUNTS['too_few_ingredients']:,}  (< {MIN_INGREDIENTS} ingredients)")
+    print(f"    No title:               {REJECTION_COUNTS['no_title']:,}")
+    print(f"    Invalid/missing ID:     {REJECTION_COUNTS['invalid_id']:,}")
     if not args.dry_run:
         print(f"\nYour recipes table now has these recipes searchable via search_by_ingredients().")
 
