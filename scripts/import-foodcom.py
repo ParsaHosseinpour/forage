@@ -249,11 +249,24 @@ _GUESSED_UNIT = {
     'baking soda': 'tsp', 'vanilla': 'tsp', 'vanilla extract': 'tsp',
     'cinnamon': 'tsp', 'nutmeg': 'tsp', 'paprika': 'tsp', 'cumin': 'tsp',
     'oregano': 'tsp', 'basil': 'tsp', 'garlic powder': 'tsp', 'onion powder': 'tsp',
+    'italian seasoning': 'tsp', 'thyme': 'tsp', 'rosemary': 'tsp', 'dill': 'tsp',
+    'parsley': 'tbsp', 'cilantro': 'tbsp', 'chives': 'tbsp',
     'butter': 'tbsp', 'oil': 'tbsp', 'olive oil': 'tbsp', 'vegetable oil': 'tbsp',
     'soy sauce': 'tbsp', 'lemon juice': 'tbsp', 'lime juice': 'tbsp',
     'milk': 'cup', 'water': 'cup', 'cream': 'cup', 'heavy cream': 'cup',
     'broth': 'cup', 'chicken broth': 'cup', 'beef broth': 'cup', 'stock': 'cup',
     'rice': 'cup', 'wine': 'cup',
+    # Grated/shredded cheeses — measured by volume, never counted like eggs.
+    # Whole-number quantities were incorrectly falling through to the
+    # "bare count is fine" path (e.g. "6 cheddar cheese", which reads as
+    # nonsense — cheese isn't sold or measured in units of 6).
+    'cheddar cheese': 'cup', 'cheddar': 'cup', 'mozzarella': 'cup',
+    'parmesan': 'cup', 'shredded cheese': 'cup', 'grated cheese': 'cup',
+    'cream cheese': 'oz', 'cottage cheese': 'cup', 'feta': 'cup',
+    'sour cream': 'cup', 'yogurt': 'cup', 'mayonnaise': 'cup',
+    'ketchup': 'cup', 'mustard': 'tbsp', 'honey': 'tbsp', 'syrup': 'cup',
+    'cocoa powder': 'cup', 'cornstarch': 'tbsp', 'cornmeal': 'cup',
+    'breadcrumbs': 'cup', 'panko': 'cup', 'oats': 'cup',
 }
 
 # Words that are ALWAYS units/measures on their own — if an ingredient
@@ -315,6 +328,59 @@ def _split_qualifier(name):
     return f"{qualifier} {base}".strip(), base
 
 
+def _pluralize_unit(unit, qty):
+    """
+    "1 cup" and "1/2 cup" both stay singular (quantity <= 1); "6 cup"
+    and "1 1/2 cup" should read "6 cups" / "1 1/2 cups". Evaluates the
+    actual numeric value rather than string-matching "1" literally, so
+    fractional quantities under 1 (1/2, 1/4, 1/3) are correctly treated
+    as singular too. Only pluralizes units where doing so is
+    unambiguous (cup/tsp/tbsp) -- skips abbreviations like "oz"/"lb"
+    that don't take a natural plural "s" in common usage.
+    """
+    no_plural = {'oz', 'lb', 'ml', 'g', 'kg'}
+    if unit in no_plural or unit.endswith('s'):
+        return unit
+
+    numeric_value = _quantity_to_float(qty)
+    is_singular = numeric_value is not None and numeric_value <= 1.0
+    return unit if is_singular else f"{unit}s"
+
+
+def _quantity_to_float(qty):
+    """Best-effort numeric value of a quantity string ('1 1/2' -> 1.5, '1/2' -> 0.5, '3' -> 3.0)."""
+    qty = qty.strip()
+    if not qty:
+        return None
+    FRACS = {'½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.667, '⅛': 0.125}
+    parts = qty.split()
+    total = 0.0
+    found_any = False
+    for p in parts:
+        for f, v in FRACS.items():
+            if f in p:
+                total += v
+                found_any = True
+                p = ''
+                break
+        if not p:
+            continue
+        if '/' in p:
+            try:
+                num, den = p.split('/')
+                total += float(num) / float(den)
+                found_any = True
+            except (ValueError, ZeroDivisionError):
+                pass
+        else:
+            try:
+                total += float(p)
+                found_any = True
+            except ValueError:
+                pass
+    return total if found_any else None
+
+
 def _guess_display_line(qty, name_clean, countable_base_lower):
     """
     Build the human-readable ingredient line, choosing the least
@@ -345,7 +411,8 @@ def _guess_display_line(qty, name_clean, countable_base_lower):
 
     for key, unit in _GUESSED_UNIT.items():
         if key in name_lower:
-            return f"{qty} {unit} {name_clean}"
+            unit_display = _pluralize_unit(unit, qty)
+            return f"{qty} {unit_display} {name_clean}"
 
     if _is_whole_number(qty) or _looks_countable(countable_base_lower):
         return f"{qty} {name_clean}"
@@ -376,17 +443,69 @@ def build_ingredient_lines(quantities, parts):
     return lines, names_lower
 
 
-def flag_orphaned_ingredients(instructions_text, ingredient_names_lower):
+def flag_orphaned_ingredients(title, instructions_text, ingredient_names_lower):
     """
-    Detect ingredients mentioned in the instructions that never appear
-    in the parsed ingredient list — a sign the source row's ingredient/
-    quantity arrays were incomplete or misaligned. A quality SIGNAL,
-    not a hard filter — checks a short list of easily-detected named
-    herbs/spices rather than every word, to avoid false-positiving on
-    common words.
+    Detect two signs that a recipe's source row is internally
+    inconsistent -- a sign the ingredient/quantity arrays were
+    incomplete or misaligned at the source, not something introduced by
+    our parsing:
+
+    1. TITLE CHECK (the stronger, more general signal): a recipe's
+       title almost always names its hero ingredient(s) -- "Squash
+       Frittata", "Chicken Alfredo", "Beef Stew". If none of the
+       meaningful nouns in the title appear anywhere in the parsed
+       ingredient list, the row is very likely missing its main
+       ingredient entirely (real example: "Yellow Squash Frittata"
+       where squash never appears in Ingredients at all, despite being
+       used as the primary ingredient across multiple instruction
+       steps). This generalises far better than a fixed word list --
+       it would have caught the squash case, which a herb/spice-only
+       check never could.
+
+    2. HERB CHECK (narrower, kept as a secondary signal): a short list
+       of easily-detected named herbs/spices used in instructions but
+       absent from Ingredients (e.g. "sprinkle the tarragon on top").
+
+    A quality SIGNAL, not a hard filter -- both checks are heuristics
+    that can occasionally false-positive (e.g. a title word that's a
+    genuine synonym for something phrased differently in the
+    ingredient list), so affected recipes are deprioritised via
+    quality_score rather than rejected outright.
     """
     if not instructions_text:
         return False
+
+    # ── 1. Title check ──────────────────────────────────────────────────────
+    # Generic recipe-title words that are never themselves the missing
+    # ingredient -- filtered out so "Chicken Salad" doesn't flag just
+    # because "salad" isn't a literal ingredient name.
+    TITLE_STOPWORDS = {
+        'the', 'a', 'an', 'with', 'and', 'or', 'in', 'on', 'style', 'recipe',
+        'easy', 'quick', 'simple', 'best', 'homemade', 'classic', 'traditional',
+        'salad', 'soup', 'stew', 'bake', 'baked', 'roast', 'roasted', 'grilled',
+        'fried', 'stir', 'fry', 'casserole', 'dish', 'meal', 'dinner', 'lunch',
+        'breakfast', 'dessert', 'appetizer', 'side', 'main', 'sweet', 'savory',
+        'spicy', 'creamy', 'crispy', 'fresh', 'delicious', 'perfect', 'ultimate',
+        'frittata', 'omelette', 'omelet', 'casserole', 'skillet', 'pot', 'pan',
+        'sandwich', 'wrap', 'bowl', 'plate', 'style', 'no', 'low', 'free', 'of',
+        'for', 'to', 'my', 'your', 'our', 'this', 'that', 'i', 'ii', 'iii',
+    }
+    title_words = re.findall(r"[a-z']+", title.lower())
+    candidate_words = [
+        w for w in title_words
+        if len(w) > 3 and w not in TITLE_STOPWORDS and not w.endswith("'s")
+    ]
+    if candidate_words:
+        # If NONE of the meaningful title words appear anywhere in the
+        # ingredient list, the title's hero ingredient is likely missing.
+        found_any = any(
+            any(word in ing for ing in ingredient_names_lower)
+            for word in candidate_words
+        )
+        if not found_any:
+            return True
+
+    # ── 2. Herb/spice check ──────────────────────────────────────────────────
     instructions_lower = instructions_text.lower()
     named_check = (
         'tarragon', 'thyme', 'rosemary', 'basil', 'oregano', 'cilantro',
@@ -396,6 +515,7 @@ def flag_orphaned_ingredients(instructions_text, ingredient_names_lower):
         if re.search(rf'\b{herb}\b', instructions_lower):
             if not any(herb in n for n in ingredient_names_lower):
                 return True
+
     return False
 
 
@@ -515,7 +635,7 @@ def transform_row(row):
             return None
         return float(v)
 
-    has_orphan = flag_orphaned_ingredients(instructions_text, names_lower)
+    has_orphan = flag_orphaned_ingredients(title, instructions_text, names_lower)
     quality = compute_quality_score(len(names_lower), instructions_text, has_orphan)
 
     return {
