@@ -1,0 +1,1849 @@
+[
+  {
+    "title": "Khoresh Narenj",
+    "persian_name": "خورش نارنج",
+    "cuisine": "Iranian",
+    "region": "Mazandaran",
+    "tags": [
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "dinner",
+    "servings": 5,
+    "cook_time_minutes": 100,
+    "ingredients": [
+      {
+        "quantity": 600,
+        "unit": "g",
+        "name": "duck"
+      },
+      {
+        "quantity": 3,
+        "unit": "piece",
+        "name": "bitter orange"
+      },
+      {
+        "quantity": 2,
+        "unit": "tbsp",
+        "name": "sugar"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 600,
+        "unit": "ml",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Cut the duck into serving pieces and season with salt, black pepper, and turmeric.",
+      "Heat the oil in a pot and sauté the diced onion until golden.",
+      "Add the duck pieces and brown them on all sides for about 10 minutes.",
+      "Squeeze the juice from the bitter oranges and set aside, reserving a few strips of the peel.",
+      "Add the water to the pot, cover, and simmer over low heat for 45 minutes.",
+      "Stir in the bitter orange juice, a few strips of the peel, and the sugar.",
+      "Continue simmering uncovered for another 30 minutes until the duck is tender and the sauce has thickened.",
+      "Taste and adjust the balance of tartness and sweetness with more sugar or orange juice as needed.",
+      "Remove the orange peel strips and serve hot over steamed rice."
+    ],
+    "calories": 410,
+    "protein_g": 24,
+    "carbs_g": 14,
+    "fat_g": 28
+  },
+  {
+    "title": "Chelow Kabab Koobideh",
+    "persian_name": "چلو کباب کوبیده",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "dinner",
+    "servings": 4,
+    "cook_time_minutes": 60,
+    "ingredients": [
+      {
+        "quantity": 600,
+        "unit": "g",
+        "name": "ground beef"
+      },
+      {
+        "quantity": 200,
+        "unit": "g",
+        "name": "ground lamb"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "baking soda"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 2,
+        "unit": "tbsp",
+        "name": "butter"
+      },
+      {
+        "quantity": 3,
+        "unit": "cup",
+        "name": "basmati rice"
+      },
+      {
+        "quantity": 2,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Grate the onions and squeeze out as much liquid as possible, reserving the pulp.",
+      "In a large bowl, combine the ground beef, ground lamb, grated onion pulp, baking soda, turmeric, salt, and black pepper.",
+      "Knead the mixture thoroughly for several minutes until smooth and sticky.",
+      "Cover and refrigerate the meat mixture for at least 1 hour to firm up.",
+      "Rinse the basmati rice, soak in salted water for 1 hour, then parboil in the water for 6 to 8 minutes and drain.",
+      "Steam the parboiled rice with a drizzle of melted butter over low heat for 40 minutes until fluffy.",
+      "Divide the meat mixture into portions and mold each firmly onto a flat metal skewer, pressing to remove air pockets.",
+      "Preheat a grill to high heat and grill the skewers for 10 to 12 minutes, turning frequently, until fully cooked and lightly charred.",
+      "Serve the kabab over the steamed rice with grilled tomatoes."
+    ],
+    "calories": 520,
+    "protein_g": 32,
+    "carbs_g": 45,
+    "fat_g": 24
+  },
+  {
+    "title": "Khoresh Karafs",
+    "persian_name": "خورش کرفس",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "dinner",
+    "servings": 5,
+    "cook_time_minutes": 90,
+    "ingredients": [
+      {
+        "quantity": 500,
+        "unit": "g",
+        "name": "lamb stew meat"
+      },
+      {
+        "quantity": 4,
+        "unit": "piece",
+        "name": "celery stalk"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "parsley"
+      },
+      {
+        "quantity": 50,
+        "unit": "g",
+        "name": "mint leaves"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "lemon juice"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 600,
+        "unit": "ml",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Cut the celery stalks into batons and chop the parsley and mint leaves finely.",
+      "Heat oil in a pot and sauté the diced onion until golden.",
+      "Add the lamb and turmeric, browning the meat on all sides.",
+      "Stir in the chopped parsley and mint, cooking for 5 minutes until fragrant.",
+      "Add the water, season with salt and black pepper, and bring to a boil.",
+      "Cover and simmer over low heat for 45 minutes.",
+      "Add the celery batons and continue simmering for 25 minutes until the celery is tender.",
+      "Stir in the lemon juice and simmer uncovered for 10 more minutes until the sauce thickens slightly.",
+      "Taste and adjust seasoning before serving hot with steamed rice."
+    ],
+    "calories": 380,
+    "protein_g": 25,
+    "carbs_g": 10,
+    "fat_g": 24
+  },
+  {
+    "title": "Aash-e Jow",
+    "persian_name": "آش جو",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegetarian"
+    ],
+    "meal_type": "lunch",
+    "servings": 6,
+    "cook_time_minutes": 90,
+    "ingredients": [
+      {
+        "quantity": 200,
+        "unit": "g",
+        "name": "barley"
+      },
+      {
+        "quantity": 200,
+        "unit": "g",
+        "name": "lentils"
+      },
+      {
+        "quantity": 300,
+        "unit": "g",
+        "name": "spinach"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "parsley"
+      },
+      {
+        "quantity": 200,
+        "unit": "ml",
+        "name": "plain yogurt"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "dried mint"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 2,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the barley and lentils, then cook them together in the water over medium heat for 40 minutes until soft.",
+      "Finely chop the spinach and parsley.",
+      "Sauté one chopped onion in oil until golden, then add the chopped greens and cook for 10 minutes.",
+      "Add the sautéed greens to the pot of barley and lentils.",
+      "Simmer for 20 minutes, stirring occasionally, and season with salt and black pepper.",
+      "Remove a ladle of the hot soup and whisk it into the yogurt to temper it, then stir the tempered yogurt back into the pot.",
+      "Simmer gently for 5 more minutes without boiling to avoid curdling.",
+      "Fry the remaining sliced onion in oil until crispy and golden.",
+      "Ladle the soup into bowls and top with the crispy onions and a drizzle of oil infused with dried mint."
+    ],
+    "calories": 290,
+    "protein_g": 11,
+    "carbs_g": 42,
+    "fat_g": 9
+  },
+  {
+    "title": "Sabzi Polo",
+    "persian_name": "سبزی پلو",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegetarian",
+      "gluten free"
+    ],
+    "meal_type": "lunch",
+    "servings": 6,
+    "cook_time_minutes": 75,
+    "ingredients": [
+      {
+        "quantity": 3,
+        "unit": "cup",
+        "name": "basmati rice"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "dill"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "parsley"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "cilantro"
+      },
+      {
+        "quantity": 50,
+        "unit": "g",
+        "name": "chives"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "butter"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": 2,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the basmati rice thoroughly and soak in salted water for 1 hour.",
+      "Finely chop the dill, parsley, cilantro, and chives, then combine them in a bowl.",
+      "Bring a large pot of salted water to a boil and parboil the drained rice for 6 to 8 minutes, then drain.",
+      "In a clean pot, layer a third of the parboiled rice, then sprinkle with a layer of the chopped herbs.",
+      "Continue layering the rice and herbs, finishing with a rice layer on top.",
+      "Drizzle melted butter over the top and cover the pot with a towel-wrapped lid.",
+      "Steam on low heat for 40 to 45 minutes until the rice is fully cooked and a golden crust forms on the bottom.",
+      "Gently fluff and mix the rice and herbs together before transferring to a serving platter.",
+      "Serve hot, traditionally alongside fried fish or lamb."
+    ],
+    "calories": 370,
+    "protein_g": 7,
+    "carbs_g": 66,
+    "fat_g": 9
+  },
+  {
+    "title": "Naan-e Sangak",
+    "persian_name": "نان سنگک",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegan",
+      "vegetarian",
+      "dairy free"
+    ],
+    "meal_type": "breakfast",
+    "servings": 6,
+    "cook_time_minutes": 180,
+    "ingredients": [
+      {
+        "quantity": 5,
+        "unit": "cup",
+        "name": "whole wheat flour"
+      },
+      {
+        "quantity": 2,
+        "unit": "tsp",
+        "name": "instant yeast"
+      },
+      {
+        "quantity": 2,
+        "unit": "tsp",
+        "name": "salt"
+      },
+      {
+        "quantity": 2,
+        "unit": "cup",
+        "name": "warm water"
+      },
+      {
+        "quantity": 2,
+        "unit": "tbsp",
+        "name": "sesame seeds"
+      },
+      {
+        "quantity": 2,
+        "unit": "tbsp",
+        "name": "poppy seeds"
+      }
+    ],
+    "instructions": [
+      "In a large bowl, combine the whole wheat flour, instant yeast, and salt.",
+      "Gradually add the warm water, mixing and kneading into a soft, elastic dough for about 12 minutes.",
+      "Cover the dough and let it rise in a warm place for 2 hours until doubled in size.",
+      "Preheat the oven to its highest setting with a baking stone or heavy tray inside.",
+      "Divide the dough into portions and stretch each into a long, thin rectangle directly on a floured surface.",
+      "Transfer each stretched piece of dough onto the hot baking stone.",
+      "Sprinkle the surface with sesame seeds and poppy seeds, pressing them lightly into the dough.",
+      "Bake for 8 to 10 minutes until the bread puffs up and develops a deep golden, blistered crust.",
+      "Remove from the oven and let cool slightly before tearing and serving."
+    ],
+    "calories": 280,
+    "protein_g": 9,
+    "carbs_g": 56,
+    "fat_g": 3
+  },
+  {
+    "title": "Kotlet",
+    "persian_name": "کتلت",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "dairy free"
+    ],
+    "meal_type": "lunch",
+    "servings": 4,
+    "cook_time_minutes": 45,
+    "ingredients": [
+      {
+        "quantity": 500,
+        "unit": "g",
+        "name": "ground beef"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "potato"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "egg"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "breadcrumbs"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      }
+    ],
+    "instructions": [
+      "Boil the potatoes until fully tender, then peel and mash them in a bowl.",
+      "Grate the onion and add it to the mashed potatoes along with the ground beef.",
+      "Add the eggs, breadcrumbs, turmeric, salt, and black pepper to the mixture.",
+      "Knead everything together thoroughly until well combined and smooth.",
+      "Shape the mixture into small oval patties with your hands.",
+      "Heat the oil in a large skillet over medium heat.",
+      "Fry the patties in batches for 4 to 5 minutes per side until golden brown and cooked through.",
+      "Drain the cooked patties on paper towels to remove excess oil.",
+      "Serve warm with bread, herbs, and pickles."
+    ],
+    "calories": 340,
+    "protein_g": 20,
+    "carbs_g": 18,
+    "fat_g": 21
+  },
+  {
+    "title": "Shirin Polo",
+    "persian_name": "شیرین پلو",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegetarian",
+      "gluten free"
+    ],
+    "meal_type": "lunch",
+    "servings": 6,
+    "cook_time_minutes": 80,
+    "ingredients": [
+      {
+        "quantity": 3,
+        "unit": "cup",
+        "name": "basmati rice"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "orange peel"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "slivered almonds"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "slivered pistachios"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "sugar"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "butter"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "saffron"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": 2,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the basmati rice and soak in salted water for 1 hour, then drain.",
+      "Cut the orange peel into thin strips and boil in water for 5 minutes to remove bitterness, then drain and repeat once more.",
+      "Bloom the saffron in 3 tablespoons of hot water.",
+      "In a small pan, combine the blanched orange peel, sugar, and a splash of water, and simmer for 10 minutes until syrupy.",
+      "Stir in the slivered almonds and pistachios to the orange peel syrup and set aside.",
+      "Bring a large pot of salted water to a boil and parboil the drained rice for 6 to 8 minutes, then drain.",
+      "Layer the parboiled rice in a pot with the orange peel and nut mixture, finishing with a rice layer.",
+      "Drizzle with melted butter, cover with a towel-wrapped lid, and steam on low heat for 40 minutes.",
+      "Mix a portion of the rice with the bloomed saffron water and use it to garnish the platter before serving."
+    ],
+    "calories": 430,
+    "protein_g": 8,
+    "carbs_g": 72,
+    "fat_g": 14
+  },
+  {
+    "title": "Khorak-e Morgh",
+    "persian_name": "خوراک مرغ",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "dinner",
+    "servings": 4,
+    "cook_time_minutes": 60,
+    "ingredients": [
+      {
+        "quantity": 4,
+        "unit": "piece",
+        "name": "chicken drumstick"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "potato"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "carrot"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "tomato paste"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 700,
+        "unit": "ml",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Heat the oil in a large pot and sauté the diced onion until golden.",
+      "Add the chicken drumsticks and turmeric, browning them on all sides.",
+      "Stir in the tomato paste and cook for 2 minutes to deepen the flavor.",
+      "Peel and cut the potatoes and carrots into large chunks and add them to the pot.",
+      "Pour in the water, season with salt and black pepper, and bring to a boil.",
+      "Reduce heat to low, cover, and simmer for 40 minutes until the chicken and vegetables are tender.",
+      "Uncover and simmer for 10 more minutes to thicken the sauce slightly.",
+      "Taste and adjust seasoning as needed before serving hot with bread or rice."
+    ],
+    "calories": 390,
+    "protein_g": 28,
+    "carbs_g": 22,
+    "fat_g": 20
+  },
+  {
+    "title": "Nargesi",
+    "persian_name": "نرگسی",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegetarian",
+      "gluten free"
+    ],
+    "meal_type": "breakfast",
+    "servings": 3,
+    "cook_time_minutes": 30,
+    "ingredients": [
+      {
+        "quantity": 400,
+        "unit": "g",
+        "name": "spinach"
+      },
+      {
+        "quantity": 4,
+        "unit": "piece",
+        "name": "egg"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      }
+    ],
+    "instructions": [
+      "Wash the spinach thoroughly and roughly chop it.",
+      "Heat the oil in a large skillet and sauté the diced onion until golden.",
+      "Add the turmeric and chopped spinach to the skillet, stirring to combine.",
+      "Cook the spinach over medium heat for 10 minutes until wilted and most of the liquid has evaporated.",
+      "Season with salt and black pepper.",
+      "Make small wells in the spinach mixture and crack an egg into each well.",
+      "Cover the skillet and cook for 5 to 7 minutes until the eggs are set to your liking.",
+      "Serve hot directly from the skillet with fresh bread."
+    ],
+    "calories": 220,
+    "protein_g": 13,
+    "carbs_g": 8,
+    "fat_g": 15
+  },
+  {
+    "title": "Khoresh Rivas",
+    "persian_name": "خورش ریواس",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "dinner",
+    "servings": 5,
+    "cook_time_minutes": 90,
+    "ingredients": [
+      {
+        "quantity": 500,
+        "unit": "g",
+        "name": "lamb stew meat"
+      },
+      {
+        "quantity": 400,
+        "unit": "g",
+        "name": "rhubarb"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "parsley"
+      },
+      {
+        "quantity": 50,
+        "unit": "g",
+        "name": "mint leaves"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 2,
+        "unit": "tbsp",
+        "name": "sugar"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 600,
+        "unit": "ml",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Cut the rhubarb into short batons and set aside.",
+      "Finely chop the parsley and mint leaves.",
+      "Heat oil in a pot and sauté the diced onion until golden.",
+      "Add the lamb and turmeric, browning the meat on all sides.",
+      "Stir in the chopped parsley and mint, cooking for 5 minutes.",
+      "Add the water, season with salt and black pepper, and simmer covered for 45 minutes.",
+      "Add the rhubarb batons and sugar, and simmer for 20 more minutes until the rhubarb is soft but not disintegrated.",
+      "Taste and adjust the sweet-tart balance with more sugar if needed.",
+      "Serve hot with steamed rice."
+    ],
+    "calories": 370,
+    "protein_g": 24,
+    "carbs_g": 14,
+    "fat_g": 23
+  },
+  {
+    "title": "Havij Polo",
+    "persian_name": "هویج پلو",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "lunch",
+    "servings": 6,
+    "cook_time_minutes": 90,
+    "ingredients": [
+      {
+        "quantity": 3,
+        "unit": "cup",
+        "name": "basmati rice"
+      },
+      {
+        "quantity": 500,
+        "unit": "g",
+        "name": "chicken thighs"
+      },
+      {
+        "quantity": 4,
+        "unit": "piece",
+        "name": "carrot"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "raisins"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "sugar"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "saffron"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 2,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the basmati rice and soak in salted water for 1 hour, then drain.",
+      "Cut the carrots into thin matchsticks.",
+      "Heat oil in a pan and sauté the diced onion until golden, then add the chicken thighs and brown on both sides.",
+      "Season the chicken with salt and black pepper, add a splash of water, cover, and simmer for 25 minutes until cooked through.",
+      "In a separate pan, sauté the carrot matchsticks with sugar for 10 minutes until softened and lightly caramelized, then stir in the raisins.",
+      "Bloom the saffron in 2 tablespoons of hot water.",
+      "Bring a large pot of salted water to a boil and parboil the drained rice for 6 to 8 minutes, then drain.",
+      "Layer the parboiled rice with the sweet carrot mixture in a pot, finishing with a rice layer, then drizzle with the bloomed saffron water.",
+      "Cover with a towel-wrapped lid and steam on low heat for 40 minutes, then serve with the cooked chicken."
+    ],
+    "calories": 480,
+    "protein_g": 24,
+    "carbs_g": 70,
+    "fat_g": 14
+  },
+  {
+    "title": "Ash-e Mast",
+    "persian_name": "آش ماست",
+    "cuisine": "Iranian",
+    "region": "Shiraz",
+    "tags": [
+      "vegetarian"
+    ],
+    "meal_type": "lunch",
+    "servings": 6,
+    "cook_time_minutes": 75,
+    "ingredients": [
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "rice"
+      },
+      {
+        "quantity": 500,
+        "unit": "ml",
+        "name": "plain yogurt"
+      },
+      {
+        "quantity": 200,
+        "unit": "g",
+        "name": "spinach"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "dried mint"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 1.5,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the rice and cook it in the water over medium heat for 20 minutes until tender.",
+      "Finely chop the spinach and one onion, then sauté the onion in oil until golden and add the spinach, cooking for 8 minutes.",
+      "Stir the sautéed spinach mixture into the pot of cooked rice.",
+      "Simmer for 10 minutes, then season with salt and black pepper.",
+      "Remove a ladle of the hot soup and whisk it into the yogurt to temper it, then stir the tempered yogurt back into the pot.",
+      "Simmer gently for 5 minutes without letting the soup boil to avoid curdling.",
+      "Fry the remaining sliced onion in oil until crispy and golden.",
+      "Ladle the soup into bowls and top with crispy onions and a drizzle of oil infused with dried mint."
+    ],
+    "calories": 260,
+    "protein_g": 10,
+    "carbs_g": 30,
+    "fat_g": 11
+  },
+  {
+    "title": "Morgh-e Torsh",
+    "persian_name": "مرغ ترش",
+    "cuisine": "Iranian",
+    "region": "Gilan",
+    "tags": [
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "dinner",
+    "servings": 5,
+    "cook_time_minutes": 90,
+    "ingredients": [
+      {
+        "quantity": 800,
+        "unit": "g",
+        "name": "chicken thighs"
+      },
+      {
+        "quantity": 200,
+        "unit": "g",
+        "name": "walnuts"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "cilantro"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "parsley"
+      },
+      {
+        "quantity": 150,
+        "unit": "ml",
+        "name": "pomegranate paste"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 6,
+        "unit": "clove",
+        "name": "garlic"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 500,
+        "unit": "ml",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Grind the walnuts finely in a food processor.",
+      "Finely chop the cilantro and parsley.",
+      "Heat oil in a pot and sauté the diced onion and minced garlic until golden.",
+      "Add the chicken thighs and turmeric, browning them on both sides.",
+      "Stir in the ground walnuts, chopped herbs, and water, and bring to a simmer.",
+      "Cover and cook over low heat for 40 minutes, stirring occasionally.",
+      "Stir in the pomegranate paste, salt, and black pepper.",
+      "Simmer uncovered for 20 more minutes until the sauce thickens and turns a deep color.",
+      "Taste and balance the tartness with more pomegranate paste if needed, then serve hot with rice."
+    ],
+    "calories": 490,
+    "protein_g": 30,
+    "carbs_g": 14,
+    "fat_g": 34
+  },
+  {
+    "title": "Koofteh Tabrizi",
+    "persian_name": "کوفته تبریزی",
+    "cuisine": "Iranian",
+    "region": "Azerbaijani-Iranian",
+    "tags": [
+      "dairy free"
+    ],
+    "meal_type": "dinner",
+    "servings": 6,
+    "cook_time_minutes": 120,
+    "ingredients": [
+      {
+        "quantity": 600,
+        "unit": "g",
+        "name": "ground beef"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "split peas"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "rice"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "egg"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 8,
+        "unit": "piece",
+        "name": "prunes"
+      },
+      {
+        "quantity": 3,
+        "unit": "piece",
+        "name": "hard boiled egg"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "tomato paste"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 1.5,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the rice and split peas, then cook them together in water until soft, about 20 minutes, and drain.",
+      "In a large bowl, combine the ground beef, cooked rice and split peas, grated onion, raw eggs, turmeric, salt, and black pepper.",
+      "Knead the mixture thoroughly until smooth and well combined.",
+      "Divide the mixture into large portions and flatten each into a disc in your palm.",
+      "Place a few prunes and a wedge of hard boiled egg in the center of each disc, then fold the meat around the filling to form a large ball.",
+      "Heat oil in a large pot and sauté the second chopped onion until golden.",
+      "Stir in the tomato paste and water, bringing the mixture to a gentle simmer.",
+      "Carefully lower the meatballs into the simmering sauce, cover, and cook for 60 minutes, turning occasionally.",
+      "Serve the meatballs whole in a bowl with the sauce spooned over the top."
+    ],
+    "calories": 480,
+    "protein_g": 28,
+    "carbs_g": 30,
+    "fat_g": 26
+  },
+  {
+    "title": "Shami Lapeh",
+    "persian_name": "شامی لپه",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "dairy free"
+    ],
+    "meal_type": "appetizer",
+    "servings": 4,
+    "cook_time_minutes": 50,
+    "ingredients": [
+      {
+        "quantity": 400,
+        "unit": "g",
+        "name": "ground beef"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "split peas"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "egg"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "cinnamon"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 600,
+        "unit": "ml",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the split peas and cook them in the water until very soft, about 25 minutes, then drain well.",
+      "Mash the cooked split peas into a smooth paste.",
+      "In a large bowl, combine the mashed split peas, ground beef, grated onion, turmeric, cinnamon, salt, and black pepper.",
+      "Add the eggs and knead everything together until the mixture is smooth and holds together well.",
+      "Shape the mixture into small oval patties with your hands.",
+      "Heat the oil in a skillet over medium heat.",
+      "Fry the patties for 4 to 5 minutes per side until golden brown and cooked through.",
+      "Drain on paper towels and serve warm with bread and fresh herbs."
+    ],
+    "calories": 320,
+    "protein_g": 20,
+    "carbs_g": 16,
+    "fat_g": 19
+  },
+  {
+    "title": "Torshi Bademjan",
+    "persian_name": "ترشی بادمجان",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegan",
+      "vegetarian",
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "appetizer",
+    "servings": 10,
+    "cook_time_minutes": 50,
+    "ingredients": [
+      {
+        "quantity": 600,
+        "unit": "g",
+        "name": "eggplant"
+      },
+      {
+        "quantity": 6,
+        "unit": "clove",
+        "name": "garlic"
+      },
+      {
+        "quantity": 2,
+        "unit": "tbsp",
+        "name": "dried mint"
+      },
+      {
+        "quantity": 700,
+        "unit": "ml",
+        "name": "white vinegar"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      }
+    ],
+    "instructions": [
+      "Peel the eggplants and cut them into thick slices.",
+      "Salt the eggplant slices and let them sit for 20 minutes to draw out bitterness, then rinse and pat dry.",
+      "Boil the eggplant slices in salted water for 5 minutes until just softened, then drain thoroughly.",
+      "Mince the garlic and combine it with the dried mint, salt, and black pepper.",
+      "Layer the boiled eggplant slices in a clean sterilized jar, sprinkling the garlic and mint mixture between each layer.",
+      "Pour the white vinegar over the layered eggplant until fully submerged.",
+      "Seal the jar tightly and store in a cool, dark place for at least one week before serving.",
+      "Serve chilled as a tangy side with rice or bread."
+    ],
+    "calories": 45,
+    "protein_g": 1,
+    "carbs_g": 8,
+    "fat_g": 0
+  },
+  {
+    "title": "Masghati",
+    "persian_name": "مسقطی",
+    "cuisine": "Iranian",
+    "region": "Bushehr",
+    "tags": [
+      "vegetarian",
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "dessert",
+    "servings": 10,
+    "cook_time_minutes": 60,
+    "ingredients": [
+      {
+        "quantity": 200,
+        "unit": "g",
+        "name": "rice flour"
+      },
+      {
+        "quantity": 200,
+        "unit": "g",
+        "name": "sugar"
+      },
+      {
+        "quantity": 500,
+        "unit": "ml",
+        "name": "water"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "rose water"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "cardamom"
+      },
+      {
+        "quantity": 2,
+        "unit": "tbsp",
+        "name": "slivered pistachios"
+      }
+    ],
+    "instructions": [
+      "In a saucepan, whisk the rice flour with the water until completely smooth and lump-free.",
+      "Add the sugar and cardamom to the saucepan and place over medium heat.",
+      "Cook the mixture, stirring constantly, until it begins to thicken.",
+      "Gradually stream in the vegetable oil while continuing to stir vigorously.",
+      "Continue cooking for 15 to 20 minutes, stirring constantly, until the mixture becomes glossy and pulls away from the sides of the pan.",
+      "Stir in the rose water during the final minute of cooking.",
+      "Pour the mixture into a greased shallow dish and smooth the top with a spatula.",
+      "Sprinkle the slivered pistachios evenly over the surface.",
+      "Let the mixture cool completely at room temperature, then chill until firm before slicing into diamonds."
+    ],
+    "calories": 190,
+    "protein_g": 2,
+    "carbs_g": 32,
+    "fat_g": 6
+  },
+  {
+    "title": "Kachi",
+    "persian_name": "کاچی",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegetarian",
+      "dairy free"
+    ],
+    "meal_type": "breakfast",
+    "servings": 4,
+    "cook_time_minutes": 30,
+    "ingredients": [
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "flour"
+      },
+      {
+        "quantity": 100,
+        "unit": "ml",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "sugar"
+      },
+      {
+        "quantity": 400,
+        "unit": "ml",
+        "name": "water"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "saffron"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "cinnamon"
+      }
+    ],
+    "instructions": [
+      "Bloom the saffron in 2 tablespoons of hot water.",
+      "Combine the sugar and the remaining water in a small saucepan and bring to a boil to make a syrup, then set aside.",
+      "Heat the oil in a separate pan over medium heat.",
+      "Add the flour to the hot oil and stir constantly to avoid lumps or burning.",
+      "Toast the flour for 8 to 10 minutes, stirring continuously, until it turns golden and fragrant.",
+      "Slowly pour the sugar syrup into the toasted flour while whisking vigorously to prevent clumping.",
+      "Stir in the bloomed saffron water and continue cooking for 5 minutes until smooth and thickened.",
+      "Pour into serving bowls and sprinkle with cinnamon before serving warm."
+    ],
+    "calories": 310,
+    "protein_g": 3,
+    "carbs_g": 42,
+    "fat_g": 15
+  },
+  {
+    "title": "Lavashak",
+    "persian_name": "لواشک",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegan",
+      "vegetarian",
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "snack",
+    "servings": 8,
+    "cook_time_minutes": 480,
+    "ingredients": [
+      {
+        "quantity": 1,
+        "unit": "kg",
+        "name": "plums"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "sugar"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      }
+    ],
+    "instructions": [
+      "Wash the plums thoroughly and remove the pits.",
+      "Blend the pitted plums in a food processor until completely smooth.",
+      "Pour the puree into a saucepan and add the sugar and a pinch of salt.",
+      "Cook the puree over low heat for 15 minutes, stirring frequently, until slightly thickened.",
+      "Line a large flat baking sheet with parchment paper and pour the puree onto it, spreading it into a thin, even layer.",
+      "Place the sheet in a very low oven or in direct sun for 6 to 8 hours until the puree is fully dried and no longer tacky.",
+      "Once dried, peel the fruit leather away from the parchment paper.",
+      "Cut or roll the fruit leather into strips for serving or storage."
+    ],
+    "calories": 90,
+    "protein_g": 1,
+    "carbs_g": 22,
+    "fat_g": 0
+  },
+  {
+    "title": "Sekanjabin",
+    "persian_name": "سکنجبین",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegan",
+      "vegetarian",
+      "gluten free",
+      "dairy free"
+    ],
+    "meal_type": "snack",
+    "servings": 8,
+    "cook_time_minutes": 25,
+    "ingredients": [
+      {
+        "quantity": 400,
+        "unit": "g",
+        "name": "sugar"
+      },
+      {
+        "quantity": 500,
+        "unit": "ml",
+        "name": "water"
+      },
+      {
+        "quantity": 150,
+        "unit": "ml",
+        "name": "white vinegar"
+      },
+      {
+        "quantity": 20,
+        "unit": "g",
+        "name": "mint leaves"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "cucumber"
+      }
+    ],
+    "instructions": [
+      "Combine the sugar and water in a saucepan and bring to a boil, stirring until the sugar fully dissolves.",
+      "Reduce the heat and simmer the syrup for 10 minutes until it thickens slightly.",
+      "Stir in the white vinegar and continue simmering for 5 more minutes.",
+      "Add the fresh mint leaves to the syrup and let them steep for 5 minutes.",
+      "Remove the syrup from heat and let it cool completely, then strain out the mint leaves.",
+      "Transfer the syrup to a clean bottle and refrigerate until ready to serve.",
+      "To serve, dilute a few tablespoons of the syrup with cold water in a glass.",
+      "Peel and slice the cucumbers into sticks and serve alongside the drink for dipping."
+    ],
+    "calories": 140,
+    "protein_g": 0,
+    "carbs_g": 36,
+    "fat_g": 0
+  },
+  {
+    "title": "Morasa Polo",
+    "persian_name": "مرصع پلو",
+    "cuisine": "Iranian",
+    "region": "Shiraz",
+    "tags": [
+      "gluten free"
+    ],
+    "meal_type": "lunch",
+    "servings": 6,
+    "cook_time_minutes": 100,
+    "ingredients": [
+      {
+        "quantity": 3,
+        "unit": "cup",
+        "name": "basmati rice"
+      },
+      {
+        "quantity": 500,
+        "unit": "g",
+        "name": "chicken breast"
+      },
+      {
+        "quantity": 80,
+        "unit": "g",
+        "name": "barberries"
+      },
+      {
+        "quantity": 80,
+        "unit": "g",
+        "name": "slivered almonds"
+      },
+      {
+        "quantity": 80,
+        "unit": "g",
+        "name": "slivered pistachios"
+      },
+      {
+        "quantity": 80,
+        "unit": "g",
+        "name": "orange peel"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "sugar"
+      },
+      {
+        "quantity": 1,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "saffron"
+      },
+      {
+        "quantity": 5,
+        "unit": "tbsp",
+        "name": "butter"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 2,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the basmati rice and soak in salted water for 1 hour, then drain.",
+      "Boil the chicken breast with the sliced onion, salt, and black pepper until fully cooked, then shred the meat.",
+      "Cut the orange peel into thin strips and boil twice in fresh water to remove bitterness, then drain.",
+      "In a small pan, combine the orange peel, sugar, and a splash of water and simmer for 10 minutes until syrupy, then stir in the almonds, pistachios, and barberries.",
+      "Bloom the saffron in 3 tablespoons of hot water.",
+      "Bring a large pot of salted water to a boil and parboil the drained rice for 6 to 8 minutes, then drain.",
+      "Layer the parboiled rice with the shredded chicken and half of the nut and barberry mixture, finishing with a rice layer.",
+      "Drizzle melted butter and half of the bloomed saffron water over the top, cover with a towel-wrapped lid, and steam on low heat for 40 minutes.",
+      "Transfer to a serving platter and garnish with the remaining nut and barberry mixture and saffron rice before serving."
+    ],
+    "calories": 490,
+    "protein_g": 24,
+    "carbs_g": 70,
+    "fat_g": 15
+  },
+  {
+    "title": "Kufteh Berenji",
+    "persian_name": "کوفته برنجی",
+    "cuisine": "Iranian",
+    "region": "Qazvin",
+    "tags": [
+      "dairy free"
+    ],
+    "meal_type": "dinner",
+    "servings": 6,
+    "cook_time_minutes": 90,
+    "ingredients": [
+      {
+        "quantity": 500,
+        "unit": "g",
+        "name": "ground beef"
+      },
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "rice"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "yellow split peas"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "fresh herbs"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "onion"
+      },
+      {
+        "quantity": 3,
+        "unit": "tbsp",
+        "name": "tomato paste"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "turmeric"
+      },
+      {
+        "quantity": 4,
+        "unit": "tbsp",
+        "name": "vegetable oil"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "salt"
+      },
+      {
+        "quantity": null,
+        "unit": null,
+        "name": "black pepper"
+      },
+      {
+        "quantity": 1.5,
+        "unit": "l",
+        "name": "water"
+      }
+    ],
+    "instructions": [
+      "Rinse the rice and split peas, then cook them together in water until soft, about 20 minutes, and drain.",
+      "Finely chop the fresh herbs and grate one onion.",
+      "In a large bowl, combine the ground beef, cooked rice and split peas, grated onion, chopped herbs, turmeric, salt, and black pepper.",
+      "Knead the mixture thoroughly until smooth, then shape into large round balls.",
+      "Heat oil in a large pot and sauté the remaining chopped onion until golden.",
+      "Stir in the tomato paste and water, bringing the mixture to a gentle simmer.",
+      "Carefully lower the meatballs into the simmering broth, cover, and cook for 60 minutes, turning occasionally.",
+      "Serve the meatballs hot in bowls with the broth spooned over the top and fresh bread on the side."
+    ],
+    "calories": 420,
+    "protein_g": 25,
+    "carbs_g": 32,
+    "fat_g": 20
+  },
+  {
+    "title": "Panir-o-Sabzi",
+    "persian_name": "پنیر و سبزی",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegetarian"
+    ],
+    "meal_type": "breakfast",
+    "servings": 2,
+    "cook_time_minutes": 10,
+    "ingredients": [
+      {
+        "quantity": 150,
+        "unit": "g",
+        "name": "feta cheese"
+      },
+      {
+        "quantity": 100,
+        "unit": "g",
+        "name": "basil"
+      },
+      {
+        "quantity": 50,
+        "unit": "g",
+        "name": "mint leaves"
+      },
+      {
+        "quantity": 50,
+        "unit": "g",
+        "name": "tarragon"
+      },
+      {
+        "quantity": 2,
+        "unit": "piece",
+        "name": "radish"
+      },
+      {
+        "quantity": 4,
+        "unit": "piece",
+        "name": "walnuts"
+      },
+      {
+        "quantity": 4,
+        "unit": "piece",
+        "name": "flatbread"
+      }
+    ],
+    "instructions": [
+      "Arrange the fresh basil, mint leaves, and tarragon on a serving platter.",
+      "Slice the radishes thinly and add them to the platter.",
+      "Place the feta cheese in the center of the platter.",
+      "Scatter the walnuts around the cheese.",
+      "Warm the flatbread briefly if desired.",
+      "Serve immediately, allowing everyone to wrap the cheese, herbs, radish, and walnuts in pieces of the flatbread."
+    ],
+    "calories": 310,
+    "protein_g": 12,
+    "carbs_g": 28,
+    "fat_g": 17
+  },
+  {
+    "title": "Zoolbia",
+    "persian_name": "زولبیا",
+    "cuisine": "Iranian",
+    "region": null,
+    "tags": [
+      "vegetarian"
+    ],
+    "meal_type": "dessert",
+    "servings": 10,
+    "cook_time_minutes": 60,
+    "ingredients": [
+      {
+        "quantity": 250,
+        "unit": "g",
+        "name": "flour"
+      },
+      {
+        "quantity": 200,
+        "unit": "g",
+        "name": "plain yogurt"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "instant yeast"
+      },
+      {
+        "quantity": 400,
+        "unit": "g",
+        "name": "sugar"
+      },
+      {
+        "quantity": 300,
+        "unit": "ml",
+        "name": "water"
+      },
+      {
+        "quantity": 1,
+        "unit": "tsp",
+        "name": "saffron"
+      },
+      {
+        "quantity": 2,
+        "unit": "tbsp",
+        "name": "rose water"
+      },
+      {
+        "quantity": 500,
+        "unit": "ml",
+        "name": "vegetable oil"
+      }
+    ],
+    "instructions": [
+      "In a bowl, whisk together the flour, yogurt, and instant yeast until a smooth, thick batter forms.",
+      "Cover the batter and let it rest in a warm place for 1 hour until slightly bubbly.",
+      "Meanwhile, combine the sugar and water in a saucepan and bring to a boil to make a syrup.",
+      "Bloom the saffron in a spoonful of hot water and stir it into the syrup along with the rose water, then simmer for 10 minutes and set aside warm.",
+      "Heat the vegetable oil in a deep pan to medium-high heat.",
+      "Transfer the batter into a piping bag or squeeze bottle.",
+      "Pipe the batter into the hot oil in overlapping pretzel-like shapes, frying for 2 to 3 minutes per side until golden and crisp.",
+      "Remove the fried shapes with a slotted spoon and immediately dip them into the warm syrup for a few seconds.",
+      "Let the excess syrup drain off before arranging on a platter and serving."
+    ],
+    "calories": 250,
+    "protein_g": 3,
+    "carbs_g": 42,
+    "fat_g": 8
+  }
+]
