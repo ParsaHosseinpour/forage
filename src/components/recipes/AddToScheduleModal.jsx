@@ -50,7 +50,7 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
         <div className="px-5 pb-5 space-y-4">
           {/* Day picker */}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest mb-2"
+            <p className="text-[13px] font-medium mb-2"
                style={{ color: 'var(--ink-muted)' }}>
               Day
             </p>
@@ -78,7 +78,7 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
 
           {/* Slot type picker */}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest mb-2"
+            <p className="text-[13px] font-medium mb-2"
                style={{ color: 'var(--ink-muted)' }}>
               Meal slot
             </p>

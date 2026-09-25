@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, ChevronRight, Search } from 'lucide-react'
+import { Plus, ChevronRight, Search, Sprout } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
 import { usePantry } from '../../hooks/usePantry'
 import IngredientCard from './IngredientCard'
@@ -89,7 +89,12 @@ export default function FridgePage({ user }) {
       {/* Empty state */}
       {!loading && isEmpty && !showForm && (
         <div className="text-center py-16 fade-in">
-          <div className="text-5xl mb-4">🥬</div>
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: 'var(--green-light)' }}
+          >
+            <Sprout size={26} style={{ color: 'var(--green)' }} strokeWidth={1.75} />
+          </div>
           <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
             Your fridge is empty
           </h2>
@@ -108,7 +113,7 @@ export default function FridgePage({ user }) {
         <div className="space-y-8 mb-8 fade-in">
           {Object.entries(grouped).map(([cat, catItems]) => (
             <section key={cat}>
-              <h2 className="text-xs font-medium uppercase tracking-widest mb-3"
+              <h2 className="text-[13px] font-medium mb-3"
                   style={{ color: 'var(--ink-muted)' }}>
                 {categoryLabel[cat]}
               </h2>

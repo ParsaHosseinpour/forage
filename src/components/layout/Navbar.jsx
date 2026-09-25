@@ -1,6 +1,7 @@
 import { signOut } from '../../lib/supabase'
 import Button from '../ui/Button'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { Sprout } from 'lucide-react'
 
 export default function Navbar({ user }) {
   const navigate = useNavigate()
@@ -27,9 +28,9 @@ export default function Navbar({ user }) {
 
         {/* Logo */}
         <button onClick={() => navigate('/fridge')} className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
                style={{ background: 'var(--green)' }}>
-            🌿
+            <Sprout size={15} color="white" strokeWidth={2} />
           </div>
           <span className="font-semibold tracking-tight"
                 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.1rem' }}>

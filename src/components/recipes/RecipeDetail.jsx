@@ -244,9 +244,9 @@ export default function RecipeDetail({
                 <div className="space-y-5">
                   {have.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-widest mb-2"
+                      <p className="text-[13px] font-medium mb-2"
                          style={{ color: 'var(--green)' }}>
-                        ✅ In your fridge ({have.length})
+                        In your fridge ({have.length})
                       </p>
                       <ul className="space-y-2">
                         {have.map((ing, i) => (
@@ -266,9 +266,9 @@ export default function RecipeDetail({
                   )}
                   {need.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-widest mb-2"
+                      <p className="text-[13px] font-medium mb-2"
                          style={{ color: 'var(--amber)' }}>
-                        🛒 Need to buy ({need.length})
+                        Need to buy ({need.length})
                       </p>
                       <ul className="space-y-2">
                         {need

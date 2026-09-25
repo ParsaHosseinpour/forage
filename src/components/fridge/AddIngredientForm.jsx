@@ -213,7 +213,7 @@ function BulkForm({ onAdd, onClose }) {
       ) : (
         <>
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest mb-3"
+            <p className="text-[13px] font-medium mb-3"
                style={{ color: 'var(--ink-muted)' }}>
               Review {parsed.length} ingredient{parsed.length !== 1 ? 's' : ''} — edit anything before adding
             </p>

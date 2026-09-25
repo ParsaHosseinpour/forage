@@ -158,7 +158,7 @@ function DayColumn({ dayIdx, weekStart, todayIdx, grid, onCookNow, onRemove, coo
           borderBottom: isNow ? 'none' : '1px solid var(--border)',
         }}
       >
-        <p className="text-xs font-semibold uppercase tracking-wider"
+        <p className="text-[11px] font-semibold uppercase tracking-wide"
            style={{ color: isNow ? 'white' : 'var(--ink-muted)', fontSize: '0.65rem' }}>
           {DAY_NAMES[dayIdx].slice(0, 3)}
         </p>
@@ -437,7 +437,7 @@ export default function SchedulePage({ user }) {
                       border: `1px solid ${isSelected ? 'var(--green)' : isNow ? 'var(--green-mid)' : 'var(--border)'}`,
                     }}
                   >
-                    <span className="text-xs font-semibold uppercase tracking-wider"
+                    <span className="text-[11px] font-semibold uppercase tracking-wide"
                           style={{
                             color: isSelected ? 'white'
                                  : isNow      ? 'var(--green)'

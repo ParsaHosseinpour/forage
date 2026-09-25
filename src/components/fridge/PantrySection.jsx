@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Flame } from 'lucide-react'
+import { ChevronDown, ChevronUp, Flame, Package } from 'lucide-react'
 import { DEFAULT_STAPLES } from '../../hooks/usePantry'
 
 export default function PantrySection({ isActive, onToggle, loading }) {
@@ -19,7 +19,7 @@ export default function PantrySection({ isActive, onToggle, loading }) {
         <div className="flex items-center gap-3">
           <span className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                 style={{ background: 'var(--amber-light)' }}>
-            🫙
+            <Package size={15} style={{ color: 'var(--amber)' }} strokeWidth={1.75} />
           </span>
           <div>
             <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>

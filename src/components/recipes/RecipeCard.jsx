@@ -1,4 +1,4 @@
-import { Clock, Users, ShoppingCart } from 'lucide-react'
+import { Clock, Users, ShoppingCart, UtensilsCrossed } from 'lucide-react'
 import SaveButton from './SaveButton'
 import { weightedMatchPct } from '../../lib/recipeUtils'
 
@@ -85,7 +85,9 @@ export default function RecipeCard({ recipe, onClick, isSaved = false, onSave })
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-            : <div className="w-full h-full flex items-center justify-center text-4xl">🍽️</div>
+            : <div className="w-full h-full flex items-center justify-center">
+                <UtensilsCrossed size={28} strokeWidth={1.5} style={{ color: 'var(--border)' }} />
+              </div>
           }
 
           {/* Diet badges — top-left */}

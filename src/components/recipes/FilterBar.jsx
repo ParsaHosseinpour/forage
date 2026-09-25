@@ -30,7 +30,7 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
 
       {/* Diet pills */}
       <div>
-        <p className="text-xs font-medium uppercase tracking-widest mb-2.5"
+        <p className="text-[13px] font-medium mb-2.5"
            style={{ color: 'var(--ink-muted)' }}>
           Dietary preference
         </p>
@@ -62,7 +62,7 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
 
         {/* Max cook time */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: 'var(--ink-muted)' }}>
+          <span className="text-[13px] font-medium" style={{ color: 'var(--ink-muted)' }}>
             Time
           </span>
           <div className="flex gap-1">
@@ -91,7 +91,7 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
 
         {/* Sort */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: 'var(--ink-muted)' }}>
+          <span className="text-[13px] font-medium" style={{ color: 'var(--ink-muted)' }}>
             Sort
           </span>
           <div className="flex gap-1">

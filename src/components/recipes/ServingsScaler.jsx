@@ -5,7 +5,7 @@ export default function ServingsScaler({ servings, onChange, defaultServings }) 
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs font-medium uppercase tracking-widest"
+      <span className="text-[13px] font-medium"
             style={{ color: 'var(--ink-muted)' }}>
         Servings
       </span>

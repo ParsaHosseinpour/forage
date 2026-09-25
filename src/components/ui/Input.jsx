@@ -23,7 +23,8 @@ export function Select({ children, className = '', ...props }) {
 export function Label({ children, className = '', ...props }) {
   return (
     <label
-      className={`block text-xs font-medium text-[var(--ink-muted)] uppercase tracking-wider mb-1.5 ${className}`}
+      className={`block text-[13px] font-medium mb-1.5 ${className}`}
+      style={{ color: 'var(--ink-muted)' }}
       {...props}
     >
       {children}
