@@ -8,6 +8,7 @@ import RecipesPage from './components/fridge/RecipesPage'
 import SavedPage from './components/saved/SavedPage'
 import HistoryPage from './components/history/HistoryPage'
 import SchedulePage from './components/schedule/SchedulePage'
+import ProfilePage from './components/profile/ProfilePage'
 
 function ProtectedLayout({ user }) {
   return (
@@ -20,6 +21,7 @@ function ProtectedLayout({ user }) {
           <Route path="/saved"    element={<SavedPage   user={user} />} />
           <Route path="/history"  element={<HistoryPage  user={user} />} />
           <Route path="/schedule" element={<SchedulePage user={user} />} />
+          <Route path="/profile"  element={<ProfilePage  user={user} />} />
           <Route path="*"         element={<Navigate to="/fridge" replace />} />
         </Routes>
       </main>
@@ -33,7 +35,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-        <span className="spinner" style={{ color: 'var(--green)', width: 28, height: 28 }} />
+        <span className="spinner" style={{ color: 'var(--brand)', width: 28, height: 28 }} />
       </div>
     )
   }

@@ -237,3 +237,23 @@ export const deleteMealPlanSlot = (id) =>
     .from('meal_plan')
     .delete()
     .eq('id', id)
+
+// ─── Account helpers ──────────────────────────────────────────────────────────
+
+/** Merge fields into the user's metadata (display name, recipe defaults). */
+export const updateUserMeta = (data) =>
+  supabase.auth.updateUser({ data })
+
+/**
+ * Permanently delete the signed-in user's account and all their data.
+ * Calls a SECURITY DEFINER SQL function (see supabase_step21_delete_account.sql)
+ * because the browser client is not allowed to delete auth users directly.
+ * Every user table cascades from auth.users, so this removes everything.
+ */
+export const deleteMyAccount = async () => {
+  const { error } = await supabase.rpc('delete_my_account')
+  if (error) return { error }
+  // The server-side session is gone with the user; just clear it locally.
+  await supabase.auth.signOut({ scope: 'local' })
+  return { error: null }
+}

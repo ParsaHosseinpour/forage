@@ -1,12 +1,4 @@
-const DIETS = [
-  { value: '',            label: 'All recipes' },
-  { value: 'vegetarian',  label: 'Vegetarian' },
-  { value: 'vegan',       label: 'Vegan' },
-  { value: 'gluten free', label: 'Gluten-free' },
-  { value: 'dairy free',  label: 'Dairy-free' },
-  { value: 'ketogenic',   label: 'Keto' },
-  { value: 'paleo',       label: 'Paleo' },
-]
+import { DIETS } from '../../lib/preferences'
 
 const TIME_OPTIONS = [
   { value: '',   label: 'Any time' },

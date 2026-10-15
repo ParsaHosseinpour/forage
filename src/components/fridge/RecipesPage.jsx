@@ -13,6 +13,7 @@ import RecipeDetail from '../recipes/RecipeDetail'
 import FilterBar from '../recipes/FilterBar'
 import Button from '../ui/Button'
 import { IconTile } from '../ui/glyphs'
+import { getPrefs } from '../../lib/preferences'
 
 // 'popularity' is the best-match-% sort mode (see recipeDb.js) — used as the
 // default so the initial view's order always agrees with the % shown on
@@ -74,9 +75,11 @@ export default function RecipesPage({ user }) {
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState('')
   const [selected, setSelected]       = useState(null)
-  const [filters, setFilters]         = useState(DEFAULT_FILTERS)
+  const prefs        = getPrefs(user)
+  const startFilters = { ...DEFAULT_FILTERS, diet: prefs.defaultDiet }
+  const [filters, setFilters]         = useState(startFilters)
   // BUG 2: global serving override — null = use recipe's own default
-  const [globalServings, setGlobalServings] = useState(null)
+  const [globalServings, setGlobalServings] = useState(prefs.defaultServings)
 
   const fridgeNames    = items.map(i => i.name)
   const allIngredients = [...new Set([...fridgeNames, ...staples])]
@@ -117,7 +120,7 @@ export default function RecipesPage({ user }) {
     if (allIngredients.length < 1) return              // nothing to search
 
     hasSearched.current = true
-    search(DEFAULT_FILTERS, allIngredients)
+    search(startFilters, allIngredients)
   }) // intentionally no dep array — runs after every render until hasSearched fires
 
   // Cook Again — detect navigation state from HistoryPage

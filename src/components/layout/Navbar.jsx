@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Refrigerator, UtensilsCrossed, Bookmark, CalendarDays, History, LogOut, Sprout } from 'lucide-react'
 import { signOut } from '../../lib/supabase'
+import { shownName } from '../../lib/preferences'
 
 const LINKS = [
   { label: 'Fridge',  path: '/fridge',   Icon: Refrigerator    },
@@ -9,6 +10,19 @@ const LINKS = [
   { label: 'Planner', path: '/schedule', Icon: CalendarDays    },
   { label: 'History', path: '/history',  Icon: History         },
 ]
+
+function Avatar({ user, size = 32 }) {
+  const initial = (shownName(user)[0] ?? '?').toUpperCase()
+  return (
+    <span
+      className="rounded-full flex items-center justify-center font-bold flex-shrink-0"
+      style={{ width: size, height: size, fontSize: size * 0.42, background: 'var(--saffron)', color: 'var(--ink)' }}
+      aria-hidden="true"
+    >
+      {initial}
+    </span>
+  )
+}
 
 function Wordmark({ onClick }) {
   return (
@@ -70,9 +84,17 @@ export default function Navbar({ user }) {
         </nav>
 
         <div className="mt-auto pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <p className="px-2 text-xs truncate mb-2" style={{ color: 'var(--ink-muted)' }} title={user.email}>
-            {user.email}
-          </p>
+          <NavLink
+            to="/profile"
+            className="flex items-center gap-3 px-2 py-2 mb-1 rounded-[10px] transition-colors hover:bg-[var(--bg-sunk)]"
+            style={({ isActive }) => ({ background: isActive ? 'var(--brand-tint)' : undefined })}
+          >
+            <Avatar user={user} />
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold truncate">{shownName(user)}</span>
+              <span className="block text-xs truncate" style={{ color: 'var(--ink-muted)' }}>Profile & settings</span>
+            </span>
+          </NavLink>
           <button
             onClick={() => signOut()}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm transition-colors hover:bg-[var(--bg-sunk)]"
@@ -90,14 +112,9 @@ export default function Navbar({ user }) {
         style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
       >
         <Wordmark onClick={() => navigate('/fridge')} />
-        <button
-          onClick={() => signOut()}
-          className="p-2 rounded-[10px]"
-          style={{ color: 'var(--ink-muted)' }}
-          aria-label="Sign out"
-        >
-          <LogOut size={18} strokeWidth={1.75} />
-        </button>
+        <NavLink to="/profile" aria-label="Profile and settings" className="p-1">
+          <Avatar user={user} size={32} />
+        </NavLink>
       </header>
 
       {/* ── Mobile: bottom tab bar ─────────────────────────────────── */}
