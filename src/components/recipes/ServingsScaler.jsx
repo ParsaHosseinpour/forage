@@ -18,7 +18,7 @@ export default function ServingsScaler({ servings, onChange, defaultServings }) 
           disabled={servings <= 1}
           className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
           style={{
-            background: servings <= 1 ? 'transparent' : 'var(--cream-dark)',
+            background: servings <= 1 ? 'transparent' : 'var(--bg-sunk)',
             color:      servings <= 1 ? 'var(--border)' : 'var(--ink)',
           }}
           aria-label="Fewer servings"
@@ -34,7 +34,7 @@ export default function ServingsScaler({ servings, onChange, defaultServings }) 
         <button
           onClick={() => onChange(Math.min(50, servings + 1))}
           className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-          style={{ background: 'var(--cream-dark)', color: 'var(--ink)' }}
+          style={{ background: 'var(--bg-sunk)', color: 'var(--ink)' }}
           aria-label="More servings"
         >
           <Plus size={13} />
@@ -43,7 +43,7 @@ export default function ServingsScaler({ servings, onChange, defaultServings }) 
 
       {multiplier !== 1 && (
         <span className="text-xs px-2 py-0.5 rounded-full"
-              style={{ background: 'var(--green-light)', color: 'var(--green)' }}>
+              style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}>
           {multiplier > 1 ? `×${multiplier.toFixed(1)}` : `×${multiplier.toFixed(2)}`}
         </span>
       )}

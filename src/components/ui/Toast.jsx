@@ -11,10 +11,10 @@ const ICONS = {
 }
 
 const STYLES = {
-  info:    { bg: 'white',                  border: 'var(--border)',    color: 'var(--ink)',      icon: 'var(--green)'     },
-  success: { bg: 'var(--green-light)',     border: 'var(--green-mid)', color: 'var(--green)',    icon: 'var(--green)'     },
-  warning: { bg: 'var(--amber-light)',     border: '#F5D9B8',          color: 'var(--amber)',    icon: 'var(--amber)'     },
-  error:   { bg: '#FEF2F0',               border: '#FECACA',          color: 'var(--red-soft)', icon: 'var(--red-soft)'  },
+  info:    { bg: 'white',                  border: 'var(--border)',    color: 'var(--ink)',      icon: 'var(--brand)'     },
+  success: { bg: 'var(--fresh-tint)', border: 'var(--fresh-soft)', color: 'var(--fresh)', icon: 'var(--fresh)' },
+  warning: { bg: 'var(--carrot-tint)',     border: 'var(--carrot-soft)',          color: 'var(--carrot)',    icon: 'var(--carrot)'     },
+  error:   { bg: 'var(--danger-tint)',               border: 'var(--danger-soft)',          color: 'var(--danger)', icon: 'var(--danger)'  },
 }
 
 let _id = 0

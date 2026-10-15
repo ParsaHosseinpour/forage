@@ -11,9 +11,9 @@ import SchedulePage from './components/schedule/SchedulePage'
 
 function ProtectedLayout({ user }) {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--cream)' }}>
+    <div className="min-h-screen md:pl-60" style={{ background: 'var(--bg)' }}>
       <Navbar user={user} />
-      <main>
+      <main className="pb-24 md:pb-0">
         <Routes>
           <Route path="/fridge"   element={<FridgePage  user={user} />} />
           <Route path="/recipes"  element={<RecipesPage user={user} />} />
@@ -32,7 +32,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--cream)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <span className="spinner" style={{ color: 'var(--green)', width: 28, height: 28 }} />
       </div>
     )

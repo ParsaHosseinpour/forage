@@ -66,7 +66,7 @@ export default function RecipePreviewModal({ entry, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(28,28,26,0.6)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(43,29,58,0.6)', backdropFilter: 'blur(4px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -84,7 +84,7 @@ export default function RecipePreviewModal({ entry, onClose }) {
         <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b flex-shrink-0"
              style={{ borderColor: 'var(--border)' }}>
           <div className="min-w-0 pr-4">
-            <h2 className="text-xl leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-xl leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
               {recipe.title}
             </h2>
             <div className="flex items-center gap-3 mt-1 text-xs" style={{ color: 'var(--ink-muted)' }}>
@@ -118,7 +118,7 @@ export default function RecipePreviewModal({ entry, onClose }) {
               {/* Hero image */}
               {(recipe.image || detail.image) && (
                 <div className="rounded-xl overflow-hidden h-44"
-                     style={{ background: 'var(--cream-dark)' }}>
+                     style={{ background: 'var(--bg-sunk)' }}>
                   <img src={recipe.image || detail.image} alt={recipe.title}
                        className="w-full h-full object-cover" />
                 </div>
@@ -134,7 +134,7 @@ export default function RecipePreviewModal({ entry, onClose }) {
                     fat     && { label: 'Fat',     value: `${Math.round(fat.amount)}g`     },
                   ].filter(Boolean).map(({ label, value }) => (
                     <div key={label} className="text-center px-3 py-2 rounded-xl flex-shrink-0"
-                         style={{ background: 'var(--cream-dark)' }}>
+                         style={{ background: 'var(--bg-sunk)' }}>
                       <p className="text-xs font-medium" style={{ color: 'var(--ink)' }}>{value}</p>
                       <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>{label}</p>
                     </div>
@@ -148,14 +148,14 @@ export default function RecipePreviewModal({ entry, onClose }) {
                 {/* Ingredients */}
                 {ings.length > 0 && (
                   <div>
-                    <h3 className="text-base mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    <h3 className="text-base mb-3" style={{ fontFamily: 'var(--font-display)' }}>
                       Ingredients
                     </h3>
                     <ul className="space-y-1.5">
                       {ings.map((ing, i) => (
                         <li key={i} className="text-sm flex items-start gap-2">
                           <span className="text-xs mt-0.5 flex-shrink-0"
-                                style={{ color: 'var(--green)' }}>•</span>
+                                style={{ color: 'var(--brand)' }}>•</span>
                           <span style={{ color: 'var(--ink)' }}>
                             {scaledDisplay(ing, multiplier)}
                           </span>
@@ -176,7 +176,7 @@ export default function RecipePreviewModal({ entry, onClose }) {
                 {/* Instructions */}
                 {steps.length > 0 && (
                   <div>
-                    <h3 className="text-base mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    <h3 className="text-base mb-3" style={{ fontFamily: 'var(--font-display)' }}>
                       Instructions
                     </h3>
                     <ol className="space-y-3">
@@ -184,7 +184,7 @@ export default function RecipePreviewModal({ entry, onClose }) {
                         <li key={step.number} className="flex gap-3">
                           <span
                             className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                            style={{ background: 'var(--green)', marginTop: 2 }}
+                            style={{ background: 'var(--brand)', marginTop: 2 }}
                           >
                             {step.number}
                           </span>
@@ -206,7 +206,7 @@ export default function RecipePreviewModal({ entry, onClose }) {
                     {detail.sourceUrl && (
                       <a href={detail.sourceUrl} target="_blank" rel="noopener noreferrer"
                          className="text-sm mt-2 inline-block underline"
-                         style={{ color: 'var(--green)' }}>
+                         style={{ color: 'var(--brand)' }}>
                         View recipe →
                       </a>
                     )}

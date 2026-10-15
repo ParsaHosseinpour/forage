@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { signIn, signUp, requestPasswordReset, resendConfirmationEmail } from '../../lib/supabase'
 import Button from '../ui/Button'
 import { Input, Label } from '../ui/Input'
+import { Sprout } from 'lucide-react'
 
 // mode: 'signin' | 'signup' | 'forgot'
 export default function AuthPage() {
@@ -67,42 +68,83 @@ export default function AuthPage() {
   const switchMode = (next) => { setMode(next); resetMessages() }
 
   const titles = {
-    signin: "Welcome back. What's in your fridge?",
-    signup: 'Start turning your fridge into dinner.',
-    forgot: "We'll email you a reset link.",
+    signin: 'Sign in',
+    signup: 'Create your account',
+    forgot: 'Reset your password',
   }
 
+  const SAMPLE = [
+    { name: 'Shakshuka',          have: 5, total: 6 },
+    { name: 'Lentil soup',        have: 6, total: 6 },
+    { name: 'Chicken & rice bowl', have: 3, total: 7 },
+  ]
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-         style={{ background: 'var(--cream)' }}>
+    <div className="min-h-screen grid lg:grid-cols-[1.05fr_1fr]" style={{ background: 'var(--bg)' }}>
 
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-20"
-             style={{ background: 'var(--green-mid)' }} />
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full opacity-15"
-             style={{ background: 'var(--amber-light)' }} />
-      </div>
-
-      <div className="relative w-full max-w-sm slide-up">
-
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg font-bold"
-                 style={{ background: 'var(--green)' }}>
-              🌿
-            </div>
-            <span className="text-2xl tracking-tight"
-                  style={{ fontFamily: 'Playfair Display, serif', color: 'var(--ink)' }}>
-              Forage
-            </span>
-          </div>
-          <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-            {titles[mode]}
-          </p>
+      {/* Left: what the app does, shown with its own meter */}
+      <section
+        className="hidden lg:flex flex-col justify-between p-14"
+        style={{ background: 'var(--brand)', color: 'white' }}
+        aria-hidden="true"
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--saffron)' }}>
+            <Sprout size={19} strokeWidth={2.25} style={{ color: 'var(--ink)' }} />
+          </span>
+          <span className="text-2xl font-extrabold" style={{ letterSpacing: '-0.03em', fontVariationSettings: "'wdth' 85" }}>
+            forage
+          </span>
         </div>
 
-        <div className="rounded-2xl border p-8"
-             style={{ background: 'white', borderColor: 'var(--border)', boxShadow: 'var(--shadow-md)' }}>
+        <div>
+          <h2 className="text-5xl mb-10 max-w-md" style={{ lineHeight: 1.04 }}>
+            Cook what is already in your fridge.
+          </h2>
+          <ul className="space-y-6 max-w-sm">
+            {SAMPLE.map(({ name, have, total }) => (
+              <li key={name}>
+                <p className="text-lg font-semibold mb-2" style={{ fontVariationSettings: "'wdth' 96" }}>{name}</p>
+                <div className="flex gap-[3px]">
+                  {Array.from({ length: total }, (_, i) => (
+                    <span
+                      key={i}
+                      className="meter-seg h-2.5 flex-1 rounded-[2px]"
+                      style={{
+                        '--i': i,
+                        background: i < have ? 'var(--saffron)' : 'transparent',
+                        boxShadow:  i < have ? 'none' : 'inset 0 0 0 1.5px rgba(255,255,255,0.4)',
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className="text-sm mt-1.5" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  {have === total ? 'Everything is in your fridge' : `${have} of ${total} in your fridge`}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+          Log your ingredients, see what you can make, plan the week.
+        </p>
+      </section>
+
+      {/* Right: the form */}
+      <main className="flex items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+
+          <div className="lg:hidden flex items-center gap-2.5 mb-10">
+            <span className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--brand)' }}>
+              <Sprout size={19} strokeWidth={2.25} style={{ color: 'var(--saffron)' }} />
+            </span>
+            <span className="text-2xl font-extrabold" style={{ letterSpacing: '-0.03em', fontVariationSettings: "'wdth' 85" }}>
+              forage
+            </span>
+          </div>
+
+          <h1 className="text-4xl mb-8">{titles[mode]}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -127,8 +169,8 @@ export default function AuthPage() {
                     <button
                       type="button"
                       onClick={() => switchMode('forgot')}
-                      className="text-xs mb-1.5"
-                      style={{ color: 'var(--ink-muted)' }}
+                      className="text-sm mb-1.5 font-medium"
+                      style={{ color: 'var(--brand)' }}
                     >
                       Forgot password?
                     </button>
@@ -137,7 +179,7 @@ export default function AuthPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder={mode === 'signup' ? 'Min. 6 characters' : '••••••••'}
+                  placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
@@ -148,8 +190,8 @@ export default function AuthPage() {
             )}
 
             {error && (
-              <p className="text-sm rounded-xl px-4 py-3"
-                 style={{ color: 'var(--red-soft)', background: '#FEF2F0' }}>
+              <p role="alert" className="text-sm rounded-[10px] px-4 py-3"
+                 style={{ color: 'var(--danger)', background: 'var(--danger-tint)' }}>
                 {error}
               </p>
             )}
@@ -158,16 +200,16 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={handleResend}
-                className="w-full text-sm rounded-xl px-4 py-2.5 text-center"
-                style={{ color: 'var(--green)', background: 'var(--green-light)' }}
+                className="w-full text-sm font-semibold rounded-[10px] px-4 py-2.5 text-center"
+                style={{ color: 'var(--brand)', background: 'var(--brand-tint)' }}
               >
                 Resend confirmation email
               </button>
             )}
 
             {success && (
-              <p className="text-sm rounded-xl px-4 py-3"
-                 style={{ color: 'var(--green)', background: 'var(--green-light)' }}>
+              <p role="status" className="text-sm rounded-[10px] px-4 py-3"
+                 style={{ color: 'var(--fresh)', background: 'var(--fresh-tint)' }}>
                 {success}
               </p>
             )}
@@ -179,25 +221,25 @@ export default function AuthPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center space-y-2">
+          <div className="mt-6">
             {mode === 'forgot' ? (
-              <button onClick={() => switchMode('signin')} className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-                <span style={{ color: 'var(--green)', fontWeight: 500 }}>← Back to sign in</span>
+              <button onClick={() => switchMode('signin')} className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
+                Back to sign in
               </button>
             ) : (
               <button
                 onClick={() => switchMode(mode === 'signin' ? 'signup' : 'signin')}
-                className="text-sm transition-colors"
+                className="text-sm"
                 style={{ color: 'var(--ink-muted)' }}
               >
                 {mode === 'signin'
-                  ? <>No account? <span style={{ color: 'var(--green)', fontWeight: 500 }}>Sign up free</span></>
-                  : <>Already have one? <span style={{ color: 'var(--green)', fontWeight: 500 }}>Sign in</span></>}
+                  ? <>New to Forage? <span style={{ color: 'var(--brand)', fontWeight: 600 }}>Create an account</span></>
+                  : <>Already have an account? <span style={{ color: 'var(--brand)', fontWeight: 600 }}>Sign in</span></>}
               </button>
             )}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

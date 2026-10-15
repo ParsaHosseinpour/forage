@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import { DAY_NAMES, SLOT_TYPES } from '../../hooks/useMealPlan'
 import Button from '../ui/Button'
+import { SlotIcon } from '../ui/glyphs'
 
-const SLOT_EMOJIS = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍎' }
 
 export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
   const [selectedDay,  setDay]  = useState(null)
@@ -26,7 +26,7 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(28,28,26,0.55)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(43,29,58,0.55)', backdropFilter: 'blur(4px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div className="w-full max-w-sm rounded-2xl border overflow-hidden slide-up"
@@ -35,7 +35,7 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <div>
-            <h2 className="text-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-lg" style={{ fontFamily: 'var(--font-display)' }}>
               Add to schedule
             </h2>
             <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--ink-muted)', maxWidth: 220 }}>
@@ -64,9 +64,9 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
                     onClick={() => setDay(idx)}
                     className="py-2 rounded-lg text-xs font-medium transition-all"
                     style={{
-                      background:  selected ? 'var(--green)'      : isToday ? 'var(--green-light)' : 'var(--cream)',
-                      color:       selected ? 'white'             : isToday ? 'var(--green)'       : 'var(--ink-muted)',
-                      borderBottom: isToday && !selected ? '2px solid var(--green)' : '2px solid transparent',
+                      background:  selected ? 'var(--brand)'      : isToday ? 'var(--brand-tint)' : 'var(--bg)',
+                      color:       selected ? 'white'             : isToday ? 'var(--brand)'       : 'var(--ink-muted)',
+                      borderBottom: isToday && !selected ? '2px solid var(--brand)' : '2px solid transparent',
                     }}
                   >
                     {name.slice(0, 2)}
@@ -91,13 +91,13 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
                     onClick={() => setSlot(slot)}
                     className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm capitalize transition-all"
                     style={{
-                      background:  selected ? 'var(--green)'      : 'white',
-                      borderColor: selected ? 'var(--green)'      : 'var(--border)',
+                      background:  selected ? 'var(--brand)'      : 'white',
+                      borderColor: selected ? 'var(--brand)'      : 'var(--border)',
                       color:       selected ? 'white'             : 'var(--ink)',
                       fontWeight:  selected ? 500                 : 400,
                     }}
                   >
-                    <span>{SLOT_EMOJIS[slot]}</span> {slot}
+                    <SlotIcon slot={slot} size={15} /> {slot}
                   </button>
                 )
               })}

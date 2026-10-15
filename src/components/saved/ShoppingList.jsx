@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
-import { Check, Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react'
+import { Check, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, ShoppingBasket, PartyPopper } from 'lucide-react'
 import Button from '../ui/Button'
 import BuyIngredientsButton from '../ui/BuyIngredientsButton'
 import { getOrderableItems } from '../../lib/affiliateLinks'
+import { IconTile } from '../ui/glyphs'
 
 // ── Single ingredient row ─────────────────────────────────────────────────────
 
@@ -20,8 +21,8 @@ function IngRow({ ing, isChecked, onToggle, showingFridgeItems }) {
       className="flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all duration-150"
       style={{
         cursor:     inFridge ? 'default' : 'pointer',
-        background: inFridge ? 'var(--green-light)'
-                  : ticked   ? 'var(--cream-dark)'
+        background: inFridge ? 'var(--brand-tint)'
+                  : ticked   ? 'var(--bg-sunk)'
                   :             'white',
         border:    '1px solid var(--border)',
         opacity:   (ticked && !inFridge) ? 0.55 : 1,
@@ -31,10 +32,10 @@ function IngRow({ ing, isChecked, onToggle, showingFridgeItems }) {
       <div
         className="flex-shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-all"
         style={{
-          background:  inFridge ? 'var(--green)'
+          background:  inFridge ? 'var(--fresh)'
                      : ticked   ? 'var(--ink-muted)'
                      :             'white',
-          borderColor: inFridge ? 'var(--green)'
+          borderColor: inFridge ? 'var(--fresh)'
                      : ticked   ? 'var(--ink-muted)'
                      :             'var(--border)',
         }}
@@ -46,7 +47,7 @@ function IngRow({ ing, isChecked, onToggle, showingFridgeItems }) {
       <span
         className="text-sm flex-1 min-w-0 truncate"
         style={{
-          color:          inFridge ? 'var(--green)'
+          color:          inFridge ? 'var(--fresh)'
                         : ticked   ? 'var(--ink-muted)'
                         :             'var(--ink)',
           textDecoration: ticked && !inFridge ? 'line-through' : 'none',
@@ -59,8 +60,8 @@ function IngRow({ ing, isChecked, onToggle, showingFridgeItems }) {
       {/* "In fridge" badge */}
       {inFridge && (
         <span className="text-xs flex-shrink-0 px-1.5 py-0.5 rounded"
-              style={{ background: 'var(--green-mid)', color: 'var(--green)' }}>
-          ✓ have it
+              style={{ background: 'var(--fresh-soft)', color: 'var(--fresh)' }}>
+          In fridge
         </span>
       )}
     </li>
@@ -87,25 +88,25 @@ function RecipeSection({ title, ingredients, isChecked, onToggle, showingFridgeI
       <button
         onClick={() => setCollapsed(v => !v)}
         className="w-full flex items-center justify-between px-4 py-3 text-left"
-        style={{ background: allTicked ? 'var(--green-light)' : 'white' }}
+        style={{ background: allTicked ? 'var(--brand-tint)' : 'white' }}
       >
         <div className="flex items-center gap-2 min-w-0">
-          {allTicked && <Check size={14} style={{ color: 'var(--green)', flexShrink: 0 }} />}
-          <span className="text-sm font-medium truncate" style={{ color: allTicked ? 'var(--green)' : 'var(--ink)' }}>
+          {allTicked && <Check size={14} style={{ color: 'var(--fresh)', flexShrink: 0 }} />}
+          <span className="text-sm font-medium truncate" style={{ color: allTicked ? 'var(--brand)' : 'var(--ink)' }}>
             {title}
           </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
           {needCount > 0 && (
             <span className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--cream-dark)', color: 'var(--ink-muted)' }}>
+                  style={{ background: 'var(--bg-sunk)', color: 'var(--ink-muted)' }}>
               {needCount} needed
             </span>
           )}
           {haveCount > 0 && (
             <span className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--green-light)', color: 'var(--green)' }}>
-              {haveCount} ✓
+                  style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}>
+              {haveCount} in fridge
             </span>
           )}
           {collapsed
@@ -154,7 +155,7 @@ export default function ShoppingList({
       <div className="space-y-3 mt-2">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="h-24 rounded-2xl animate-pulse"
-               style={{ background: 'var(--cream-dark)', animationDelay: `${i * 60}ms` }} />
+               style={{ background: 'var(--bg-sunk)', animationDelay: `${i * 60}ms` }} />
         ))}
       </div>
     )
@@ -163,12 +164,10 @@ export default function ShoppingList({
   if (!byRecipe || byRecipe.size === 0) {
     return (
       <div className="text-center py-16 fade-in">
-        <div className="text-5xl mb-4">🛒</div>
-        <h3 className="text-lg mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-          Your list is empty
-        </h3>
-        <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-          Save recipes and their ingredients will appear here, grouped by dish.
+        <IconTile Icon={ShoppingBasket} />
+        <h3 className="text-xl mb-2">Your list is empty</h3>
+        <p className="text-[15px]" style={{ color: 'var(--ink-muted)' }}>
+          Save a recipe and its ingredients show up here, grouped by dish.
         </p>
       </div>
     )
@@ -177,11 +176,9 @@ export default function ShoppingList({
   if (allTicked) {
     return (
       <div className="text-center py-16 fade-in">
-        <div className="text-5xl mb-4">🎉</div>
-        <h3 className="text-lg mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-          You've got everything!
-        </h3>
-        <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
+        <IconTile Icon={PartyPopper} tone="fresh" />
+        <h3 className="text-xl mb-2">You have everything</h3>
+        <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
           All {totalNeed} item{totalNeed !== 1 ? 's' : ''} checked off. Time to cook.
         </p>
         <Button variant="secondary" onClick={onClearAll}>
@@ -202,7 +199,7 @@ export default function ShoppingList({
           </span>
           {' '}item{totalNeed - checkedCount !== 1 ? 's' : ''} to buy
           {totalHave > 0 && (
-            <span> · <span style={{ color: 'var(--green)' }}>{totalHave} already in fridge</span></span>
+            <span> · <span style={{ color: 'var(--brand)' }}>{totalHave} already in fridge</span></span>
           )}
         </p>
 
@@ -212,7 +209,7 @@ export default function ShoppingList({
             <button
               onClick={() => setShowFridgeItems(v => !v)}
               className="flex items-center gap-1.5 text-xs transition-colors"
-              style={{ color: showFridgeItems ? 'var(--green)' : 'var(--ink-muted)' }}
+              style={{ color: showFridgeItems ? 'var(--brand)' : 'var(--ink-muted)' }}
             >
               {showFridgeItems
                 ? <><EyeOff size={13} /> Hide fridge items</>

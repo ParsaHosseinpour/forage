@@ -7,27 +7,32 @@ export default function Button({
   ...props
 }) {
   const base = `
-    inline-flex items-center justify-center gap-2 font-medium
-    rounded-xl border transition-all duration-150 cursor-pointer
+    inline-flex items-center justify-center gap-2 font-semibold
+    rounded-[10px] border transition-colors duration-150 cursor-pointer
     disabled:opacity-50 disabled:cursor-not-allowed select-none
+    active:translate-y-px
   `
 
   const variants = {
     primary: `
-      bg-[var(--green)] text-white border-[var(--green)]
-      hover:bg-[#2e5040] active:scale-[.98]
+      bg-[var(--brand)] text-white border-[var(--brand)]
+      hover:bg-[var(--brand-hover)] hover:border-[var(--brand-hover)]
+    `,
+    accent: `
+      bg-[var(--saffron)] text-[var(--ink)] border-[var(--saffron)]
+      hover:brightness-95
     `,
     secondary: `
-      bg-white text-[var(--ink)] border-[var(--border)]
-      hover:border-[var(--green)] hover:text-[var(--green)] active:scale-[.98]
+      bg-[var(--surface)] text-[var(--ink)] border-[var(--border)]
+      hover:border-[var(--brand)] hover:text-[var(--brand)]
     `,
     ghost: `
       bg-transparent text-[var(--ink-muted)] border-transparent
-      hover:text-[var(--ink)] hover:bg-[var(--cream-dark)] active:scale-[.98]
+      hover:text-[var(--ink)] hover:bg-[var(--bg-sunk)]
     `,
     danger: `
-      bg-transparent text-[var(--red-soft)] border-transparent
-      hover:bg-red-50 active:scale-[.98]
+      bg-transparent text-[var(--danger)] border-transparent
+      hover:bg-[var(--danger-tint)]
     `,
   }
 

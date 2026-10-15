@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2, UtensilsCrossed, CalendarPlus } from 'lucide-react'
+import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2, UtensilsCrossed, CalendarPlus, ChefHat } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/recipeEngine'
 import { ingredientMatches } from '../../lib/recipeDb'
 import { getMissingTier } from '../../lib/recipeUtils'
@@ -13,7 +13,7 @@ import AddToScheduleModal from './AddToScheduleModal'
 
 function NutrientPill({ label, value }) {
   return (
-    <div className="text-center px-3 py-2 rounded-xl" style={{ background: 'var(--cream-dark)' }}>
+    <div className="text-center px-3 py-2 rounded-xl" style={{ background: 'var(--bg-sunk)' }}>
       <p className="text-xs font-medium" style={{ color: 'var(--ink)' }}>{value}</p>
       <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>{label}</p>
     </div>
@@ -124,8 +124,8 @@ export default function RecipeDetail({
 
       {/* Hero image */}
       {(recipe.image || detail?.image) && (
-        <div className="rounded-2xl overflow-hidden mb-8"
-             style={{ height: 'clamp(200px, 35vw, 360px)', background: 'var(--cream-dark)' }}>
+        <div className="rounded-[14px] overflow-hidden mb-8"
+             style={{ height: 'clamp(180px, 24vw, 280px)', background: 'var(--bg-sunk)' }}>
           <img src={detail?.image || recipe.image} alt={recipe.title}
                className="w-full h-full object-cover" />
         </div>
@@ -135,7 +135,7 @@ export default function RecipeDetail({
       <div className="mb-8">
         <div className="flex items-start justify-between gap-4 mb-4">
           <h1 className="text-3xl sm:text-4xl leading-tight"
-              style={{ fontFamily: 'Playfair Display, serif' }}>
+              style={{ fontFamily: 'var(--font-display)' }}>
             {recipe.title}
           </h1>
           <div className="flex items-center gap-2 flex-shrink-0 mt-1">
@@ -144,7 +144,7 @@ export default function RecipeDetail({
               <button
                 onClick={() => setShowCookModal(true)}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-medium transition-all whitespace-nowrap"
-                style={{ background: 'var(--green-light)', borderColor: 'var(--green-mid)', color: 'var(--green)' }}
+                style={{ background: 'var(--brand-tint)', borderColor: 'var(--brand-soft)', color: 'var(--brand)' }}
               >
                 <UtensilsCrossed size={15} /> I Cooked This
               </button>
@@ -153,7 +153,7 @@ export default function RecipeDetail({
               <button
                 onClick={() => setShowScheduleModal(true)}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-medium transition-all whitespace-nowrap"
-                style={{ background: '#EEF0F9', borderColor: '#C7CDE8', color: '#4A52A0' }}
+                style={{ background: 'var(--brand-tint)', borderColor: 'var(--brand-soft)', color: 'var(--brand)' }}
               >
                 <CalendarPlus size={15} /> Add to Schedule
               </button>
@@ -170,7 +170,7 @@ export default function RecipeDetail({
           )}
           {detail?.sourceUrl && (
             <a href={detail.sourceUrl} target="_blank" rel="noopener noreferrer"
-               className="flex items-center gap-1.5 ml-auto hover:text-[var(--green)] transition-colors">
+               className="flex items-center gap-1.5 ml-auto hover:text-[var(--brand)] transition-colors">
               Source <ExternalLink size={13} />
             </a>
           )}
@@ -190,7 +190,7 @@ export default function RecipeDetail({
           <div className="flex flex-wrap gap-2 mt-4">
             {(recipe.diets ?? detail.diets).map(d => (
               <span key={d} className="text-xs px-3 py-1 rounded-full"
-                    style={{ background: 'var(--green-light)', color: 'var(--green)' }}>
+                    style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}>
                 {d}
               </span>
             ))}
@@ -217,7 +217,7 @@ export default function RecipeDetail({
       )}
 
       {error && (
-        <p className="text-sm py-4" style={{ color: 'var(--red-soft)' }}>
+        <p className="text-sm py-4" style={{ color: 'var(--danger)' }}>
           Couldn't load details — {error}
         </p>
       )}
@@ -228,11 +228,11 @@ export default function RecipeDetail({
 
           {/* Ingredients */}
           <aside className="lg:col-span-2">
-            <h2 className="text-xl mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-xl mb-1" style={{ fontFamily: 'var(--font-display)' }}>
               Ingredients
             </h2>
             {multiplier !== 1 && (
-              <p className="text-xs mb-4" style={{ color: 'var(--green)' }}>
+              <p className="text-xs mb-4" style={{ color: 'var(--brand)' }}>
                 Scaled for {currentServings} servings
               </p>
             )}
@@ -245,14 +245,14 @@ export default function RecipeDetail({
                   {have.length > 0 && (
                     <div>
                       <p className="text-[13px] font-medium mb-2"
-                         style={{ color: 'var(--green)' }}>
+                         style={{ color: 'var(--fresh)' }}>
                         In your fridge ({have.length})
                       </p>
                       <ul className="space-y-2">
                         {have.map((ing, i) => (
                           <li key={i} className="flex items-start gap-2 text-sm">
                             <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0"
-                                          style={{ color: 'var(--green)' }} />
+                                          style={{ color: 'var(--fresh)' }} />
                             <span style={{ color: 'var(--ink)' }}>
                               {scaledQty(ing, multiplier)
                                 ? <><strong>{scaledQty(ing, multiplier)}</strong>{' '}</>
@@ -267,7 +267,7 @@ export default function RecipeDetail({
                   {need.length > 0 && (
                     <div>
                       <p className="text-[13px] font-medium mb-2"
-                         style={{ color: 'var(--amber)' }}>
+                         style={{ color: 'var(--carrot)' }}>
                         Need to buy ({need.length})
                       </p>
                       <ul className="space-y-2">
@@ -277,7 +277,7 @@ export default function RecipeDetail({
                           .map((ing, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm">
                               <ShoppingCart size={14} className="mt-0.5 flex-shrink-0"
-                                            style={{ color: ing._tier === 'core' ? 'var(--red-soft)' : 'var(--amber)' }} />
+                                            style={{ color: ing._tier === 'core' ? 'var(--danger)' : 'var(--carrot)' }} />
                               <span style={{ color: 'var(--ink-muted)' }}>
                                 {scaledQty(ing, multiplier)
                                   ? <><strong style={{ color: 'var(--ink)' }}>{scaledQty(ing, multiplier)}</strong>{' '}</>
@@ -285,7 +285,7 @@ export default function RecipeDetail({
                                 {ing.name}
                                 {ing._tier === 'core' && (
                                   <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded"
-                                        style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}>
+                                        style={{ background: 'var(--danger-tint)', color: 'var(--danger)' }}>
                                     essential
                                   </span>
                                 )}
@@ -309,7 +309,7 @@ export default function RecipeDetail({
 
           {/* Instructions */}
           <section className="lg:col-span-3">
-            <h2 className="text-xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-xl mb-4" style={{ fontFamily: 'var(--font-display)' }}>
               Instructions
             </h2>
             {steps.length > 0 ? (
@@ -317,7 +317,7 @@ export default function RecipeDetail({
                 {steps.map(step => (
                   <li key={step.number} className="flex gap-4">
                     <span className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                          style={{ background: 'var(--green)', marginTop: 2 }}>
+                          style={{ background: 'var(--brand)', marginTop: 2 }}>
                       {step.number}
                     </span>
                     <div>
@@ -325,8 +325,8 @@ export default function RecipeDetail({
                         {step.step}
                       </p>
                       {step.equipment?.length > 0 && (
-                        <p className="text-xs mt-1.5" style={{ color: 'var(--ink-muted)' }}>
-                          🍳 {step.equipment.map(e => e.name).join(', ')}
+                        <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: 'var(--ink-muted)' }}>
+                          <ChefHat size={12} strokeWidth={1.75} /> {step.equipment.map(e => e.name).join(', ')}
                         </p>
                       )}
                     </div>

@@ -58,7 +58,7 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(28,28,26,0.6)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(43,29,58,0.6)', backdropFilter: 'blur(6px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -76,12 +76,12 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
         <div className="flex items-start gap-4 px-6 pt-5 pb-4 flex-shrink-0">
           {recipeSnap.image && (
             <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"
-                 style={{ background: 'var(--cream-dark)' }}>
+                 style={{ background: 'var(--bg-sunk)' }}>
               <img src={recipeSnap.image} alt={recipeSnap.title} className="w-full h-full object-cover" />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <h2 className="text-xl leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-xl leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
               {recipeSnap.title}
             </h2>
             <div className="flex items-center gap-3 mt-1 text-xs" style={{ color: 'var(--ink-muted)' }}>
@@ -91,7 +91,7 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
               <span className="flex items-center gap-1"><Users size={11} /> {servings} servings</span>
               {detail?.sourceUrl && (
                 <a href={detail.sourceUrl} target="_blank" rel="noopener noreferrer"
-                   className="flex items-center gap-1 ml-auto hover:text-[var(--green)]">
+                   className="flex items-center gap-1 ml-auto hover:text-[var(--brand)]">
                   Source <ExternalLink size={10} />
                 </a>
               )}
@@ -111,7 +111,7 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
             </div>
           )}
           {error && (
-            <p className="text-sm py-4" style={{ color: 'var(--red-soft)' }}>
+            <p className="text-sm py-4" style={{ color: 'var(--danger)' }}>
               Couldn't load details — {error}
             </p>
           )}
@@ -120,7 +120,7 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
 
               {/* Ingredients */}
               <aside className="md:col-span-2">
-                <h3 className="text-base font-semibold mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h3 className="text-base font-semibold mb-3" style={{ fontFamily: 'var(--font-display)' }}>
                   Ingredients
                 </h3>
                 <ul className="space-y-1.5">
@@ -130,9 +130,9 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
                     return (
                       <li key={i} className="flex items-start gap-2 text-sm">
                         {have
-                          ? <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--green)' }} />
+                          ? <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--fresh)' }} />
                           : <ShoppingCart size={13} className="mt-0.5 flex-shrink-0"
-                                          style={{ color: tier === 'core' ? 'var(--red-soft)' : 'var(--amber)' }} />}
+                                          style={{ color: tier === 'core' ? 'var(--danger)' : 'var(--carrot)' }} />}
                         <span style={{ color: have ? 'var(--ink)' : 'var(--ink-muted)' }}>
                           {ing.amount != null && (
                             <strong style={{ color: 'var(--ink)', marginRight: 3 }}>
@@ -142,7 +142,7 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
                           {ing.name}
                           {!have && tier === 'core' && (
                             <span className="ml-1.5 text-xs px-1 py-0.5 rounded"
-                                  style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}>
+                                  style={{ background: 'var(--danger-tint)', color: 'var(--danger)' }}>
                               essential
                             </span>
                           )}
@@ -155,7 +155,7 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
 
               {/* Instructions */}
               <section className="md:col-span-3">
-                <h3 className="text-base font-semibold mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h3 className="text-base font-semibold mb-3" style={{ fontFamily: 'var(--font-display)' }}>
                   Instructions
                 </h3>
                 {steps.length > 0 ? (
@@ -163,7 +163,7 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
                     {steps.map(step => (
                       <li key={step.number} className="flex gap-3">
                         <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white mt-0.5"
-                              style={{ background: 'var(--green)' }}>
+                              style={{ background: 'var(--brand)' }}>
                           {step.number}
                         </span>
                         <p className="text-sm leading-relaxed" style={{ color: 'var(--ink)' }}>
@@ -176,7 +176,7 @@ export default function RecipePreviewModal({ recipe: recipeSnap, fridgeIngredien
                   <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
                     {detail.sourceUrl
                       ? <>Full instructions at <a href={detail.sourceUrl} target="_blank" rel="noopener noreferrer"
-                              className="underline" style={{ color: 'var(--green)' }}>the source</a>.</>
+                              className="underline" style={{ color: 'var(--brand)' }}>the source</a>.</>
                       : 'No instructions available for this recipe.'}
                   </p>
                 )}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ShoppingBag, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react'
+import { ShoppingBag, ChevronDown, ChevronUp, Copy, Check, ShoppingCart } from 'lucide-react'
 import { buildItemLinks, enabledPlatforms, copyIngredientName } from '../../lib/affiliateLinks'
 
 /**
@@ -78,14 +78,14 @@ export default function BuyIngredientsButton({
                 width:      isCopied ? 'auto' : (size === 'sm' ? 22 : 26),
                 height:     size === 'sm' ? 22 : 26,
                 padding:    isCopied ? '0 6px' : 0,
-                background: isCopied ? 'var(--green-light)' : `${platform.color}15`,
+                background: isCopied ? 'var(--brand-tint)' : `${platform.color}15`,
                 fontSize:   size === 'sm' ? '0.7rem' : '0.8rem',
               }}
             >
               {isCopied
-                ? <><Check size={11} style={{ color: 'var(--green)' }} />
-                    <span style={{ color: 'var(--green)', fontSize: '0.65rem' }}>Copied</span></>
-                : platform.logo}
+                ? <><Check size={11} style={{ color: 'var(--fresh)' }} />
+                    <span style={{ color: 'var(--brand)', fontSize: '0.65rem' }}>Copied</span></>
+                : <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: platform.color }} />}
             </button>
           )
         })}
@@ -98,10 +98,10 @@ export default function BuyIngredientsButton({
     return (
       <div
         className={`rounded-2xl p-5 ${className}`}
-        style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+        style={{ background: 'var(--fresh-tint)', border: '1px solid var(--fresh-soft)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
       >
         <button onClick={() => setExpanded(v => !v)} className="w-full flex items-center gap-3 text-left">
-          <span className="text-2xl flex-shrink-0">🛒</span>
+          <ShoppingCart size={22} strokeWidth={1.75} className="flex-shrink-0" style={{ color: 'var(--fresh)' }} />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
               Order missing ingredients online
@@ -121,7 +121,7 @@ export default function BuyIngredientsButton({
             <div className="flex items-center gap-3 mt-4 mb-2 px-0.5">
               {enabledPlatforms.map(p => (
                 <span key={p.key} className="flex items-center gap-1.5 text-xs" style={{ color: p.color, fontWeight: 600 }}>
-                  <span>{p.logo}</span> {p.name}
+                  <span className="w-2 h-2 rounded-full inline-block" style={{ background: p.color }} /> {p.name}
                   {!p.deepLinkable && (
                     <Copy size={10} style={{ color: 'var(--ink-muted)' }} />
                   )}
@@ -143,14 +143,14 @@ export default function BuyIngredientsButton({
   if (variant === 'inline') {
     return (
       <div className={`rounded-xl p-3 ${className}`}
-           style={{ background: 'var(--cream-dark)', border: '1px solid var(--border)' }}>
+           style={{ background: 'var(--bg-sunk)', border: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2 mb-2">
           <ShoppingBag size={13} style={{ color: 'var(--ink-muted)' }} />
           <span className="text-xs font-medium" style={{ color: 'var(--ink)' }}>
             Buy {count} missing item{count !== 1 ? 's' : ''}
           </span>
           <span className="text-xs ml-auto" style={{ color: 'var(--ink-muted)' }}>
-            {enabledPlatforms.map(p => p.logo).join(' ')}
+            {enabledPlatforms.map(p => <span key={p.key} className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: p.color }} />)}
           </span>
         </div>
         <div className="space-y-1.5">
@@ -168,7 +168,7 @@ export default function BuyIngredientsButton({
       <button
         onClick={() => setExpanded(v => !v)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-        style={{ background: 'var(--cream-dark)', color: 'var(--ink)' }}
+        style={{ background: 'var(--bg-sunk)', color: 'var(--ink)' }}
       >
         <ShoppingBag size={12} />
         Buy {count} item{count !== 1 ? 's' : ''}

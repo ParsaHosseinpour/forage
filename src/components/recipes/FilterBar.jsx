@@ -1,11 +1,11 @@
 const DIETS = [
   { value: '',            label: 'All recipes' },
-  { value: 'vegetarian',  label: '🌿 Vegetarian' },
-  { value: 'vegan',       label: '🥦 Vegan' },
-  { value: 'gluten free', label: '🌾 Gluten-free' },
-  { value: 'dairy free',  label: '🧀 Dairy-free' },
-  { value: 'ketogenic',   label: '🥑 Keto' },
-  { value: 'paleo',       label: '🍖 Paleo' },
+  { value: 'vegetarian',  label: 'Vegetarian' },
+  { value: 'vegan',       label: 'Vegan' },
+  { value: 'gluten free', label: 'Gluten-free' },
+  { value: 'dairy free',  label: 'Dairy-free' },
+  { value: 'ketogenic',   label: 'Keto' },
+  { value: 'paleo',       label: 'Paleo' },
 ]
 
 const TIME_OPTIONS = [
@@ -30,24 +30,21 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
 
       {/* Diet pills */}
       <div>
-        <p className="text-[13px] font-medium mb-2.5"
-           style={{ color: 'var(--ink-muted)' }}>
-          Dietary preference
-        </p>
-        <div className="flex flex-wrap gap-2">
+        <p className="text-sm font-semibold mb-2.5">Diet</p>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 sm:mx-0 sm:px-0 sm:flex-wrap">
           {DIETS.map(({ value, label }) => {
             const active = filters.diet === value
             return (
               <button
                 key={value}
                 onClick={() => set('diet')(value)}
-                className="px-3.5 py-1.5 rounded-full text-sm border transition-all duration-150"
+                className="px-3.5 py-1.5 rounded-[8px] text-sm border transition-colors duration-150 whitespace-nowrap flex-shrink-0"
+                aria-pressed={active}
                 style={{
-                  background:   active ? 'var(--green)'       : 'white',
-                  color:        active ? 'white'              : 'var(--ink)',
-                  borderColor:  active ? 'var(--green)'       : 'var(--border)',
-                  fontWeight:   active ? 500                  : 400,
-                  transform:    active ? 'scale(1.03)'        : 'scale(1)',
+                  background:   active ? 'var(--brand)' : 'var(--surface)',
+                  color:        active ? 'white'        : 'var(--ink)',
+                  borderColor:  active ? 'var(--brand)' : 'var(--border)',
+                  fontWeight:   active ? 600            : 500,
                 }}
               >
                 {label}
@@ -58,26 +55,26 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
       </div>
 
       {/* Time + Sort row */}
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
 
         {/* Max cook time */}
-        <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium" style={{ color: 'var(--ink-muted)' }}>
+        <div className="flex items-center gap-2 min-w-0 max-w-full">
+          <span className="text-sm font-semibold">
             Time
           </span>
-          <div className="flex gap-1">
+          <div className="flex gap-1 overflow-x-auto no-scrollbar">
             {TIME_OPTIONS.map(({ value, label }) => {
               const active = filters.maxTime === value
               return (
                 <button
                   key={value}
                   onClick={() => set('maxTime')(value)}
-                  className="px-3 py-1 rounded-lg text-xs border transition-all duration-150"
+                  className="px-3 py-1 rounded-[8px] text-[13px] border transition-colors duration-150 whitespace-nowrap flex-shrink-0"
                   style={{
-                    background:  active ? 'var(--amber-light)' : 'white',
-                    color:       active ? 'var(--amber)'       : 'var(--ink-muted)',
-                    borderColor: active ? 'var(--amber)'       : 'var(--border)',
-                    fontWeight:  active ? 500 : 400,
+                    background:  active ? 'var(--brand-tint)' : 'var(--surface)',
+                    color:       active ? 'var(--brand)'      : 'var(--ink-muted)',
+                    borderColor: active ? 'var(--brand-soft)' : 'var(--border)',
+                    fontWeight:  active ? 600 : 500,
                   }}
                 >
                   {label}
@@ -87,26 +84,26 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
           </div>
         </div>
 
-        <div className="w-px h-4" style={{ background: 'var(--border)' }} />
+        <div className="hidden sm:block w-px h-4" style={{ background: 'var(--border)' }} />
 
         {/* Sort */}
-        <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium" style={{ color: 'var(--ink-muted)' }}>
+        <div className="flex items-center gap-2 min-w-0 max-w-full">
+          <span className="text-sm font-semibold">
             Sort
           </span>
-          <div className="flex gap-1">
+          <div className="flex gap-1 overflow-x-auto no-scrollbar">
             {SORTS.map(({ value, label }) => {
               const active = (filters.sort || 'min-missing-ingredients') === value
               return (
                 <button
                   key={value}
                   onClick={() => set('sort')(value)}
-                  className="px-3 py-1 rounded-lg text-xs border transition-all duration-150"
+                  className="px-3 py-1 rounded-[8px] text-[13px] border transition-colors duration-150 whitespace-nowrap flex-shrink-0"
                   style={{
-                    background:  active ? 'var(--cream-dark)' : 'white',
-                    color:       active ? 'var(--ink)'        : 'var(--ink-muted)',
-                    borderColor: active ? 'var(--ink-muted)'  : 'var(--border)',
-                    fontWeight:  active ? 500 : 400,
+                    background:  active ? 'var(--brand-tint)' : 'var(--surface)',
+                    color:       active ? 'var(--brand)'      : 'var(--ink-muted)',
+                    borderColor: active ? 'var(--brand-soft)' : 'var(--border)',
+                    fontWeight:  active ? 600 : 500,
                   }}
                 >
                   {label}
@@ -118,7 +115,7 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
 
         {/* Result count */}
         {!loading && resultCount !== null && (
-          <span className="ml-auto text-xs" style={{ color: 'var(--ink-muted)' }}>
+          <span className="ml-auto text-sm tabular-nums" style={{ color: 'var(--ink-muted)' }}>
             {resultCount} recipe{resultCount !== 1 ? 's' : ''} found
           </span>
         )}

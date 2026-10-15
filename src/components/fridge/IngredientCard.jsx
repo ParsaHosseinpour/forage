@@ -1,12 +1,6 @@
 import { useState } from 'react'
 import { Trash2, Pencil, Check, X } from 'lucide-react'
-import Button from '../ui/Button'
 import { Input } from '../ui/Input'
-import { CATEGORIES } from './AddIngredientForm'
-
-const categoryEmoji = Object.fromEntries(
-  CATEGORIES.map(c => [c.value, c.label.split(' ')[0]])
-)
 
 export default function IngredientCard({ item, onDelete, onUpdate }) {
   const [deleting, setDeleting]   = useState(false)
@@ -36,19 +30,14 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
     finally { setSaving(false) }
   }
 
-  const emoji = categoryEmoji[item.category] ?? '📦'
-
   return (
     <div
-      className="group flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200"
+      className="group flex items-center gap-3 px-4 py-3 transition-colors"
       style={{
-        background: deleting ? '#FEF2F0' : 'white',
-        borderColor: deleting ? '#FECACA' : 'var(--border)',
+        background: deleting ? 'var(--danger-tint)' : 'transparent',
         opacity: deleting ? 0.6 : 1,
       }}
     >
-      {/* Category emoji */}
-      <span className="text-xl select-none flex-shrink-0">{emoji}</span>
 
       {editing ? (
         /* ── Inline edit mode ── */
@@ -77,7 +66,7 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
             onClick={handleSave}
             disabled={saving}
             className="p-1.5 rounded-lg transition-colors"
-            style={{ color: 'var(--green)' }}
+            style={{ color: 'var(--brand)' }}
             title="Save"
           >
             {saving ? <span className="spinner" style={{ width: 14, height: 14 }} /> : <Check size={15} />}
@@ -94,21 +83,19 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
       ) : (
         /* ── Display mode ── */
         <div className="flex items-center justify-between flex-1 min-w-0">
-          <div className="min-w-0">
-            <p className="text-sm font-medium truncate" style={{ color: 'var(--ink)' }}>
-              {item.name}
+          <p className="text-[15px] font-medium truncate flex-1 min-w-0" style={{ color: 'var(--ink)' }}>
+            {item.name}
+          </p>
+          {(item.quantity || item.unit) && (
+            <p className="text-sm ml-3 flex-shrink-0 tabular-nums" style={{ color: 'var(--ink-muted)' }}>
+              {[item.quantity, item.unit].filter(Boolean).join(' ')}
             </p>
-            {(item.quantity || item.unit) && (
-              <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>
-                {[item.quantity, item.unit].filter(Boolean).join(' ')}
-              </p>
-            )}
-          </div>
+          )}
 
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+          <div className="flex items-center gap-1 ml-2 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
             <button
               onClick={() => setEditing(true)}
-              className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[var(--bg-sunk)] transition-colors"
               style={{ color: 'var(--ink-muted)' }}
               title="Edit"
             >
@@ -118,11 +105,11 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
               onClick={handleDelete}
               disabled={deleting}
               className="p-1.5 rounded-lg transition-colors"
-              style={{ color: 'var(--red-soft)' }}
+              style={{ color: 'var(--danger)' }}
               title="Remove"
             >
               {deleting
-                ? <span className="spinner" style={{ width: 14, height: 14, color: 'var(--red-soft)' }} />
+                ? <span className="spinner" style={{ width: 14, height: 14, color: 'var(--danger)' }} />
                 : <Trash2 size={14} />}
             </button>
           </div>

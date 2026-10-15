@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Flame, Package } from 'lucide-react'
+import { ChevronDown, ChevronUp, Flame, Package, Check } from 'lucide-react'
 import { DEFAULT_STAPLES } from '../../hooks/usePantry'
 
 export default function PantrySection({ isActive, onToggle, loading }) {
@@ -8,7 +8,7 @@ export default function PantrySection({ isActive, onToggle, loading }) {
 
   return (
     <section
-      className="rounded-2xl border overflow-hidden"
+      className="rounded-[14px] border overflow-hidden"
       style={{ background: 'white', borderColor: 'var(--border)' }}
     >
       {/* Header */}
@@ -18,11 +18,11 @@ export default function PantrySection({ isActive, onToggle, loading }) {
       >
         <div className="flex items-center gap-3">
           <span className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: 'var(--amber-light)' }}>
-            <Package size={15} style={{ color: 'var(--amber)' }} strokeWidth={1.75} />
+                style={{ background: 'var(--fresh-tint)' }}>
+            <Package size={15} style={{ color: 'var(--fresh)' }} strokeWidth={1.75} />
           </span>
           <div>
-            <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
+            <p className="text-[15px] font-semibold" style={{ color: 'var(--ink)' }}>
               Pantry staples
             </p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>
@@ -34,8 +34,8 @@ export default function PantrySection({ isActive, onToggle, loading }) {
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {activeCount > 0 && (
-            <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                  style={{ background: 'var(--amber-light)', color: 'var(--amber)' }}>
+            <span className="text-xs px-2.5 py-1 rounded-[6px] font-semibold"
+                  style={{ background: 'var(--fresh-tint)', color: 'var(--fresh)' }}>
               {activeCount} active
             </span>
           )}
@@ -60,21 +60,21 @@ export default function PantrySection({ isActive, onToggle, loading }) {
                   key={staple}
                   onClick={() => onToggle(staple)}
                   disabled={loading}
-                  className="px-3.5 py-1.5 rounded-full text-sm border transition-all duration-150 capitalize"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-sm border transition-colors duration-150 capitalize"
                   style={{
-                    background:  active ? 'var(--amber-light)' : 'var(--cream)',
-                    borderColor: active ? 'var(--amber)'       : 'var(--border)',
-                    color:       active ? 'var(--amber)'       : 'var(--ink-muted)',
+                    background:  active ? 'var(--fresh-tint)' : 'var(--surface)',
+                    borderColor: active ? 'var(--fresh)'       : 'var(--border)',
+                    color:       active ? 'var(--fresh)'       : 'var(--ink-muted)',
                     fontWeight:  active ? 500                  : 400,
                   }}
                 >
-                  {active && '✓ '}{staple}
+                  {active && <Check size={13} strokeWidth={2.5} />}{staple}
                 </button>
               )
             })}
           </div>
           {activeCount === DEFAULT_STAPLES.length && (
-            <p className="text-xs mt-3 flex items-center gap-1.5" style={{ color: 'var(--green)' }}>
+            <p className="text-xs mt-3 flex items-center gap-1.5" style={{ color: 'var(--fresh)' }}>
               <Flame size={12} /> Full pantry — recipe matching will be very generous!
             </p>
           )}

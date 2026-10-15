@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ChevronLeft, RefreshCw, Users } from 'lucide-react'
+import { ChevronLeft, RefreshCw, Users, Carrot, SearchX } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
 import { usePantry } from '../../hooks/usePantry'
@@ -12,6 +12,7 @@ import RecipeCard, { RecipeCardSkeleton } from '../recipes/RecipeCard'
 import RecipeDetail from '../recipes/RecipeDetail'
 import FilterBar from '../recipes/FilterBar'
 import Button from '../ui/Button'
+import { IconTile } from '../ui/glyphs'
 
 // 'popularity' is the best-match-% sort mode (see recipeDb.js) — used as the
 // default so the initial view's order always agrees with the % shown on
@@ -29,23 +30,24 @@ const SERVING_OPTIONS = [
 function QuickServingSelector({ value, onChange }) {
   return (
     <div className="flex items-center gap-2">
-      <Users size={14} style={{ color: 'var(--ink-muted)', flexShrink: 0 }} />
-      <span className="text-xs" style={{ color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>
-        Scale for
+      <span className="text-sm font-semibold flex items-center gap-1.5" style={{ whiteSpace: 'nowrap' }}>
+        <Users size={15} strokeWidth={1.75} style={{ color: 'var(--ink-muted)' }} />
+        Servings
       </span>
-      <div className="flex gap-1">
+      <div className="flex gap-1 overflow-x-auto no-scrollbar">
         {SERVING_OPTIONS.map(opt => {
           const active = value === opt.value
           return (
             <button
               key={opt.value}
               onClick={() => onChange(active ? null : opt.value)}
-              className="px-2.5 py-1 rounded-lg text-xs border transition-all duration-150"
+              className="px-3 py-1 rounded-[8px] text-[13px] border transition-colors duration-150 whitespace-nowrap"
+              aria-pressed={active}
               style={{
-                background:  active ? 'var(--green)'      : 'white',
-                borderColor: active ? 'var(--green)'      : 'var(--border)',
-                color:       active ? 'white'             : 'var(--ink-muted)',
-                fontWeight:  active ? 500                 : 400,
+                background:  active ? 'var(--brand-tint)' : 'var(--surface)',
+                borderColor: active ? 'var(--brand-soft)' : 'var(--border)',
+                color:       active ? 'var(--brand)'      : 'var(--ink-muted)',
+                fontWeight:  active ? 600 : 500,
               }}
             >
               {opt.label}
@@ -154,12 +156,12 @@ export default function RecipesPage({ user }) {
       } catch (err) { console.error('Cook deduction:', err) }
     }
     try { await logCook(selected) } catch { /* non-fatal */ }
-    toast({ type: 'success', message: '🍽️ Fridge updated! Enjoy your meal.', duration: 4000 })
+    toast({ type: 'success', message: 'Fridge updated. Enjoy your meal.', duration: 4000 })
   }, [fridgeHook, logCook, selected, toast])
 
   const handleSchedule = async (dayIdx, slotType, recipe) => {
     await addSlot(dayIdx, slotType, recipe)
-    toast({ type: 'success', message: `📅 ${recipe.title} added to ${slotType} on ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][dayIdx]}.`, duration: 4000 })
+    toast({ type: 'success', message: `${recipe.title} added to ${slotType} on ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][dayIdx]}.`, duration: 4000 })
   }
 
   const tooFewIngredients = !fridgeLoading && !pantryLoading && allIngredients.length < 1
@@ -172,8 +174,8 @@ export default function RecipesPage({ user }) {
         <div className="mb-8">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-3xl mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Recipe matches
+              <h1 className="text-4xl mb-1.5">
+                Recipes
               </h1>
               <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
                 {fridgeNames.length} fridge item{fridgeNames.length !== 1 ? 's' : ''}
@@ -194,15 +196,15 @@ export default function RecipesPage({ user }) {
           {allIngredients.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {fridgeNames.map(name => (
-                <span key={name} className="text-xs px-3 py-1 rounded-full border"
-                      style={{ background: 'white', borderColor: 'var(--border)', color: 'var(--ink)' }}>
+                <span key={name} className="text-[13px] px-2.5 py-1 rounded-[6px] border"
+                      style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--ink)' }}>
                   {name}
                 </span>
               ))}
               {staples.map(name => (
-                <span key={`pantry-${name}`} className="text-xs px-3 py-1 rounded-full border"
-                      style={{ background: 'var(--amber-light)', borderColor: '#F5D9B8', color: 'var(--amber)' }}>
-                  🫙 {name}
+                <span key={`pantry-${name}`} className="text-[13px] px-2.5 py-1 rounded-[6px] border"
+                      style={{ background: 'var(--fresh-tint)', borderColor: 'var(--fresh-soft)', color: 'var(--fresh)' }}>
+                  {name}
                 </span>
               ))}
             </div>
@@ -225,7 +227,7 @@ export default function RecipesPage({ user }) {
       {/* Error */}
       {error && !loading && (
         <div className="rounded-xl p-4 mb-6 text-sm fade-in"
-             style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}>
+             style={{ background: 'var(--danger-tint)', color: 'var(--danger)' }}>
           <strong>Search failed:</strong> {error}
         </div>
       )}
@@ -233,12 +235,10 @@ export default function RecipesPage({ user }) {
       {/* Too few ingredients */}
       {tooFewIngredients && (
         <div className="text-center py-24 fade-in">
-          <div className="text-5xl mb-4">🧅</div>
-          <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Add at least 1 ingredient
-          </h2>
-          <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-            Head back to your fridge and log what you have.
+          <IconTile Icon={Carrot} />
+          <h2 className="text-2xl mb-2">Add an ingredient first</h2>
+          <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
+            Log what you have in your fridge and Forage finds matching recipes.
           </p>
           <Button onClick={() => navigate('/fridge')}>
             <ChevronLeft size={15} /> Go to my fridge
@@ -291,12 +291,10 @@ export default function RecipesPage({ user }) {
       {/* No results */}
       {!loading && !selected && recipes.length === 0 && !tooFewIngredients && !error && (
         <div className="text-center py-24 fade-in">
-          <div className="text-5xl mb-4">🤷</div>
-          <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-            No recipes found
-          </h2>
-          <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-            Try loosening the filters or adding more ingredients.
+          <IconTile Icon={SearchX} />
+          <h2 className="text-2xl mb-2">No recipes match</h2>
+          <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
+            Clear a filter or add more ingredients to your fridge.
           </p>
           <Button variant="secondary" onClick={() => handleFiltersChange(DEFAULT_FILTERS)}>
             Clear all filters

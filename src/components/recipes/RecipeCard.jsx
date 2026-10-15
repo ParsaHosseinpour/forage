@@ -1,64 +1,68 @@
-import { Clock, Users, ShoppingCart, UtensilsCrossed } from 'lucide-react'
+import { Clock, Users, UtensilsCrossed } from 'lucide-react'
 import SaveButton from './SaveButton'
-import { weightedMatchPct } from '../../lib/recipeUtils'
 
-function MatchBadge({ usedIngredients, missedIngredients, usedCount, missedCount }) {
-  // Prefer rich ingredient arrays for weighted scoring; fall back to counts
-  const pct = (usedIngredients?.length || missedIngredients?.length)
-    ? weightedMatchPct(usedIngredients, missedIngredients)
-    : (usedCount + missedCount > 0 ? Math.round((usedCount / (usedCount + missedCount)) * 100) : null)
+const MAX_SEGMENTS = 12
 
-  if (pct === null) return null
+/**
+ * IngredientMeter — one segment per ingredient. Green = in your fridge,
+ * carrot outline = still to buy. Replaces the old "72% match" pill with the
+ * actual shape of the shopping gap.
+ */
+function IngredientMeter({ used, missed }) {
+  const total = used + missed
+  if (total === 0) return null
 
-  const style =
-    pct >= 80 ? { bg: 'var(--green-light)', color: 'var(--green)'    } :
-    pct >= 50 ? { bg: 'var(--amber-light)', color: 'var(--amber)'    } :
-                { bg: '#FEF2F0',            color: 'var(--red-soft)' }
+  // Long ingredient lists are scaled down so segments stay legible.
+  const segs   = Math.min(total, MAX_SEGMENTS)
+  const filled = total <= MAX_SEGMENTS ? used : Math.round((used / total) * MAX_SEGMENTS)
+
+  const label = missed === 0
+    ? 'Everything is in your fridge'
+    : `${used} of ${total} in your fridge`
 
   return (
-    <span
-      className="text-xs px-2.5 py-1 rounded-full font-medium flex-shrink-0"
-      style={{ background: style.bg, color: style.color }}
-    >
-      {pct}% match
-    </span>
+    <div className="min-w-0 flex-1">
+      <div
+        className="flex gap-[3px]"
+        role="img"
+        aria-label={label}
+      >
+        {Array.from({ length: segs }, (_, i) => (
+          <span
+            key={i}
+            className="meter-seg h-2 flex-1 rounded-[2px]"
+            style={{
+              '--i': i,
+              background:  i < filled ? 'var(--fresh)' : 'transparent',
+              boxShadow:   i < filled ? 'none' : 'inset 0 0 0 1.5px var(--carrot-soft)',
+            }}
+          />
+        ))}
+      </div>
+      <p className="text-[13px] mt-1.5 tabular-nums" style={{ color: missed === 0 ? 'var(--fresh)' : 'var(--ink-muted)', fontWeight: missed === 0 ? 600 : 500 }}>
+        {label}
+      </p>
+    </div>
   )
 }
 
 export function RecipeCardSkeleton() {
   return (
-    <div className="rounded-2xl border overflow-hidden"
-         style={{ background: 'white', borderColor: 'var(--border)' }}>
-      <div className="h-44 animate-pulse" style={{ background: 'var(--cream-dark)' }} />
+    <div className="rounded-[14px] border overflow-hidden"
+         style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+      <div className="h-44 animate-pulse" style={{ background: 'var(--bg-sunk)' }} />
       <div className="p-4 space-y-3">
-        <div className="h-4 rounded-lg animate-pulse"
-             style={{ background: 'var(--cream-dark)', width: '80%' }} />
-        <div className="h-3 rounded-lg animate-pulse"
-             style={{ background: 'var(--cream-dark)', width: '55%' }} />
-        <div className="flex items-center justify-between pt-1">
-          <div className="h-6 w-20 rounded-full animate-pulse"
-               style={{ background: 'var(--cream-dark)' }} />
-          <div className="h-8 w-8 rounded-full animate-pulse"
-               style={{ background: 'var(--cream-dark)' }} />
-        </div>
+        <div className="h-4 rounded animate-pulse" style={{ background: 'var(--bg-sunk)', width: '80%' }} />
+        <div className="h-3 rounded animate-pulse" style={{ background: 'var(--bg-sunk)', width: '55%' }} />
+        <div className="h-2 rounded animate-pulse mt-4" style={{ background: 'var(--bg-sunk)' }} />
       </div>
     </div>
   )
 }
 
 /**
- * RecipeCard — split into two separate interactive regions so the heart
- * button is NEVER nested inside a <button> (invalid HTML, breaks mobile).
- *
- * Structure:
- *   <div card>
- *     <button  ← clickable: opens recipe detail
- *       image + title + meta
- *     </button>
- *     <div footer>           ← NOT a button
- *       match badge  |  ♥ SaveButton   ← always visible, clear tap target
- *     </div>
- *   </div>
+ * RecipeCard — two separate interactive regions so the save button is never
+ * nested inside another <button> (invalid HTML, breaks on mobile).
  */
 export default function RecipeCard({ recipe, onClick, isSaved = false, onSave }) {
   const used   = recipe.usedIngredientCount   ?? recipe.usedIngredients?.length   ?? 0
@@ -66,38 +70,35 @@ export default function RecipeCard({ recipe, onClick, isSaved = false, onSave })
 
   return (
     <div
-      className="rounded-2xl border overflow-hidden transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
-      style={{ background: 'white', borderColor: 'var(--border)' }}
+      className="group rounded-[14px] border overflow-hidden transition-colors duration-150 hover:border-[var(--brand)]"
+      style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
     >
-      {/* ── Clickable region: image + content ─────────────────────── */}
       <button
         onClick={() => onClick(recipe)}
-        className="block w-full text-left group"
+        className="block w-full text-left"
         aria-label={`View recipe: ${recipe.title}`}
       >
         {/* Image */}
-        <div className="h-44 overflow-hidden relative"
-             style={{ background: 'var(--cream-dark)' }}>
+        <div className="h-44 overflow-hidden relative" style={{ background: 'var(--bg-sunk)' }}>
           {recipe.image
             ? <img
                 src={recipe.image}
-                alt={recipe.title}
+                alt=""
                 loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover"
               />
             : <div className="w-full h-full flex items-center justify-center">
-                <UtensilsCrossed size={28} strokeWidth={1.5} style={{ color: 'var(--border)' }} />
+                <UtensilsCrossed size={28} strokeWidth={1.5} style={{ color: 'var(--ink-muted)', opacity: 0.5 }} />
               </div>
           }
 
-          {/* Diet badges — top-left */}
           {recipe.diets?.length > 0 && (
-            <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+            <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
               {recipe.diets.slice(0, 2).map(d => (
                 <span
                   key={d}
-                  className="text-xs px-2 py-0.5 rounded-full font-medium backdrop-blur-sm"
-                  style={{ background: 'rgba(255,255,255,0.88)', color: 'var(--green)' }}
+                  className="text-xs px-2 py-0.5 rounded-[6px] font-semibold capitalize"
+                  style={{ background: 'var(--surface)', color: 'var(--ink)' }}
                 >
                   {d}
                 </span>
@@ -107,43 +108,31 @@ export default function RecipeCard({ recipe, onClick, isSaved = false, onSave })
         </div>
 
         {/* Title + meta */}
-        <div className="px-4 pt-4 pb-3">
+        <div className="px-4 pt-3.5 pb-3">
           <h3
-            className="text-sm font-medium leading-snug mb-2 line-clamp-2"
-            style={{ color: 'var(--ink)' }}
+            className="text-[17px] leading-snug mb-1.5 line-clamp-2"
+            style={{ fontWeight: 650, fontVariationSettings: "'wdth' 96" }}
           >
             {recipe.title}
           </h3>
-          <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--ink-muted)' }}>
+          <div className="flex items-center gap-3 text-[13px]" style={{ color: 'var(--ink-muted)' }}>
             {recipe.readyInMinutes && (
               <span className="flex items-center gap-1">
-                <Clock size={11} /> {recipe.readyInMinutes} min
+                <Clock size={13} strokeWidth={1.75} /> {recipe.readyInMinutes} min
               </span>
             )}
             {recipe.servings && (
               <span className="flex items-center gap-1">
-                <Users size={11} /> {recipe.servings}
-              </span>
-            )}
-            {missed > 0 && (
-              <span className="flex items-center gap-1">
-                <ShoppingCart size={11} /> {missed} to buy
+                <Users size={13} strokeWidth={1.75} /> {recipe.servings}
               </span>
             )}
           </div>
         </div>
       </button>
 
-      {/* ── Footer: match badge + heart ─────────────────────────────
-           This is a plain <div>, NOT a <button>, so SaveButton is a
-           top-level interactive element with a full 34×34 px tap target.
-           Always visible — no hover gate, no opacity toggle.          ── */}
-      <div
-        className="flex items-center justify-between px-4 py-3 border-t"
-        style={{ borderColor: 'var(--border)' }}
-      >
-        <MatchBadge usedIngredients={recipe.usedIngredients} missedIngredients={recipe.missedIngredients} usedCount={used} missedCount={missed} />
-
+      {/* Footer: meter + save (plain div, not a button) */}
+      <div className="flex items-center gap-4 px-4 pb-4">
+        <IngredientMeter used={used} missed={missed} />
         {onSave && (
           <SaveButton
             saved={isSaved}

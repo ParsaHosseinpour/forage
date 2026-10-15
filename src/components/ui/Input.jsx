@@ -1,9 +1,9 @@
 const base = `
-  w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)]
-  bg-white text-[var(--ink)] text-sm
+  w-full px-3.5 py-2.5 rounded-[10px] border border-[var(--border)]
+  bg-[var(--surface)] text-[var(--ink)] text-[15px]
   placeholder:text-[var(--ink-muted)]
-  focus:outline-none focus:border-[var(--green)] focus:ring-2 focus:ring-[var(--green-mid)]
-  transition-all duration-150
+  focus:outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-soft)]
+  transition-colors duration-150
 `
 
 export function Input({ className = '', ...props }) {
@@ -23,8 +23,8 @@ export function Select({ children, className = '', ...props }) {
 export function Label({ children, className = '', ...props }) {
   return (
     <label
-      className={`block text-[13px] font-medium mb-1.5 ${className}`}
-      style={{ color: 'var(--ink-muted)' }}
+      className={`block text-sm font-semibold mb-1.5 ${className}`}
+      style={{ color: 'var(--ink)' }}
       {...props}
     >
       {children}

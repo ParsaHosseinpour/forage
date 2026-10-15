@@ -86,7 +86,7 @@ export default function CookItModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(28,28,26,0.55)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(43,29,58,0.55)', backdropFilter: 'blur(4px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -100,14 +100,14 @@ export default function CookItModal({
         {/* Header */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4 flex-shrink-0">
           <div>
-            <h2 className="text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-xl" style={{ fontFamily: 'var(--font-display)' }}>
               I Cooked This!
             </h2>
             <p className="text-xs mt-1 truncate" style={{ color: 'var(--ink-muted)', maxWidth: 280 }}>
               {recipe.title}
               {servingsMultiplier !== 1 && (
                 <span className="ml-2 px-1.5 py-0.5 rounded text-xs"
-                      style={{ background: 'var(--green-light)', color: 'var(--green)' }}>
+                      style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}>
                   ×{servingsMultiplier % 1 === 0 ? servingsMultiplier : servingsMultiplier.toFixed(1)} servings
                 </span>
               )}
@@ -129,7 +129,7 @@ export default function CookItModal({
         {/* Estimate disclaimer */}
         {hasEstimates && (
           <div className="mx-6 mb-3 flex items-start gap-2 px-3 py-2.5 rounded-xl text-xs flex-shrink-0"
-               style={{ background: 'var(--amber-light)', color: 'var(--amber)' }}>
+               style={{ background: 'var(--carrot-tint)', color: 'var(--carrot)' }}>
             <Info size={13} className="flex-shrink-0 mt-0.5" />
             <span>
               <strong>~Estimated</strong> rows use a typical weight-per-piece (e.g. ~200g per chicken breast).
@@ -142,7 +142,7 @@ export default function CookItModal({
         <div className="flex-1 overflow-y-auto px-6 pb-2">
           {computedPlan.length === 0 ? (
             <div className="py-8 text-center">
-              <CheckCircle2 size={32} className="mx-auto mb-3" style={{ color: 'var(--green)' }} />
+              <CheckCircle2 size={32} className="mx-auto mb-3" style={{ color: 'var(--fresh)' }} />
               <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
                 All ingredients are pantry staples or not in your fridge — nothing to deduct. Enjoy!
               </p>
@@ -153,12 +153,12 @@ export default function CookItModal({
                 const { fridgeItem, recipeQty, remaining, willDelete, canCompute,
                         isEstimated, typicalNote } = item
 
-                const borderColor = willDelete   ? '#FECACA'
-                                  : isEstimated  ? '#F5D9B8'
+                const borderColor = willDelete   ? 'var(--danger-soft)'
+                                  : isEstimated  ? 'var(--carrot-soft)'
                                   :                'var(--border)'
-                const bgColor     = willDelete   ? '#FEF2F0'
-                                  : isEstimated  ? 'var(--amber-light)'
-                                  :                'var(--cream)'
+                const bgColor     = willDelete   ? 'var(--danger-tint)'
+                                  : isEstimated  ? 'var(--carrot-tint)'
+                                  :                'var(--bg)'
 
                 return (
                   <li key={i} className="rounded-xl border p-3"
@@ -172,15 +172,15 @@ export default function CookItModal({
                         </p>
                         {isEstimated && (
                           <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 font-medium"
-                                style={{ background: 'var(--amber)', color: 'white' }}>
+                                style={{ background: 'var(--carrot)', color: 'white' }}>
                             ~
                           </span>
                         )}
                       </div>
                       <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 ml-2"
                             style={{
-                              background: willDelete ? '#FEF2F0'              : 'var(--amber-light)',
-                              color:      willDelete ? 'var(--red-soft)'      : 'var(--amber)',
+                              background: willDelete ? 'var(--danger-tint)'              : 'var(--carrot-tint)',
+                              color:      willDelete ? 'var(--danger)'      : 'var(--carrot)',
                             }}>
                         {willDelete ? 'Remove' : 'Reduce'}
                       </span>
@@ -201,7 +201,7 @@ export default function CookItModal({
                           style={{
                             borderColor: 'var(--border)',
                             background:  'white',
-                            outline:     isEstimated ? '1px solid var(--amber)' : 'none',
+                            outline:     isEstimated ? '1px solid var(--carrot)' : 'none',
                           }}
                         />
                         <span className="text-xs" style={{ color: 'var(--ink-muted)' }}>
@@ -215,14 +215,14 @@ export default function CookItModal({
                           <>
                             {formatQty(fridgeItem.quantity, fridgeItem.unit)} →{' '}
                             {willDelete
-                              ? <span style={{ color: 'var(--red-soft)' }}>gone</span>
-                              : <span style={{ color: 'var(--amber)' }}>
+                              ? <span style={{ color: 'var(--danger)' }}>gone</span>
+                              : <span style={{ color: 'var(--carrot)' }}>
                                   {formatQty(remaining, fridgeItem.unit)} left
                                 </span>}
                           </>
                         ) : (
                           <span className="flex items-center gap-1"
-                                style={{ color: 'var(--amber)' }}>
+                                style={{ color: 'var(--carrot)' }}>
                             <AlertTriangle size={11} />
                             enter manually
                           </span>
@@ -232,7 +232,7 @@ export default function CookItModal({
 
                     {/* Estimate note */}
                     {typicalNote && typicalNote !== 'manual override' && (
-                      <p className="text-xs mt-1.5" style={{ color: 'var(--amber)' }}>
+                      <p className="text-xs mt-1.5" style={{ color: 'var(--carrot)' }}>
                         Estimate: {typicalNote}
                         {recipeQty.amount && (
                           <span> · recipe asks for {formatQty(recipeQty.amount, recipeQty.unit)}</span>
@@ -251,7 +251,7 @@ export default function CookItModal({
              style={{ borderColor: 'var(--border)' }}>
           <Button variant="secondary" className="flex-1" onClick={onClose}>Cancel</Button>
           <Button className="flex-1" loading={loading} onClick={handleConfirm}>
-            ✅ Confirm & Update Fridge
+            Confirm and update fridge
           </Button>
         </div>
       </div>

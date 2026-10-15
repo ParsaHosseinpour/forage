@@ -1,63 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap');
 @import "tailwindcss";
 
+/*
+  Forage design tokens — "fridge light".
+  Cool shelf-white surfaces, plum ink, and produce colours that each carry
+  one meaning: green = you have it, carrot = you need to buy it,
+  saffron = the single accent, plum = actions.
+*/
 :root {
-  --cream: #FAF8F3;
-  --cream-dark: #F2EDE3;
-  --ink: #1C1C1A;
-  --ink-muted: #6B6860;
-  --green: #3A6349;
-  --green-light: #EBF2ED;
-  --green-mid: #C5DCCB;
-  --amber: #C87941;
-  --amber-light: #FDF3EA;
-  --red-soft: #E05C4B;
-  --border: #E3DDD3;
-  --shadow: 0 2px 12px rgba(28,28,26,0.07);
-  --shadow-md: 0 4px 24px rgba(28,28,26,0.10);
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+
+  --bg:          #F0F4F2;   /* the shelf */
+  --bg-sunk:     #E2EAE6;   /* wells, skeletons, inactive */
+  --surface:     #FFFFFF;
+  --border:      #CBD6D1;
+
+  --ink:         #2B1D3A;   /* aubergine, not black */
+  --ink-muted:   #6A6076;
+
+  --brand:       #5B2A86;   /* plum: actions, links, active */
+  --brand-hover: #47206B;
+  --brand-tint:  #EDE4F5;
+  --brand-soft:  #CDB5E4;
+
+  --saffron:      #F2B400;  /* accent: marks, selection */
+  --saffron-tint: #FFF3CC;
+  --saffron-ink:  #7A5600;
+
+  --fresh:       #2E7D4F;   /* in your fridge / done */
+  --fresh-tint:  #E1F2E7;
+  --fresh-soft:  #A9D6B9;
+
+  --carrot:      #B84E16;   /* need to buy / warning */
+  --carrot-tint: #FCE8DA;
+  --carrot-soft: #F1BF9F;
+
+  --danger:      #C0332A;   /* delete / error */
+  --danger-tint: #FDECEA;
+  --danger-soft: #F2B4AE;
+
+  --shadow:    0 1px 0 rgba(43, 29, 58, 0.06);
+  --shadow-md: 0 10px 28px -10px rgba(43, 29, 58, 0.30);
 }
 
 * { box-sizing: border-box; }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--ink);
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-}
+@layer base {
+  body {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-size: 15px;
+    line-height: 1.5;
+    background: var(--bg);
+    color: var(--ink);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1, h2, h3 {
-  font-family: 'Playfair Display', serif;
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    font-variation-settings: 'wdth' 90;
+  }
+
+  button, input, select, textarea { font-family: inherit; }
 }
 
 ::selection {
-  background: var(--green-mid);
-  color: var(--green);
+  background: var(--saffron);
+  color: var(--ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-.fade-in {
-  animation: fadeIn 0.35s ease both;
-}
-
-.slide-up {
-  animation: slideUp 0.4s cubic-bezier(.16,1,.3,1) both;
-}
+/* Entrances are deliberately quiet: a short fade, no travel. */
+.fade-in  { animation: fadeIn 0.18s ease both; }
+.slide-up { animation: fadeIn 0.22s ease both; }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes spin {
@@ -73,6 +101,28 @@ h1, h2, h3 {
   display: inline-block;
 }
 
-/* Hide scrollbar on day-picker strip (mobile) while keeping scroll behaviour */
+/*
+  Ingredient meter — the one orchestrated moment. Segments fill in left to
+  right when a results grid appears.
+*/
+.meter-seg {
+  transform-origin: bottom;
+  animation: segIn 0.35s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay: calc(var(--i, 0) * 30ms + 120ms);
+}
+@keyframes segIn {
+  from { opacity: 0; transform: scaleY(0.15); }
+  to   { opacity: 1; transform: scaleY(1); }
+}
+
+/* Hide scrollbar on horizontal strips while keeping scroll behaviour */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

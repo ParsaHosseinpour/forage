@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, UtensilsCrossed, ShoppingCart, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Trash2, UtensilsCrossed, ShoppingCart, CalendarDays, ChevronLeft, ChevronRight, ChefHat } from 'lucide-react'
 import { useMealPlan, DAY_NAMES, SLOT_TYPES, parseLocalDate } from '../../hooks/useMealPlan'
 import { useFridge } from '../../hooks/useFridge'
 import { usePantry } from '../../hooks/usePantry'
@@ -8,38 +8,15 @@ import { useCookHistory } from '../../hooks/useCookHistory'
 import { useToast } from '../ui/Toast'
 import { buildDeductionPlan } from '../../lib/cookUtils'
 import Button from '../ui/Button'
+import { IconTile, SlotIcon } from '../ui/glyphs'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
 const SLOT_CONFIG = {
-  breakfast: {
-    label: 'Breakfast',
-    icon:  '🌅',
-    bg:    '#FFF8EC',
-    ring:  '#F9D98A',
-    text:  '#A0690A',
-  },
-  lunch: {
-    label: 'Lunch',
-    icon:  '☀️',
-    bg:    '#EDFBF3',
-    ring:  '#9DE8BE',
-    text:  '#1A7A4A',
-  },
-  dinner: {
-    label: 'Dinner',
-    icon:  '🌙',
-    bg:    '#F0F1FB',
-    ring:  '#BDC2EF',
-    text:  '#3D4499',
-  },
-  snack: {
-    label: 'Snack',
-    icon:  '🍎',
-    bg:    '#FAF8F3',
-    ring:  '#DDD8CE',
-    text:  '#6B6860',
-  },
+  breakfast: { label: 'Breakfast', bg: 'var(--saffron-tint)', ring: 'var(--saffron)',   text: 'var(--saffron-ink)' },
+  lunch:     { label: 'Lunch',     bg: 'var(--fresh-tint)',   ring: 'var(--fresh-soft)', text: 'var(--fresh)'       },
+  dinner:    { label: 'Dinner',    bg: 'var(--brand-tint)',   ring: 'var(--brand-soft)', text: 'var(--brand)'       },
+  snack:     { label: 'Snack',     bg: 'var(--bg-sunk)',      ring: 'var(--border)',     text: 'var(--ink-muted)'   },
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -79,7 +56,7 @@ function SlotChip({ slot, onRemove, onCookNow, cooking, slotCfg }) {
       className="group relative rounded-xl overflow-hidden transition-all duration-200"
       style={{
         background:  'white',
-        boxShadow:   '0 1px 4px rgba(28,28,26,0.07), 0 0 0 1px rgba(28,28,26,0.05)',
+        boxShadow:   '0 1px 4px rgba(43,29,58,0.07), 0 0 0 1px rgba(43,29,58,0.05)',
       }}
     >
       {/* Colour accent strip */}
@@ -113,7 +90,7 @@ function SlotChip({ slot, onRemove, onCookNow, cooking, slotCfg }) {
           onClick={() => onCookNow(slot)}
           disabled={busy}
           className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg text-xs font-medium transition-colors"
-          style={{ background: 'var(--green-light)', color: 'var(--green)' }}
+          style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}
           title="Cook Now — deducts fridge"
         >
           {busy
@@ -123,7 +100,7 @@ function SlotChip({ slot, onRemove, onCookNow, cooking, slotCfg }) {
         <button
           onClick={() => onRemove(slot.id)}
           className="p-1 rounded-lg transition-colors"
-          style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}
+          style={{ background: 'var(--danger-tint)', color: 'var(--danger)' }}
           title="Remove"
         >
           <Trash2 size={11} />
@@ -144,17 +121,17 @@ function DayColumn({ dayIdx, weekStart, todayIdx, grid, onCookNow, onRemove, coo
     <div
       className="rounded-2xl overflow-hidden flex flex-col transition-all duration-200"
       style={{
-        background:  isNow ? 'white' : 'var(--cream)',
+        background:  isNow ? 'white' : 'var(--bg)',
         boxShadow:   isNow
-          ? '0 0 0 2px var(--green), 0 4px 16px rgba(58,99,73,0.12)'
-          : '0 1px 3px rgba(28,28,26,0.05)',
+          ? '0 0 0 2px var(--brand), 0 4px 16px rgba(91,42,134,0.12)'
+          : '0 1px 3px rgba(43,29,58,0.05)',
       }}
     >
       {/* Day header */}
       <div
         className="text-center py-2.5 px-2"
         style={{
-          background: isNow ? 'var(--green)' : 'transparent',
+          background: isNow ? 'var(--brand)' : 'transparent',
           borderBottom: isNow ? 'none' : '1px solid var(--border)',
         }}
       >
@@ -181,22 +158,20 @@ function DayColumn({ dayIdx, weekStart, todayIdx, grid, onCookNow, onRemove, coo
           const items = daySlots[slotType] ?? []
           return (
             <div key={slotType}
-                 className="rounded-xl p-1.5 space-y-1.5"
-                 style={{ background: cfg.bg }}>
-              <p className="text-center"
-                 style={{ color: cfg.text, fontSize: '0.6rem', fontWeight: 600,
-                          letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                {cfg.icon} {cfg.label}
+                 className="rounded-[10px] p-1.5 space-y-1.5"
+                 style={items.length
+                   ? { background: cfg.bg }
+                   : { border: '1px dashed var(--border)' }}>
+              <p className="flex items-center justify-center gap-1"
+                 style={{ color: items.length ? cfg.text : 'var(--ink-muted)', fontSize: '0.72rem', fontWeight: 600 }}>
+                <SlotIcon slot={slotType} size={12} /> {cfg.label}
               </p>
               {items.map(slot => (
                 <SlotChip key={slot.id} slot={slot} slotCfg={cfg}
                           onRemove={onRemove} onCookNow={onCookNow} cooking={cooking} />
               ))}
               {items.length === 0 && (
-                <div className="text-center py-2"
-                     style={{ color: cfg.ring, fontSize: '0.6rem' }}>
-                  —
-                </div>
+                <div className="py-1" aria-hidden="true" />
               )}
             </div>
           )
@@ -218,19 +193,16 @@ function MobileDayView({ selectedDay, weekStart, todayIdx, grid, onCookNow, onRe
         const items = daySlots[slotType] ?? []
         return (
           <section key={slotType}
-                   className="rounded-2xl overflow-hidden"
-                   style={{
-                     background: cfg.bg,
-                     boxShadow:  '0 1px 4px rgba(28,28,26,0.06)',
-                   }}>
+                   className="rounded-[14px] overflow-hidden"
+                   style={{ background: cfg.bg }}>
             {/* Slot header */}
             <div className="flex items-center gap-2 px-4 py-3 border-b"
-                 style={{ borderColor: cfg.ring + '60' }}>
-              <span style={{ fontSize: '1.1rem' }}>{cfg.icon}</span>
+                 style={{ borderColor: `color-mix(in srgb, ${cfg.ring} 45%, transparent)` }}>
+              <SlotIcon slot={slotType} size={18} style={{ color: cfg.text }} />
               <p className="text-sm font-medium" style={{ color: cfg.text }}>{cfg.label}</p>
               {items.length > 0 && (
                 <span className="ml-auto text-xs px-2 py-0.5 rounded-full"
-                      style={{ background: cfg.ring + '60', color: cfg.text }}>
+                      style={{ background: `color-mix(in srgb, ${cfg.ring} 45%, transparent)`, color: cfg.text }}>
                   {items.length}
                 </span>
               )}
@@ -243,7 +215,7 @@ function MobileDayView({ selectedDay, weekStart, todayIdx, grid, onCookNow, onRe
                 return (
                   <div key={slot.id}
                        className="flex items-center gap-3 bg-white rounded-xl px-3 py-2.5"
-                       style={{ boxShadow: '0 1px 3px rgba(28,28,26,0.07)' }}>
+                       style={{ boxShadow: '0 1px 3px rgba(43,29,58,0.07)' }}>
                     {recipe.image && (
                       <img src={recipe.image} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                     )}
@@ -262,14 +234,14 @@ function MobileDayView({ selectedDay, weekStart, todayIdx, grid, onCookNow, onRe
                         onClick={() => onCookNow(slot)}
                         disabled={busy}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium"
-                        style={{ background: 'var(--green-light)', color: 'var(--green)' }}
+                        style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}
                       >
-                        {busy ? <span className="spinner" style={{ width: 10, height: 10 }} /> : '🍳'}
+                        {busy ? <span className="spinner" style={{ width: 10, height: 10 }} /> : <ChefHat size={14} strokeWidth={2} />}
                       </button>
                       <button
                         onClick={() => onRemove(slot.id)}
                         className="p-1.5 rounded-lg"
-                        style={{ background: '#FEF2F0', color: 'var(--red-soft)' }}
+                        style={{ background: 'var(--danger-tint)', color: 'var(--danger)' }}
                       >
                         <Trash2 size={13} />
                       </button>
@@ -335,7 +307,7 @@ export default function SchedulePage({ user }) {
       }
       try { await logCook(recipe, { meal_type: slot.slot_type }) } catch { /* non-fatal */ }
       await removeSlot(slot.id)
-      toast({ type: 'success', message: `🍽️ ${recipe.title} cooked! Fridge updated.`, duration: 4000 })
+      toast({ type: 'success', message: `${recipe.title} cooked. Fridge updated.`, duration: 4000 })
     } catch (err) {
       toast({ type: 'error', message: `Cook failed: ${err.message}`, duration: 5000 })
     } finally {
@@ -349,14 +321,14 @@ export default function SchedulePage({ user }) {
       {/* ── Header ── */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-3xl mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h1 className="text-4xl mb-1.5">
             Meal planner
           </h1>
           <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
             {weekLabel}
             {slotCount > 0 && (
               <span className="ml-2 px-2 py-0.5 rounded-full text-xs"
-                    style={{ background: 'var(--green-light)', color: 'var(--green)' }}>
+                    style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}>
                 {slotCount} meal{slotCount !== 1 ? 's' : ''} planned
               </span>
             )}
@@ -374,9 +346,9 @@ export default function SchedulePage({ user }) {
 
       {/* ── Tip banner ── */}
       <div className="flex items-center gap-3 px-4 py-3 rounded-2xl mb-6"
-           style={{ background: 'var(--green-light)', border: '1px solid var(--green-mid)' }}>
-        <CalendarDays size={16} style={{ color: 'var(--green)', flexShrink: 0 }} />
-        <p className="text-xs" style={{ color: 'var(--green)' }}>
+           style={{ background: 'var(--brand-tint)', border: '1px solid var(--brand-soft)' }}>
+        <CalendarDays size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+        <p className="text-xs" style={{ color: 'var(--brand)' }}>
           Open any recipe → <strong>Add to Schedule</strong> to plan meals.
           Hover a card to reveal <strong>Cook</strong> and <strong>Remove</strong>.
           Scheduled meals auto-sync to your Shopping List.
@@ -388,7 +360,7 @@ export default function SchedulePage({ user }) {
         <div className="hidden sm:grid grid-cols-7 gap-3">
           {[...Array(7)].map((_, i) => (
             <div key={i} className="h-72 rounded-2xl animate-pulse"
-                 style={{ background: 'var(--cream-dark)', animationDelay: `${i * 40}ms` }} />
+                 style={{ background: 'var(--bg-sunk)', animationDelay: `${i * 40}ms` }} />
           ))}
         </div>
       )}
@@ -429,18 +401,18 @@ export default function SchedulePage({ user }) {
                     className="flex-shrink-0 flex flex-col items-center px-3 py-2.5 rounded-2xl transition-all duration-150"
                     style={{
                       minWidth: 60,
-                      background:  isSelected ? 'var(--green)'
-                                 : isNow      ? 'var(--green-light)'
+                      background:  isSelected ? 'var(--brand)'
+                                 : isNow      ? 'var(--brand-tint)'
                                  :              'white',
-                      boxShadow:   isSelected ? '0 2px 8px rgba(58,99,73,0.25)'
-                                 :              '0 1px 3px rgba(28,28,26,0.07)',
-                      border: `1px solid ${isSelected ? 'var(--green)' : isNow ? 'var(--green-mid)' : 'var(--border)'}`,
+                      boxShadow:   isSelected ? '0 2px 8px rgba(91,42,134,0.25)'
+                                 :              '0 1px 3px rgba(43,29,58,0.07)',
+                      border: `1px solid ${isSelected ? 'var(--brand)' : isNow ? 'var(--brand-soft)' : 'var(--border)'}`,
                     }}
                   >
                     <span className="text-[11px] font-semibold uppercase tracking-wide"
                           style={{
                             color: isSelected ? 'white'
-                                 : isNow      ? 'var(--green)'
+                                 : isNow      ? 'var(--brand)'
                                  :              'var(--ink-muted)',
                             fontSize: '0.6rem',
                           }}>
@@ -449,14 +421,14 @@ export default function SchedulePage({ user }) {
                     <span className="text-sm font-bold mt-0.5"
                           style={{
                             color: isSelected ? 'white'
-                                 : isNow      ? 'var(--green)'
+                                 : isNow      ? 'var(--brand)'
                                  :              'var(--ink)',
                           }}>
                       {formatDayDate(weekStart, dayIdx).split(' ')[1]}
                     </span>
                     {hasItems && (
                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full"
-                            style={{ background: isSelected ? 'rgba(255,255,255,0.7)' : 'var(--green)' }} />
+                            style={{ background: isSelected ? 'rgba(255,255,255,0.7)' : 'var(--brand)' }} />
                     )}
                   </button>
                 )
@@ -465,11 +437,11 @@ export default function SchedulePage({ user }) {
 
             {/* Selected day content */}
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-lg font-medium" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h2 className="text-lg font-medium" style={{ fontFamily: 'var(--font-display)' }}>
                 {DAY_NAMES[mobileDay]}
                 {mobileDay === todayIdx && (
                   <span className="ml-2 text-xs font-normal px-2 py-0.5 rounded-full"
-                        style={{ background: 'var(--green)', color: 'white' }}>
+                        style={{ background: 'var(--brand)', color: 'white' }}>
                     Today
                   </span>
                 )}
@@ -510,12 +482,10 @@ export default function SchedulePage({ user }) {
       {/* ── Empty state ── */}
       {!loading && slotCount === 0 && (
         <div className="text-center py-16 fade-in">
-          <div className="text-5xl mb-4">📅</div>
-          <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Your week is wide open
-          </h2>
-          <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-            Open any recipe and tap <strong>Add to Schedule</strong> to start planning.
+          <IconTile Icon={CalendarDays} />
+          <h2 className="text-2xl mb-2">Nothing planned yet</h2>
+          <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
+            Open a recipe and tap <strong>Add to schedule</strong> to plan your week.
           </p>
           <Button onClick={() => navigate('/recipes')}>Browse recipes</Button>
         </div>

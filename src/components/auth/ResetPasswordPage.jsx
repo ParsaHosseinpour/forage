@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { updatePassword } from '../../lib/supabase'
 import Button from '../ui/Button'
 import { Input, Label } from '../ui/Input'
+import { Sprout, CheckCircle2 } from 'lucide-react'
 
 export default function ResetPasswordPage({ onComplete }) {
   const [password, setPassword]   = useState('')
@@ -39,26 +40,19 @@ export default function ResetPasswordPage({ onComplete }) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4"
-         style={{ background: 'var(--cream)' }}>
-
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-20"
-             style={{ background: 'var(--green-mid)' }} />
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full opacity-15"
-             style={{ background: 'var(--amber-light)' }} />
-      </div>
+         style={{ background: 'var(--bg)' }}>
 
       <div className="relative w-full max-w-sm slide-up">
 
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg font-bold"
-                 style={{ background: 'var(--green)' }}>
-              🌿
+            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center"
+                 style={{ background: 'var(--brand)' }}>
+              <Sprout size={19} strokeWidth={2.25} style={{ color: 'var(--saffron)' }} />
             </div>
-            <span className="text-2xl tracking-tight"
-                  style={{ fontFamily: 'Playfair Display, serif', color: 'var(--ink)' }}>
-              Forage
+            <span className="text-2xl font-extrabold"
+                  style={{ letterSpacing: '-0.03em', fontVariationSettings: "'wdth' 85" }}>
+              forage
             </span>
           </div>
           <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
@@ -66,12 +60,12 @@ export default function ResetPasswordPage({ onComplete }) {
           </p>
         </div>
 
-        <div className="rounded-2xl border p-8"
-             style={{ background: 'white', borderColor: 'var(--border)', boxShadow: 'var(--shadow-md)' }}>
+        <div className="rounded-[14px] border p-8"
+             style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
 
           {success ? (
             <div className="text-center py-2">
-              <div className="text-4xl mb-3">✅</div>
+              <CheckCircle2 size={36} className="mx-auto mb-3" strokeWidth={1.75} style={{ color: 'var(--fresh)' }} />
               <p className="text-sm" style={{ color: 'var(--ink)' }}>
                 Password updated. Taking you to your fridge…
               </p>
@@ -109,7 +103,7 @@ export default function ResetPasswordPage({ onComplete }) {
 
               {error && (
                 <p className="text-sm rounded-xl px-4 py-3"
-                   style={{ color: 'var(--red-soft)', background: '#FEF2F0' }}>
+                   style={{ color: 'var(--danger)', background: 'var(--danger-tint)' }}>
                   {error}
                 </p>
               )}

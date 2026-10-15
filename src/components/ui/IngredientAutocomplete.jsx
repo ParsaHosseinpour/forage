@@ -62,7 +62,7 @@ export default function IngredientAutocomplete({
     w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)]
     bg-white text-[var(--ink)] text-sm
     placeholder:text-[var(--ink-muted)]
-    focus:outline-none focus:border-[var(--green)] focus:ring-2 focus:ring-[var(--green-mid)]
+    focus:outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-soft)]
     transition-all duration-150
   `
 
@@ -109,7 +109,7 @@ export default function IngredientAutocomplete({
                 onMouseEnter={() => setActiveIdx(i)}
                 className="flex items-center px-3.5 py-2.5 text-sm cursor-pointer transition-colors"
                 style={{
-                  background: i === activeIdx ? 'var(--green-light)' : 'transparent',
+                  background: i === activeIdx ? 'var(--brand-tint)' : 'transparent',
                   color:      'var(--ink)',
                 }}
               >
@@ -117,7 +117,7 @@ export default function IngredientAutocomplete({
                 {matchIdx >= 0 ? (
                   <>
                     {s.slice(0, matchIdx)}
-                    <strong style={{ color: 'var(--green)' }}>
+                    <strong style={{ color: 'var(--brand)' }}>
                       {s.slice(matchIdx, matchIdx + q.length)}
                     </strong>
                     {s.slice(matchIdx + q.length)}

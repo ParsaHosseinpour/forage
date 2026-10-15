@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Sparkles, Plus } from 'lucide-react'
+import { X, Sparkles, Plus, Carrot, Beef, Milk, Wheat, Package, Snowflake } from 'lucide-react'
 import Button from '../ui/Button'
 import { Input, Label, Select } from '../ui/Input'
 import IngredientAutocomplete from '../ui/IngredientAutocomplete'
@@ -7,13 +7,13 @@ import { parseBulkIngredients, detectCategory } from '../../lib/ingredientParser
 import { getIngredientDefaults } from '../../lib/ingredientSuggestions'
 
 export const CATEGORIES = [
-  { value: 'produce',   label: '🥦 Produce'   },
-  { value: 'protein',   label: '🥩 Protein'   },
-  { value: 'dairy',     label: '🧀 Dairy'     },
-  { value: 'grains',    label: '🌾 Grains'    },
-  { value: 'pantry',    label: '🫙 Pantry'    },
-  { value: 'frozen',    label: '🧊 Frozen'    },
-  { value: 'other',     label: '📦 Other'     },
+  { value: 'produce', label: 'Produce', Icon: Carrot    },
+  { value: 'protein', label: 'Protein', Icon: Beef      },
+  { value: 'dairy',   label: 'Dairy',   Icon: Milk      },
+  { value: 'grains',  label: 'Grains',  Icon: Wheat     },
+  { value: 'pantry',  label: 'Pantry',  Icon: Package   },
+  { value: 'frozen',  label: 'Frozen',  Icon: Snowflake },
+  { value: 'other',   label: 'Other',   Icon: Package   },
 ]
 
 const UNITS = ['', 'g', 'kg', 'ml', 'L', 'oz', 'lb', 'cup', 'tbsp', 'tsp', 'piece', 'bunch', 'clove', 'slice']
@@ -97,7 +97,7 @@ function SingleForm({ onAdd, onClose }) {
         </Select>
       </div>
 
-      {error && <p className="text-sm" style={{ color: 'var(--red-soft)' }}>{error}</p>}
+      {error && <p className="text-sm" style={{ color: 'var(--danger)' }}>{error}</p>}
 
       <div className="flex gap-3 pt-1">
         {onClose && (
@@ -186,7 +186,7 @@ function BulkForm({ onAdd, onClose }) {
                 color:       'var(--ink)',
                 lineHeight:  1.6,
               }}
-              onFocus={e => e.target.style.borderColor = 'var(--green)'}
+              onFocus={e => e.target.style.borderColor = 'var(--brand)'}
               onBlur={e => e.target.style.borderColor = 'var(--border)'}
               autoFocus
             />
@@ -222,7 +222,7 @@ function BulkForm({ onAdd, onClose }) {
               {parsed.map((item, idx) => (
                 <div key={idx}
                      className="flex items-center gap-2 p-3 rounded-xl border"
-                     style={{ background: 'var(--cream)', borderColor: 'var(--border)' }}>
+                     style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}>
                   {/* Name */}
                   <input
                     className="flex-1 min-w-0 text-sm bg-white border rounded-lg px-2.5 py-1.5"
@@ -252,7 +252,7 @@ function BulkForm({ onAdd, onClose }) {
                   <button
                     onClick={() => removeParsed(idx)}
                     className="p-1.5 rounded-lg hover:bg-red-50 transition-colors flex-shrink-0"
-                    style={{ color: 'var(--red-soft)' }}
+                    style={{ color: 'var(--danger)' }}
                   >
                     <X size={14} />
                   </button>
@@ -261,7 +261,7 @@ function BulkForm({ onAdd, onClose }) {
             </div>
           </div>
 
-          {error && <p className="text-sm" style={{ color: 'var(--red-soft)' }}>{error}</p>}
+          {error && <p className="text-sm" style={{ color: 'var(--danger)' }}>{error}</p>}
 
           <div className="flex gap-3">
             <Button variant="secondary" className="flex-1"
@@ -293,8 +293,8 @@ export default function AddIngredientForm({ onAdd, onClose }) {
     padding: '0.5rem 0',
     fontSize: '0.8125rem',
     fontWeight: tab === t ? 500 : 400,
-    borderBottom: `2px solid ${tab === t ? 'var(--green)' : 'transparent'}`,
-    color: tab === t ? 'var(--green)' : 'var(--ink-muted)',
+    borderBottom: `2px solid ${tab === t ? 'var(--brand)' : 'transparent'}`,
+    color: tab === t ? 'var(--brand)' : 'var(--ink-muted)',
     transition: 'all 0.15s',
     background: 'transparent',
     cursor: 'pointer',
@@ -306,7 +306,7 @@ export default function AddIngredientForm({ onAdd, onClose }) {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h3 className="text-lg" style={{ fontFamily: 'var(--font-display)' }}>
           Add to fridge
         </h3>
         {onClose && (
@@ -322,7 +322,7 @@ export default function AddIngredientForm({ onAdd, onClose }) {
           Single item
         </button>
         <button style={tabStyle('bulk')} onClick={() => setTab('bulk')}>
-          ✨ Smart paste
+          Smart paste
         </button>
       </div>
 

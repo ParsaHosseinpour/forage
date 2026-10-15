@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, ChevronLeft, UtensilsCrossed, Flame, RotateCcw } from 'lucide-react'
+import { Trash2, ChevronLeft, UtensilsCrossed, Flame, RotateCcw, ChefHat } from 'lucide-react'
 import { useCookHistory } from '../../hooks/useCookHistory'
 import RecipePreviewModal from '../recipes/RecipePreviewModal'
 import Button from '../ui/Button'
+import { IconTile, SlotIcon, MoodIcon } from '../ui/glyphs'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -16,11 +17,11 @@ const MEAL_TYPES = [
 ]
 
 const MOOD_OPTIONS = [
-  { value: 5, emoji: '😋', label: 'Delicious'  },
-  { value: 4, emoji: '👍', label: 'Good'        },
-  { value: 3, emoji: '😐', label: 'Okay'        },
-  { value: 2, emoji: '🌶️', label: 'Too spicy'  },
-  { value: 1, emoji: '⏳', label: 'Too long'    },
+  { value: 5, label: 'Delicious' },
+  { value: 4, label: 'Good' },
+  { value: 3, label: 'Okay' },
+  { value: 2, label: 'Too spicy' },
+  { value: 1, label: 'Too long' },
 ]
 
 const SORT_OPTIONS = [
@@ -55,34 +56,26 @@ function daysAgo(iso) {
   return `${Math.floor(d / 30)}mo ago`
 }
 
-function moodEmoji(rating) {
-  return MOOD_OPTIONS.find(m => m.value === rating)?.emoji ?? null
-}
 
 // ── Meal type selector ────────────────────────────────────────────────────────
 
 function MealTypePicker({ value, onChange }) {
-  const types = [
-    { key: 'breakfast', emoji: '🌅' },
-    { key: 'lunch',     emoji: '☀️'  },
-    { key: 'dinner',    emoji: '🌙' },
-    { key: 'snack',     emoji: '🍎' },
-  ]
+  const types = ['breakfast', 'lunch', 'dinner', 'snack']
   return (
     <div className="flex gap-1.5 flex-wrap">
-      {types.map(({ key, emoji }) => (
+      {types.map(key => (
         <button
           key={key}
           onClick={() => onChange(value === key ? null : key)}
           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs border capitalize transition-all"
           style={{
-            background:  value === key ? 'var(--amber-light)' : 'var(--cream)',
-            borderColor: value === key ? 'var(--amber)'       : 'var(--border)',
-            color:       value === key ? 'var(--amber)'       : 'var(--ink-muted)',
-            fontWeight:  value === key ? 500                  : 400,
+            background:  value === key ? 'var(--brand-tint)' : 'var(--surface)',
+            borderColor: value === key ? 'var(--brand-soft)' : 'var(--border)',
+            color:       value === key ? 'var(--brand)'      : 'var(--ink-muted)',
+            fontWeight:  value === key ? 600                 : 500,
           }}
         >
-          {emoji} {key}
+          <SlotIcon slot={key} size={13} /> {key}
         </button>
       ))}
     </div>
@@ -99,14 +92,15 @@ function MoodPicker({ value, onChange }) {
           key={opt.value}
           onClick={() => onChange(value === opt.value ? null : opt.value)}
           title={opt.label}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-base transition-all"
+          className="w-8 h-8 rounded-[8px] flex items-center justify-center transition-colors"
+          aria-pressed={value === opt.value}
           style={{
-            background:  value === opt.value ? 'var(--cream-dark)' : 'transparent',
-            transform:   value === opt.value ? 'scale(1.15)'       : 'scale(1)',
-            border:      `1px solid ${value === opt.value ? 'var(--border)' : 'transparent'}`,
+            background:  value === opt.value ? 'var(--brand-tint)' : 'transparent',
+            color:       value === opt.value ? 'var(--brand)'      : 'var(--ink-muted)',
+            border:      `1px solid ${value === opt.value ? 'var(--brand-soft)' : 'transparent'}`,
           }}
         >
-          {opt.emoji}
+          <MoodIcon value={opt.value} size={17} />
         </button>
       ))}
     </div>
@@ -119,10 +113,10 @@ function WeeklyStats({ weeklyCalories, weekCount }) {
   if (weekCount === 0) return null
   return (
     <div className="flex items-center gap-4 px-5 py-4 rounded-2xl border mb-8"
-         style={{ background: 'var(--green-light)', borderColor: 'var(--green-mid)' }}>
-      <Flame size={22} style={{ color: 'var(--green)', flexShrink: 0 }} />
+         style={{ background: 'var(--brand-tint)', borderColor: 'var(--brand-soft)' }}>
+      <Flame size={22} style={{ color: 'var(--brand)', flexShrink: 0 }} />
       <div>
-        <p className="text-sm font-medium" style={{ color: 'var(--green)' }}>
+        <p className="text-sm font-medium" style={{ color: 'var(--brand)' }}>
           This week
         </p>
         <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>
@@ -161,10 +155,10 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
       <div className="flex items-start gap-4 p-4">
         {/* Thumbnail */}
         <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden"
-             style={{ background: 'var(--cream-dark)' }}>
+             style={{ background: 'var(--bg-sunk)' }}>
           {recipe.image
             ? <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
-            : <div className="w-full h-full flex items-center justify-center text-2xl">🍽️</div>}
+            : <div className="w-full h-full flex items-center justify-center"><UtensilsCrossed size={20} strokeWidth={1.5} style={{ color: 'var(--ink-muted)', opacity: 0.5 }} /></div>}
         </div>
 
         {/* Title + meta */}
@@ -177,11 +171,11 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
               {timeStr(entry.cooked_at)}
             </span>
             {entry.rating && (
-              <span className="text-sm">{moodEmoji(entry.rating)}</span>
+              <span style={{ color: 'var(--brand)' }} title={MOOD_OPTIONS.find(m => m.value === entry.rating)?.label}><MoodIcon value={entry.rating} size={16} /></span>
             )}
             {count > 1 && (
               <span className="text-xs px-2 py-0.5 rounded-full"
-                    style={{ background: 'var(--green-light)', color: 'var(--green)' }}>
+                    style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}>
                 {count}× cooked
               </span>
             )}
@@ -200,9 +194,9 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
             title="Cook again"
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs border transition-all"
             style={{
-              background:  'var(--green-light)',
-              borderColor: 'var(--green-mid)',
-              color:       'var(--green)',
+              background:  'var(--brand-tint)',
+              borderColor: 'var(--brand-soft)',
+              color:       'var(--brand)',
               fontWeight:  500,
             }}
           >
@@ -288,7 +282,7 @@ export default function HistoryPage({ user }) {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-3xl mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h1 className="text-4xl mb-1.5">
             Cook history
           </h1>
           <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
@@ -357,7 +351,7 @@ export default function HistoryPage({ user }) {
         <div className="space-y-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="h-24 rounded-2xl animate-pulse"
-                 style={{ background: 'var(--cream-dark)', animationDelay: `${i * 60}ms` }} />
+                 style={{ background: 'var(--bg-sunk)', animationDelay: `${i * 60}ms` }} />
           ))}
         </div>
       )}
@@ -365,12 +359,10 @@ export default function HistoryPage({ user }) {
       {/* Empty */}
       {!loading && history.length === 0 && (
         <div className="text-center py-24 fade-in">
-          <div className="text-5xl mb-4">🍳</div>
-          <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-            No meals logged yet
-          </h2>
-          <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-            Open a recipe and tap "I Cooked This" — it'll appear in your journal.
+          <IconTile Icon={ChefHat} />
+          <h2 className="text-2xl mb-2">No meals logged yet</h2>
+          <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
+            Open a recipe and tap "I cooked this". It shows up here.
           </p>
           <Button onClick={() => navigate('/recipes')}>Find a recipe</Button>
         </div>
@@ -402,7 +394,7 @@ export default function HistoryPage({ user }) {
                     {dateLabel}
                   </span>
                   <span className="text-xs px-2 py-0.5 rounded-full"
-                        style={{ background: 'var(--cream-dark)', color: 'var(--ink-muted)' }}>
+                        style={{ background: 'var(--bg-sunk)', color: 'var(--ink-muted)' }}>
                     {daysAgo(entries[0].cooked_at)}
                   </span>
                   <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bookmark, ShoppingCart, Trash2, ChevronLeft } from 'lucide-react'
+import { Bookmark, ShoppingCart, Trash2, ChevronLeft, Heart, ChefHat } from 'lucide-react'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
 import { useShoppingList } from '../../hooks/useShoppingList'
 import { useFridge } from '../../hooks/useFridge'
@@ -14,6 +14,7 @@ import RecipeDetail from '../recipes/RecipeDetail'
 import CookItModal from '../recipes/CookItModal'
 import ShoppingList from './ShoppingList'
 import Button from '../ui/Button'
+import { IconTile } from '../ui/glyphs'
 
 const TABS = [
   { key: 'recipes',  label: 'Saved recipes',  Icon: Bookmark     },
@@ -40,7 +41,7 @@ export default function SavedPage({ user }) {
 
   const handleSchedule = async (dayIdx, slotType, recipe) => {
     await addSlot(dayIdx, slotType, recipe)
-    toast({ type: 'success', message: `📅 Added to schedule.`, duration: 3000 })
+    toast({ type: 'success', message: 'Added to schedule.', duration: 3000 })
   }
 
   // ── Cook It — runs from both the modal (card) and the detail page ──────────
@@ -56,7 +57,7 @@ export default function SavedPage({ user }) {
     }
     // 2. Log to history
     try { await logCook(recipe) } catch { /* non-fatal */ }
-    toast({ type: 'success', message: '🍽️ Fridge updated! Enjoy your meal.', duration: 4000 })
+    toast({ type: 'success', message: 'Fridge updated. Enjoy your meal.', duration: 4000 })
   }
 
   const handleCardCook = (recipe) => setCookModal(recipe)
@@ -73,7 +74,7 @@ export default function SavedPage({ user }) {
         <div className="mb-8">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-3xl mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h1 className="text-4xl mb-1.5">
                 {tab === 'recipes' ? 'Saved recipes' : 'Shopping list'}
               </h1>
               <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
@@ -88,7 +89,7 @@ export default function SavedPage({ user }) {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: 'var(--cream-dark)' }}>
+          <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: 'var(--bg-sunk)' }}>
             {TABS.map(({ key, label, Icon }) => {
               const active = tab === key
               const badge  = key === 'shopping' && need.length > 0 && !listLoading
@@ -109,7 +110,7 @@ export default function SavedPage({ user }) {
                   {label}
                   {badge != null && badge > 0 && (
                     <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
-                          style={{ background: 'var(--green)', color: 'white', minWidth: 18, textAlign: 'center' }}>
+                          style={{ background: 'var(--brand)', color: 'white', minWidth: 18, textAlign: 'center' }}>
                       {badge}
                     </span>
                   )}
@@ -131,12 +132,10 @@ export default function SavedPage({ user }) {
 
           {!loading && saved.length === 0 && (
             <div className="text-center py-24 fade-in">
-              <div className="text-5xl mb-4">🤍</div>
-              <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-                No saved recipes yet
-              </h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--ink-muted)' }}>
-                Hit the heart on any recipe to save it here.
+              <IconTile Icon={Heart} />
+              <h2 className="text-2xl mb-2">No saved recipes yet</h2>
+              <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
+                Tap the heart on any recipe to keep it here.
               </p>
               <Button onClick={() => navigate('/recipes')}>Browse recipes</Button>
             </div>
@@ -161,14 +160,14 @@ export default function SavedPage({ user }) {
                     {/* Cook It — available directly from the card */}
                     <button
                       onClick={() => handleCardCook(recipe)}
-                      className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border text-sm font-medium transition-all duration-150"
+                      className="w-full flex items-center justify-center gap-2 py-2 rounded-[10px] border text-sm font-semibold transition-colors duration-150 hover:bg-[var(--brand-soft)]"
                       style={{
-                        background:  'var(--green-light)',
-                        borderColor: 'var(--green-mid)',
-                        color:       'var(--green)',
+                        background:  'var(--brand-tint)',
+                        borderColor: 'var(--brand-soft)',
+                        color:       'var(--brand)',
                       }}
                     >
-                      🍽️ I Cooked This
+                      <ChefHat size={15} strokeWidth={2} /> I cooked this
                     </button>
                   </div>
                 )
