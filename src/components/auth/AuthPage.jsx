@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { signIn, signUp, requestPasswordReset, resendConfirmationEmail } from '../../lib/supabase'
 import Button from '../ui/Button'
 import { Input, Label } from '../ui/Input'
-import { Sprout, Eye, EyeOff } from 'lucide-react'
+import { Sprout, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 
 // mode: 'signin' | 'signup' | 'forgot'
 export default function AuthPage() {
-  const [mode, setMode]         = useState('signin')
+  const [params]                  = useSearchParams()
+  const [mode, setMode]         = useState(params.get('mode') === 'signup' ? 'signup' : 'signin')
+  useEffect(() => { document.title = 'Sign in · Forage' }, [])
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
@@ -136,14 +139,19 @@ export default function AuthPage() {
       <main className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
 
-          <div className="lg:hidden flex items-center gap-2.5 mb-10">
+          <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-10" aria-label="Back to Forage home">
             <span className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--brand)' }}>
               <Sprout size={19} strokeWidth={2.25} style={{ color: 'var(--saffron)' }} />
             </span>
             <span className="text-2xl font-extrabold" style={{ letterSpacing: '-0.03em', fontVariationSettings: "'wdth' 85" }}>
               forage
             </span>
-          </div>
+          </Link>
+
+          <Link to="/" className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium mb-8 hover:underline"
+                style={{ color: 'var(--ink-muted)' }}>
+            <ArrowLeft size={15} strokeWidth={2} /> Back to home
+          </Link>
 
           <h1 className="text-4xl mb-8">{titles[mode]}</h1>
 

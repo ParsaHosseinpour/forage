@@ -86,6 +86,17 @@ export default function RecipesPage({ user }) {
   const fridgeNames    = items.map(i => i.name)
   const allIngredients = [...new Set([...fridgeNames, ...staples])]
 
+  // Chips: fridge items first, then pantry staples. Past a few extra, collapse.
+  const CHIP_LIMIT = 8
+  const [showAllChips, setShowAllChips] = useState(false)
+  const chips = [
+    ...fridgeNames.map(name => ({ name, kind: 'fridge' })),
+    ...staples.filter(n => !fridgeNames.includes(n)).map(name => ({ name, kind: 'staple' })),
+  ]
+  const collapsible = chips.length > CHIP_LIMIT + 2
+  const visibleChips = showAllChips || !collapsible ? chips : chips.slice(0, CHIP_LIMIT)
+  const hiddenChipCount = chips.length - visibleChips.length
+
   // BUG 1 FIX: track whether we've already fired the initial search.
   // The old effect only depended on fridgeLoading, so when pantry arrived
   // async after fridge it didn't re-fire — ingredients were stale/incomplete.
@@ -197,21 +208,37 @@ export default function RecipesPage({ user }) {
             </div>
           </div>
 
-          {/* Ingredient chips */}
+          {/* Ingredient chips — capped so a full fridge doesn't push recipes off screen */}
           {allIngredients.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {fridgeNames.map(name => (
-                <span key={name} className="text-[13px] px-2.5 py-1 rounded-[6px] border"
-                      style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--ink)' }}>
-                  {name}
-                </span>
-              ))}
-              {staples.map(name => (
-                <span key={`pantry-${name}`} className="text-[13px] px-2.5 py-1 rounded-[6px] border"
-                      style={{ background: 'var(--fresh-tint)', borderColor: 'var(--fresh-soft)', color: 'var(--fresh)' }}>
-                  {name}
-                </span>
-              ))}
+            <div className="mb-4">
+              <div className="flex flex-wrap items-center gap-2">
+                {visibleChips.map(({ name, kind }) => (
+                  <span key={`${kind}-${name}`} className="text-[13px] px-2.5 py-1 rounded-[6px] border"
+                        style={kind === 'staple'
+                          ? { background: 'var(--fresh-tint)', borderColor: 'var(--fresh-soft)', color: 'var(--fresh)' }
+                          : { background: 'var(--surface)',    borderColor: 'var(--border)',     color: 'var(--ink)' }}>
+                    {name}
+                  </span>
+                ))}
+                {hiddenChipCount > 0 && (
+                  <button
+                    onClick={() => setShowAllChips(true)}
+                    className="text-[13px] font-semibold px-2.5 py-1 rounded-[6px]"
+                    style={{ color: 'var(--brand)' }}
+                  >
+                    +{hiddenChipCount} more
+                  </button>
+                )}
+                {showAllChips && chips.length > CHIP_LIMIT + 2 && (
+                  <button
+                    onClick={() => setShowAllChips(false)}
+                    className="text-[13px] font-semibold px-2.5 py-1 rounded-[6px]"
+                    style={{ color: 'var(--brand)' }}
+                  >
+                    Show fewer
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

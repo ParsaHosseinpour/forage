@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import LandingPage from './components/landing/LandingPage'
 import AuthPage from './components/auth/AuthPage'
 import ResetPasswordPage from './components/auth/ResetPasswordPage'
 import Navbar from './components/layout/Navbar'
@@ -60,9 +61,11 @@ export default function App() {
         ? <ProtectedLayout user={user} />
         : (
           <Routes>
+            <Route path="/"      element={<LandingPage />} />
             {/* Forgot-password flow only ever needs the request form here;
                 the actual reset UI is the passwordRecovery branch above. */}
-            <Route path="*" element={<AuthPage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="*"      element={<Navigate to="/login" replace />} />
           </Routes>
         )
       }
