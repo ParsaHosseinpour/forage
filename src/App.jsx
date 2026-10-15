@@ -9,8 +9,10 @@ import SavedPage from './components/saved/SavedPage'
 import HistoryPage from './components/history/HistoryPage'
 import SchedulePage from './components/schedule/SchedulePage'
 import ProfilePage from './components/profile/ProfilePage'
+import { usePageTitle } from './hooks/usePageTitle'
 
 function ProtectedLayout({ user }) {
+  usePageTitle()
   return (
     <div className="min-h-screen md:pl-60" style={{ background: 'var(--bg)' }}>
       <Navbar user={user} />

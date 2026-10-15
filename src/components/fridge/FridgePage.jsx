@@ -7,6 +7,7 @@ import IngredientCard from './IngredientCard'
 import AddIngredientForm, { CATEGORIES } from './AddIngredientForm'
 import PantrySection from './PantrySection'
 import Button from '../ui/Button'
+import { useDeferredDelete } from '../../hooks/useDeferredDelete'
 
 const categoryOrder = CATEGORIES.map(c => c.value)
 
@@ -14,20 +15,22 @@ export default function FridgePage({ user }) {
   const { items, loading, add, remove, update } = useFridge(user.id)
   const { staples, isActive, toggle, loading: pantryLoading } = usePantry(user.id)
   const [showForm, setShowForm] = useState(false)
+  const { pending, request: requestRemove } = useDeferredDelete(remove)
+  const visible = items.filter(i => !pending.has(i.id))
   const navigate = useNavigate()
 
   // Group items by category
   const grouped = categoryOrder.reduce((acc, cat) => {
-    const catItems = items.filter(i => i.category === cat)
+    const catItems = visible.filter(i => i.category === cat)
     if (catItems.length) acc[cat] = catItems
     return acc
   }, {})
 
   const categoryMeta = Object.fromEntries(CATEGORIES.map(c => [c.value, c]))
 
-  const isEmpty = items.length === 0
+  const isEmpty = visible.length === 0
   // CTA needs at least 2 ingredients — pantry staples count toward this
-  const totalIngredients = items.length + staples.length
+  const totalIngredients = visible.length + staples.length
   const canFindRecipes = totalIngredients >= 2
 
   return (
@@ -38,9 +41,9 @@ export default function FridgePage({ user }) {
         <div>
           <h1 className="text-4xl mb-1.5">Fridge</h1>
           <p className="text-[15px]" style={{ color: 'var(--ink-muted)' }}>
-            {items.length === 0
+            {visible.length === 0
               ? 'Nothing logged yet.'
-              : `${items.length} ingredient${items.length !== 1 ? 's' : ''}`}
+              : `${visible.length} ingredient${visible.length !== 1 ? 's' : ''}`}
             {staples.length > 0 && `, ${staples.length} pantry staple${staples.length !== 1 ? 's' : ''}`}
           </p>
         </div>
@@ -114,7 +117,7 @@ export default function FridgePage({ user }) {
                 >
                   {catItems.map(item => (
                     <div key={item.id} style={{ borderColor: 'var(--border)' }}>
-                      <IngredientCard item={item} onDelete={remove} onUpdate={update} />
+                      <IngredientCard item={item} onDelete={(id) => requestRemove(id, item.name)} onUpdate={update} />
                     </div>
                   ))}
                 </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { X, Clock, Users, CheckCircle2, ShoppingCart, Loader2 } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/recipeEngine'
 import BuyIngredientsButton from '../ui/BuyIngredientsButton'
+import { useDialog } from '../../hooks/useDialog'
 
 // ── Fraction formatter (same logic as RecipeDetail/ServingsScaler) ────────────
 
@@ -29,6 +30,7 @@ function scaledDisplay(ing, multiplier) {
 }
 
 export default function RecipePreviewModal({ entry, onClose }) {
+  const dialogRef = useDialog(onClose)
   const [detail, setDetail]   = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -65,6 +67,10 @@ export default function RecipePreviewModal({ entry, onClose }) {
 
   return (
     <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Recipe preview"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
       style={{ background: 'rgba(43,29,58,0.6)', backdropFilter: 'blur(4px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
@@ -96,8 +102,8 @@ export default function RecipePreviewModal({ entry, onClose }) {
               )}
             </div>
           </div>
-          <button onClick={onClose}
-                  className="flex-shrink-0 p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} aria-label="Close"
+                  className="flex-shrink-0 p-1.5 rounded-lg hover:bg-[var(--bg-sunk)] transition-colors">
             <X size={18} style={{ color: 'var(--ink-muted)' }} />
           </button>
         </div>

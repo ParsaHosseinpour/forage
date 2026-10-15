@@ -3,9 +3,12 @@ import { X } from 'lucide-react'
 import { DAY_NAMES, SLOT_TYPES } from '../../hooks/useMealPlan'
 import Button from '../ui/Button'
 import { SlotIcon } from '../ui/glyphs'
+import { useDialog } from '../../hooks/useDialog'
 
 
 export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
+  const dialogRef = useDialog(onClose)
+  const [week, setWeek]            = useState(0)   // 0 = this week, 1 = next
   const [selectedDay,  setDay]  = useState(null)
   const [selectedSlot, setSlot] = useState(null)
   const [loading, setLoading]   = useState(false)
@@ -13,7 +16,7 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
   const handleAdd = async () => {
     if (selectedDay == null || !selectedSlot) return
     setLoading(true)
-    try { await onAdd(selectedDay, selectedSlot) }
+    try { await onAdd(selectedDay, selectedSlot, week) }
     finally { setLoading(false) }
   }
 
@@ -25,6 +28,10 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
 
   return (
     <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Add to meal planner"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
       style={{ background: 'rgba(43,29,58,0.55)', backdropFilter: 'blur(4px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
@@ -42,12 +49,32 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
               {recipe.title}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} aria-label="Close" className="p-1.5 rounded-lg hover:bg-[var(--bg-sunk)] transition-colors">
             <X size={18} style={{ color: 'var(--ink-muted)' }} />
           </button>
         </div>
 
         <div className="px-5 pb-5 space-y-4">
+          {/* Week */}
+          <div className="flex gap-1 p-1 rounded-[10px]" style={{ background: 'var(--bg-sunk)' }} role="group" aria-label="Week">
+            {[['This week', 0], ['Next week', 1]].map(([label, w]) => (
+              <button
+                key={w}
+                type="button"
+                onClick={() => setWeek(w)}
+                aria-pressed={week === w}
+                className="flex-1 py-1.5 rounded-[8px] text-sm transition-colors"
+                style={{
+                  background: week === w ? 'var(--surface)' : 'transparent',
+                  color:      week === w ? 'var(--ink)'     : 'var(--ink-muted)',
+                  fontWeight: week === w ? 650 : 500,
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           {/* Day picker */}
           <div>
             <p className="text-[13px] font-medium mb-2"
@@ -56,7 +83,7 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
             </p>
             <div className="grid grid-cols-7 gap-1">
               {DAY_NAMES.map((name, idx) => {
-                const isToday  = idx === todayIdx
+                const isToday  = week === 0 && idx === todayIdx
                 const selected = selectedDay === idx
                 return (
                   <button

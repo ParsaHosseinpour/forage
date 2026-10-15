@@ -44,9 +44,8 @@ export function ToastProvider({ children }) {
       {/* Toast container — bottom-centre on mobile, bottom-right on desktop */}
       <div
         aria-live="polite"
-        className="fixed z-50 flex flex-col gap-2 pointer-events-none"
+        className="fixed z-50 flex flex-col gap-2 pointer-events-none bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] md:bottom-6"
         style={{
-          bottom: '1.5rem',
           right:  '1.5rem',
           left:   '1.5rem',
           maxWidth: '420px',
@@ -59,7 +58,7 @@ export function ToastProvider({ children }) {
             <div
               key={id}
               role="alert"
-              className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-2xl border shadow-lg slide-up"
+              className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px] border slide-up"
               style={{
                 background:   s.bg,
                 borderColor:  s.border,
@@ -80,7 +79,7 @@ export function ToastProvider({ children }) {
               {action && (
                 <button
                   onClick={() => { action.onClick(); dismiss(id) }}
-                  className="flex-shrink-0 text-xs font-medium underline underline-offset-2"
+                  className="flex-shrink-0 text-sm font-semibold underline underline-offset-2 px-1 py-0.5"
                   style={{ color: s.color }}
                 >
                   {action.label}

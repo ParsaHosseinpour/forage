@@ -15,6 +15,7 @@ import CookItModal from '../recipes/CookItModal'
 import ShoppingList from './ShoppingList'
 import Button from '../ui/Button'
 import { IconTile } from '../ui/glyphs'
+import { useBackToClose } from '../../hooks/useBackToClose'
 
 const TABS = [
   { key: 'recipes',  label: 'Saved recipes',  Icon: Bookmark     },
@@ -27,6 +28,7 @@ export default function SavedPage({ user }) {
 
   const [tab, setTab]                   = useState('recipes')
   const [selected, setSelected]         = useState(null)
+  useBackToClose(!!selected, () => setSelected(null))
   const [cookModalRecipe, setCookModal] = useState(null) // recipe being cooked from card
 
   const { items: fridgeItems, remove: fridgeRemove, update: fridgeUpdate } = useFridge(user.id)
@@ -39,9 +41,9 @@ export default function SavedPage({ user }) {
 
   const fridgeNames = fridgeItems.map(i => i.name)
 
-  const handleSchedule = async (dayIdx, slotType, recipe) => {
-    await addSlot(dayIdx, slotType, recipe)
-    toast({ type: 'success', message: 'Added to schedule.', duration: 3000 })
+  const handleSchedule = async (dayIdx, slotType, recipe, weekOffset = 0) => {
+    await addSlot(dayIdx, slotType, recipe, weekOffset)
+    toast({ type: 'success', message: weekOffset ? 'Added to next week.' : 'Added to schedule.', duration: 3000 })
   }
 
   // ── Cook It — runs from both the modal (card) and the detail page ──────────

@@ -14,6 +14,7 @@ import FilterBar from '../recipes/FilterBar'
 import Button from '../ui/Button'
 import { IconTile } from '../ui/glyphs'
 import { getPrefs } from '../../lib/preferences'
+import { useBackToClose } from '../../hooks/useBackToClose'
 
 // 'popularity' is the best-match-% sort mode (see recipeDb.js) — used as the
 // default so the initial view's order always agrees with the % shown on
@@ -75,6 +76,7 @@ export default function RecipesPage({ user }) {
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState('')
   const [selected, setSelected]       = useState(null)
+  useBackToClose(!!selected, () => setSelected(null))
   const prefs        = getPrefs(user)
   const startFilters = { ...DEFAULT_FILTERS, diet: prefs.defaultDiet }
   const [filters, setFilters]         = useState(startFilters)
@@ -162,9 +164,9 @@ export default function RecipesPage({ user }) {
     toast({ type: 'success', message: 'Fridge updated. Enjoy your meal.', duration: 4000 })
   }, [fridgeHook, logCook, selected, toast])
 
-  const handleSchedule = async (dayIdx, slotType, recipe) => {
-    await addSlot(dayIdx, slotType, recipe)
-    toast({ type: 'success', message: `${recipe.title} added to ${slotType} on ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][dayIdx]}.`, duration: 4000 })
+  const handleSchedule = async (dayIdx, slotType, recipe, weekOffset = 0) => {
+    await addSlot(dayIdx, slotType, recipe, weekOffset)
+    toast({ type: 'success', message: `${recipe.title} added to ${slotType} on ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][dayIdx]}${weekOffset ? ' next week' : ''}.`, duration: 4000 })
   }
 
   const tooFewIngredients = !fridgeLoading && !pantryLoading && allIngredients.length < 1

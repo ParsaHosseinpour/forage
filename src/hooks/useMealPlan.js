@@ -17,18 +17,34 @@ export function getMondayOf(date = new Date()) {
   return `${y}-${m}-${dd}`
 }
 
+function toISO(d) {
+  const y  = d.getFullYear()
+  const m  = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${dd}`
+}
+
 /** Parse a YYYY-MM-DD string into a local Date object (avoids UTC-midnight offset) */
 export function parseLocalDate(iso) {
   const [y, m, d] = iso.split('-').map(Number)
   return new Date(y, m - 1, d)
 }
 
+/** ISO date `days` days after the given ISO date (local calendar). */
+export function shiftWeek(iso, days) {
+  const d = parseLocalDate(iso)
+  d.setDate(d.getDate() + days)
+  return toISO(d)
+}
+
 export const DAY_NAMES  = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 export const SLOT_TYPES = ['breakfast', 'lunch', 'dinner', 'snack']
 
-export function useMealPlan(userId) {
-  // Compute once per mount — weekStart is stable for the lifetime of the session
-  const weekStart = useMemo(() => getMondayOf(), [])
+/**
+ * `weekOffset` = how many weeks from the current one to show (0 = this week).
+ */
+export function useMealPlan(userId, weekOffset = 0) {
+  const weekStart = useMemo(() => shiftWeek(getMondayOf(), weekOffset * 7), [weekOffset])
 
   const [slots,   setSlots]   = useState([])
   const [loading, setLoading] = useState(true)
@@ -43,10 +59,12 @@ export function useMealPlan(userId) {
 
   useEffect(() => { load() }, [load])
 
-  const addSlot = useCallback(async (slotDay, slotType, recipe) => {
-    const { data, error } = await addMealPlanSlot(userId, weekStart, slotDay, slotType, recipe)
+  // `extraWeeks` adds to a week other than the one being viewed (0 = same).
+  const addSlot = useCallback(async (slotDay, slotType, recipe, extraWeeks = 0) => {
+    const target = shiftWeek(weekStart, extraWeeks * 7)
+    const { data, error } = await addMealPlanSlot(userId, target, slotDay, slotType, recipe)
     if (error) throw new Error(error.message)
-    setSlots(prev => [...prev, data])
+    if (extraWeeks === 0) setSlots(prev => [...prev, data])
     return data
   }, [userId, weekStart])
 

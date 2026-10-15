@@ -5,6 +5,7 @@ import { useCookHistory } from '../../hooks/useCookHistory'
 import RecipePreviewModal from '../recipes/RecipePreviewModal'
 import Button from '../ui/Button'
 import { IconTile, SlotIcon, MoodIcon } from '../ui/glyphs'
+import { useDeferredDelete } from '../../hooks/useDeferredDelete'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -239,26 +240,29 @@ export default function HistoryPage({ user }) {
     cookCount, weeklyCalories, loggedMealTypes,
   } = useCookHistory(user.id)
 
+  const { pending, request: requestRemove } = useDeferredDelete(removeEntry)
+  const visibleHistory = useMemo(() => history.filter(h => !pending.has(h.id)), [history, pending])
+
   const [mealFilter, setMealFilter] = useState('all')
   const [sortKey, setSortKey]       = useState('recent')
   const [previewEntry, setPreviewEntry] = useState(null)
 
   // Weekly meal count (regardless of filter)
   const weekCutoff = Date.now() - 7 * 24 * 3600 * 1000
-  const weekCount  = history.filter(h => new Date(h.cooked_at).getTime() >= weekCutoff).length
+  const weekCount  = visibleHistory.filter(h => new Date(h.cooked_at).getTime() >= weekCutoff).length
 
   // Filtered + sorted list
   const displayed = useMemo(() => {
     let list = mealFilter === 'all'
-      ? history
-      : history.filter(h => h.meal_type === mealFilter)
+      ? visibleHistory
+      : visibleHistory.filter(h => h.meal_type === mealFilter)
 
     if (sortKey === 'oldest') list = [...list].reverse()
     else if (sortKey === 'rating') {
       list = [...list].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
     }
     return list
-  }, [history, mealFilter, sortKey])
+  }, [visibleHistory, mealFilter, sortKey])
 
   const grouped  = groupByDate(displayed)
   const dateKeys = Object.keys(grouped)
@@ -286,8 +290,8 @@ export default function HistoryPage({ user }) {
             Cook history
           </h1>
           <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-            {history.length > 0
-              ? `${history.length} meal${history.length !== 1 ? 's' : ''} cooked total`
+            {visibleHistory.length > 0
+              ? `${visibleHistory.length} meal${visibleHistory.length !== 1 ? 's' : ''} cooked total`
               : 'Your cooking journal'}
           </p>
         </div>
@@ -300,13 +304,13 @@ export default function HistoryPage({ user }) {
       <WeeklyStats weeklyCalories={weeklyCalories} weekCount={weekCount} />
 
       {/* Filter + sort toolbar */}
-      {history.length > 0 && (
+      {visibleHistory.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 mb-6">
           {/* Meal type filter pills */}
           <div className="flex gap-1 flex-wrap">
             {MEAL_TYPES.map(({ key, label }) => {
               const active = mealFilter === key
-              const hasEntries = key === 'all' || history.some(h => h.meal_type === key)
+              const hasEntries = key === 'all' || visibleHistory.some(h => h.meal_type === key)
               if (!hasEntries) return null
               return (
                 <button
@@ -357,7 +361,7 @@ export default function HistoryPage({ user }) {
       )}
 
       {/* Empty */}
-      {!loading && history.length === 0 && (
+      {!loading && visibleHistory.length === 0 && (
         <div className="text-center py-24 fade-in">
           <IconTile Icon={ChefHat} />
           <h2 className="text-2xl mb-2">No meals logged yet</h2>
@@ -369,7 +373,7 @@ export default function HistoryPage({ user }) {
       )}
 
       {/* No results for current filter */}
-      {!loading && history.length > 0 && displayed.length === 0 && (
+      {!loading && visibleHistory.length > 0 && displayed.length === 0 && (
         <div className="text-center py-16 fade-in">
           <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
             No {mealFilter} entries yet. Log a meal and tag it!
@@ -406,7 +410,7 @@ export default function HistoryPage({ user }) {
                       key={entry.id}
                       entry={entry}
                       cookCount={cookCount}
-                      onRemove={removeEntry}
+                      onRemove={(id) => requestRemove(id, entry.recipe_json?.title ?? 'Entry')}
                       onRatingChange={handleRatingChange}
                       onMealTypeChange={handleMealTypeChange}
                       onCookAgain={handleCookAgain}
@@ -421,7 +425,7 @@ export default function HistoryPage({ user }) {
           <div className="text-center pt-4 pb-8">
             <UtensilsCrossed size={20} className="mx-auto mb-2" style={{ color: 'var(--border)' }} />
             <p className="text-xs" style={{ color: 'var(--ink-muted)' }}>
-              {history.length} meal{history.length !== 1 ? 's' : ''} cooked · keep going!
+              {visibleHistory.length} meal{visibleHistory.length !== 1 ? 's' : ''} cooked · keep going!
             </p>
           </div>
         </div>

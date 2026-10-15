@@ -65,7 +65,7 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="p-1.5 rounded-lg transition-colors"
+            className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-lg transition-colors"
             style={{ color: 'var(--brand)' }}
             title="Save"
           >
@@ -73,7 +73,7 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
           </button>
           <button
             onClick={() => { setEditing(false); setName(item.name); setQuantity(item.quantity ?? ''); setUnit(item.unit ?? '') }}
-            className="p-1.5 rounded-lg transition-colors"
+            className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-lg transition-colors"
             style={{ color: 'var(--ink-muted)' }}
             title="Cancel"
           >
@@ -95,7 +95,7 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
           <div className="flex items-center gap-1 ml-2 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
             <button
               onClick={() => setEditing(true)}
-              className="p-1.5 rounded-lg hover:bg-[var(--bg-sunk)] transition-colors"
+              className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-lg hover:bg-[var(--bg-sunk)] transition-colors"
               style={{ color: 'var(--ink-muted)' }}
               title="Edit"
             >
@@ -104,7 +104,7 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="p-1.5 rounded-lg transition-colors"
+              className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-lg transition-colors"
               style={{ color: 'var(--danger)' }}
               title="Remove"
             >

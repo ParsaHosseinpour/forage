@@ -9,6 +9,7 @@ import { useToast } from '../ui/Toast'
 import { buildDeductionPlan } from '../../lib/cookUtils'
 import Button from '../ui/Button'
 import { IconTile, SlotIcon } from '../ui/glyphs'
+import { useDeferredDelete } from '../../hooks/useDeferredDelete'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
@@ -83,7 +84,7 @@ function SlotChip({ slot, onRemove, onCookNow, cooking, slotCfg }) {
 
       {/* Hover action bar */}
       <div
-        className="flex gap-1 px-2 pb-2 opacity-0 group-hover:opacity-100 transition-all duration-150"
+        className="flex gap-1 px-2 pb-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity duration-150"
         style={{ transform: 'translateY(2px)' }}
       >
         <button
@@ -268,7 +269,24 @@ function MobileDayView({ selectedDay, weekStart, todayIdx, grid, onCookNow, onRe
 export default function SchedulePage({ user }) {
   const navigate   = useNavigate()
   const toast      = useToast()
-  const { grid, weekStart, addSlot, removeSlot, loading } = useMealPlan(user.id)
+  const [weekOffset, setWeekOffset] = useState(0)
+  const { slots: allSlots, grid: rawGrid, weekStart, removeSlot, loading } = useMealPlan(user.id, weekOffset)
+  const { pending, request: requestRemove } = useDeferredDelete(removeSlot)
+
+  // Hide meals that are waiting out their Undo window.
+  const grid = useMemo(() => {
+    const g = {}
+    for (const d of Object.keys(rawGrid)) {
+      g[d] = {}
+      for (const t of Object.keys(rawGrid[d])) g[d][t] = rawGrid[d][t].filter(x => !pending.has(x.id))
+    }
+    return g
+  }, [rawGrid, pending])
+
+  const removeWithUndo = (id) => {
+    const slot = allSlots.find(x => x.id === id)
+    requestRemove(id, slot?.recipe_json?.title ?? 'Meal')
+  }
   const { items: fridgeItems, remove: fridgeRemove, update: fridgeUpdate } = useFridge(user.id)
   const { staples }   = usePantry(user.id)
   const { logCook }   = useCookHistory(user.id)
@@ -334,7 +352,18 @@ export default function SchedulePage({ user }) {
             )}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
+          <div className="flex items-center gap-1" role="group" aria-label="Choose week">
+            <Button variant="secondary" size="sm" onClick={() => setWeekOffset(o => o - 1)} aria-label="Previous week">
+              <ChevronLeft size={14} />
+            </Button>
+            <Button variant="secondary" size="sm" disabled={weekOffset === 0} onClick={() => setWeekOffset(0)}>
+              This week
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => setWeekOffset(o => o + 1)} aria-label="Next week">
+              <ChevronRight size={14} />
+            </Button>
+          </div>
           <Button variant="secondary" size="sm" onClick={() => navigate('/saved')}>
             <ShoppingCart size={13} /> List
           </Button>
@@ -350,7 +379,7 @@ export default function SchedulePage({ user }) {
         <CalendarDays size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
         <p className="text-xs" style={{ color: 'var(--brand)' }}>
           Open any recipe → <strong>Add to Schedule</strong> to plan meals.
-          Hover a card to reveal <strong>Cook</strong> and <strong>Remove</strong>.
+          Use <strong>Cook</strong> to log a meal and update your fridge, or <strong>Remove</strong> to take it off the plan.
           Scheduled meals auto-sync to your Shopping List.
         </p>
       </div>
@@ -377,7 +406,7 @@ export default function SchedulePage({ user }) {
                 todayIdx={todayIdx}
                 grid={grid}
                 onCookNow={handleCookNow}
-                onRemove={removeSlot}
+                onRemove={removeWithUndo}
                 cooking={cooking}
               />
             ))}
@@ -472,7 +501,7 @@ export default function SchedulePage({ user }) {
               todayIdx={todayIdx}
               grid={grid}
               onCookNow={handleCookNow}
-              onRemove={removeSlot}
+              onRemove={removeWithUndo}
               cooking={cooking}
             />
           </div>

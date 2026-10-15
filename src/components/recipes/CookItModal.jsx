@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { X, AlertTriangle, CheckCircle2, Info } from 'lucide-react'
 import Button from '../ui/Button'
 import { buildDeductionPlan, formatQty } from '../../lib/cookUtils'
+import { useDialog } from '../../hooks/useDialog'
 
 /**
  * CookItModal
@@ -22,6 +23,7 @@ export default function CookItModal({
   onConfirm,
   onClose,
 }) {
+  const dialogRef = useDialog(onClose)
   const [loading, setLoading] = useState(false)
 
   const ingredients = recipeDetail?.extendedIngredients ?? []
@@ -85,6 +87,10 @@ export default function CookItModal({
 
   return (
     <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Cook this recipe"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
       style={{ background: 'rgba(43,29,58,0.55)', backdropFilter: 'blur(4px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
@@ -113,8 +119,8 @@ export default function CookItModal({
               )}
             </p>
           </div>
-          <button onClick={onClose}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors ml-4 flex-shrink-0">
+          <button onClick={onClose} aria-label="Close"
+                  className="p-1.5 rounded-lg hover:bg-[var(--bg-sunk)] transition-colors ml-4 flex-shrink-0">
             <X size={18} style={{ color: 'var(--ink-muted)' }} />
           </button>
         </div>

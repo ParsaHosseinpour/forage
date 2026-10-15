@@ -25,6 +25,7 @@ function SingleForm({ onAdd, onClose }) {
   const [form, setForm]       = useState(DEFAULT)
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
+  const [lastAdded, setLastAdded] = useState('')
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
 
@@ -35,8 +36,10 @@ function SingleForm({ onAdd, onClose }) {
     setError('')
     try {
       await onAdd({ ...form, category: form.category || detectCategory(form.name) })
+      setLastAdded(form.name.trim())
       setForm(DEFAULT)
-      onClose?.()
+      // Stay open so several ingredients can be added in a row.
+      document.getElementById('ing-name')?.focus()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -97,12 +100,17 @@ function SingleForm({ onAdd, onClose }) {
         </Select>
       </div>
 
-      {error && <p className="text-sm" style={{ color: 'var(--danger)' }}>{error}</p>}
+      {error && <p role="alert" className="text-sm" style={{ color: 'var(--danger)' }}>{error}</p>}
+      {lastAdded && !error && (
+        <p role="status" className="text-sm" style={{ color: 'var(--fresh)' }}>
+          Added {lastAdded}. Add another, or press Done.
+        </p>
+      )}
 
       <div className="flex gap-3 pt-1">
         {onClose && (
           <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
-            Cancel
+            {lastAdded ? 'Done' : 'Cancel'}
           </Button>
         )}
         <Button type="submit" loading={loading} className="flex-1">
@@ -310,7 +318,7 @@ export default function AddIngredientForm({ onAdd, onClose }) {
           Add to fridge
         </h3>
         {onClose && (
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} aria-label="Close" className="p-1 rounded-lg hover:bg-[var(--bg-sunk)] transition-colors">
             <X size={18} style={{ color: 'var(--ink-muted)' }} />
           </button>
         )}

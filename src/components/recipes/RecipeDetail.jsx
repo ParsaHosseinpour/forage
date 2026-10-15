@@ -352,8 +352,8 @@ export default function RecipeDetail({
         <AddToScheduleModal
           recipe={detail ?? recipe}
           onClose={() => setShowScheduleModal(false)}
-          onAdd={async (dayIdx, slotType) => {
-            await onSchedule?.(dayIdx, slotType, detail ?? recipe)
+          onAdd={async (dayIdx, slotType, weekOffset) => {
+            await onSchedule?.(dayIdx, slotType, detail ?? recipe, weekOffset)
             setShowScheduleModal(false)
           }}
         />
