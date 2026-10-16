@@ -1,5 +1,6 @@
-import { Clock, Users, UtensilsCrossed } from 'lucide-react'
+import { Clock, Users } from 'lucide-react'
 import SaveButton from './SaveButton'
+import Produce, { produceKey } from '../ui/Produce'
 
 const MAX_SEGMENTS = 12
 
@@ -30,16 +31,16 @@ function IngredientMeter({ used, missed }) {
         {Array.from({ length: segs }, (_, i) => (
           <span
             key={i}
-            className="meter-seg h-2 flex-1 rounded-[2px]"
+            className="meter-seg h-2.5 flex-1 rounded-[3px]"
             style={{
               '--i': i,
               background:  i < filled ? 'var(--fresh)' : 'transparent',
-              boxShadow:   i < filled ? 'none' : 'inset 0 0 0 1.5px var(--carrot-soft)',
+              boxShadow:   i < filled ? 'inset 0 0 0 1.5px var(--ink)' : 'inset 0 0 0 1.5px var(--carrot-soft)',
             }}
           />
         ))}
       </div>
-      <p className="text-[13px] mt-1.5 tabular-nums" style={{ color: missed === 0 ? 'var(--fresh)' : 'var(--ink-muted)', fontWeight: missed === 0 ? 600 : 500 }}>
+      <p className="text-sm mt-1.5 tabular-nums" style={{ color: missed === 0 ? 'var(--fresh)' : 'var(--ink-muted)', fontWeight: missed === 0 ? 600 : 500 }}>
         {label}
       </p>
     </div>
@@ -48,10 +49,9 @@ function IngredientMeter({ used, missed }) {
 
 export function RecipeCardSkeleton() {
   return (
-    <div className="rounded-[14px] border overflow-hidden"
-         style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-      <div className="h-44 animate-pulse" style={{ background: 'var(--bg-sunk)' }} />
-      <div className="p-4 space-y-3">
+    <div>
+      <div className="aspect-[4/3] rounded-[10px] animate-pulse" style={{ background: 'var(--bg-sunk)' }} />
+      <div className="pt-3.5 space-y-3">
         <div className="h-4 rounded animate-pulse" style={{ background: 'var(--bg-sunk)', width: '80%' }} />
         <div className="h-3 rounded animate-pulse" style={{ background: 'var(--bg-sunk)', width: '55%' }} />
         <div className="h-2 rounded animate-pulse mt-4" style={{ background: 'var(--bg-sunk)' }} />
@@ -61,87 +61,64 @@ export function RecipeCardSkeleton() {
 }
 
 /**
- * RecipeCard — two separate interactive regions so the save button is never
- * nested inside another <button> (invalid HTML, breaks on mobile).
+ * RecipeCard — an editorial tile, not a box: framed photo, serif title,
+ * the ingredient meter underneath. The photo and the title are separate
+ * buttons so the save button is never nested inside another button.
  */
 export default function RecipeCard({ recipe, onClick, isSaved = false, onSave }) {
   const used   = recipe.usedIngredientCount   ?? recipe.usedIngredients?.length   ?? 0
   const missed = recipe.missedIngredientCount ?? recipe.missedIngredients?.length ?? 0
+  const open   = () => onClick(recipe)
 
   return (
-    <div
-      className="group rounded-[14px] border overflow-hidden transition-colors duration-150 hover:border-[var(--brand)]"
-      style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
-    >
-      <button
-        onClick={() => onClick(recipe)}
-        className="block w-full text-left"
-        aria-label={`View recipe: ${recipe.title}`}
-      >
-        {/* Image */}
-        <div className="h-44 overflow-hidden relative" style={{ background: 'var(--bg-sunk)' }}>
-          {recipe.image
-            ? <img
-                src={recipe.image}
-                alt=""
-                loading="lazy"
-                className="w-full h-full object-cover"
-              />
-            : <div className="w-full h-full flex items-center justify-center">
-                <UtensilsCrossed size={28} strokeWidth={1.5} style={{ color: 'var(--ink-muted)', opacity: 0.5 }} />
-              </div>
-          }
-
-          {recipe.diets?.length > 0 && (
-            <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-              {recipe.diets.slice(0, 2).map(d => (
-                <span
-                  key={d}
-                  className="text-xs px-2 py-0.5 rounded-[6px] font-semibold capitalize"
-                  style={{ background: 'var(--surface)', color: 'var(--ink)' }}
-                >
-                  {d}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Title + meta */}
-        <div className="px-4 pt-3.5 pb-3">
-          <h3
-            className="text-[17px] leading-snug mb-1.5 line-clamp-2"
-            style={{ fontWeight: 650, fontVariationSettings: "'wdth' 96" }}
+    <article className="group">
+      <div className="relative">
+        <button onClick={open} className="block w-full text-left" aria-label={`View recipe: ${recipe.title}`} tabIndex={-1}>
+          <div
+            className="aspect-[4/3] overflow-hidden rounded-[10px] grid place-items-center"
+            style={{ background: 'var(--bg-sunk)', border: '2px solid var(--ink)' }}
           >
-            {recipe.title}
-          </h3>
-          <div className="flex items-center gap-3 text-[13px]" style={{ color: 'var(--ink-muted)' }}>
-            {recipe.readyInMinutes && (
-              <span className="flex items-center gap-1">
-                <Clock size={13} strokeWidth={1.75} /> {recipe.readyInMinutes} min
-              </span>
-            )}
-            {recipe.servings && (
-              <span className="flex items-center gap-1">
-                <Users size={13} strokeWidth={1.75} /> {recipe.servings}
-              </span>
-            )}
+            {recipe.image
+              ? <img src={recipe.image} alt="" loading="lazy" className="w-full h-full object-cover" />
+              : <Produce name={produceKey(recipe.title) ?? 'Tomatoes'} size={84} />}
           </div>
+        </button>
+
+        {recipe.diets?.length > 0 && (
+          <div className="absolute bottom-2 left-2 flex flex-wrap gap-1 pointer-events-none">
+            {recipe.diets.slice(0, 2).map(d => (
+              <span key={d} className="text-xs px-2.5 py-0.5 rounded-full font-bold capitalize"
+                    style={{ background: 'var(--saffron)', color: 'var(--ink)', border: '1.5px solid var(--ink)' }}>
+                {d}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {onSave && (
+          <div className="absolute top-2.5 right-2.5">
+            <SaveButton saved={isSaved} onClick={onSave} size="sm" />
+          </div>
+        )}
+      </div>
+
+      <button onClick={open} className="block w-full text-left mt-3.5">
+        <h3 className="text-[22px] leading-[1.15] mb-1.5 line-clamp-2 group-hover:underline decoration-2 underline-offset-4">
+          {recipe.title}
+        </h3>
+        <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--ink-muted)' }}>
+          {recipe.readyInMinutes && (
+            <span className="flex items-center gap-1.5"><Clock size={14} strokeWidth={1.75} /> {recipe.readyInMinutes} min</span>
+          )}
+          {recipe.servings && (
+            <span className="flex items-center gap-1.5"><Users size={14} strokeWidth={1.75} /> {recipe.servings}</span>
+          )}
         </div>
       </button>
 
-      {/* Footer: meter + save (plain div, not a button) */}
-      <div className="flex items-center gap-4 px-4 pb-4">
+      <div className="mt-3">
         <IngredientMeter used={used} missed={missed} />
-        {onSave && (
-          <SaveButton
-            saved={isSaved}
-            onClick={onSave}
-            size="sm"
-            aria-label={isSaved ? 'Remove from saved' : 'Save recipe'}
-          />
-        )}
       </div>
-    </div>
+    </article>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ChevronLeft, RefreshCw, Users, Carrot, SearchX } from 'lucide-react'
+import { ChevronLeft, RefreshCw, Users } from 'lucide-react'
 import { useFridge } from '../../hooks/useFridge'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
 import { usePantry } from '../../hooks/usePantry'
@@ -15,6 +15,7 @@ import Button from '../ui/Button'
 import { IconTile } from '../ui/glyphs'
 import { getPrefs } from '../../lib/preferences'
 import { useBackToClose } from '../../hooks/useBackToClose'
+import PageHeader from '../layout/PageHeader'
 
 // 'popularity' is the best-match-% sort mode (see recipeDb.js) — used as the
 // default so the initial view's order always agrees with the % shown on
@@ -43,12 +44,12 @@ function QuickServingSelector({ value, onChange }) {
             <button
               key={opt.value}
               onClick={() => onChange(active ? null : opt.value)}
-              className="px-3 py-1 rounded-[8px] text-[13px] border transition-colors duration-150 whitespace-nowrap"
+              className="px-3 py-1 rounded-full text-[13px] border-[1.5px] transition-colors duration-100 whitespace-nowrap"
               aria-pressed={active}
               style={{
-                background:  active ? 'var(--brand-tint)' : 'var(--surface)',
-                borderColor: active ? 'var(--brand-soft)' : 'var(--border)',
-                color:       active ? 'var(--brand)'      : 'var(--ink-muted)',
+                background:  active ? 'var(--saffron)' : 'var(--surface)',
+                borderColor: 'var(--ink)',
+                color:       active ? 'var(--ink)'     : 'var(--ink-muted)',
                 fontWeight:  active ? 600 : 500,
               }}
             >
@@ -188,35 +189,29 @@ export default function RecipesPage({ user }) {
       {/* Header */}
       {!selected && (
         <div className="mb-8">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h1 className="text-4xl mb-1.5">
-                Recipes
-              </h1>
-              <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-                {fridgeNames.length} fridge item{fridgeNames.length !== 1 ? 's' : ''}
-                {staples.length > 0 && ` + ${staples.length} pantry staple${staples.length !== 1 ? 's' : ''}`}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="ghost" onClick={() => navigate('/fridge')}>
+          <PageHeader
+            title="Recipes"
+            art="Tomatoes"
+            subtitle={`${fridgeNames.length} fridge item${fridgeNames.length !== 1 ? 's' : ''}${staples.length > 0 ? ` and ${staples.length} pantry staple${staples.length !== 1 ? 's' : ''}` : ''}`}
+            actions={<>
+              <Button variant="secondary" onClick={() => navigate('/fridge')}>
                 <ChevronLeft size={15} /> Fridge
               </Button>
               <Button variant="secondary" loading={loading} onClick={() => search(filters)}>
                 <RefreshCw size={14} /> Refresh
               </Button>
-            </div>
-          </div>
+            </>}
+          />
 
           {/* Ingredient chips — capped so a full fridge doesn't push recipes off screen */}
           {allIngredients.length > 0 && (
             <div className="mb-4">
               <div className="flex flex-wrap items-center gap-2">
                 {visibleChips.map(({ name, kind }) => (
-                  <span key={`${kind}-${name}`} className="text-[13px] px-2.5 py-1 rounded-[6px] border"
+                  <span key={`${kind}-${name}`} className="text-[13px] px-3 py-1 rounded-full border-[1.5px]"
                         style={kind === 'staple'
-                          ? { background: 'var(--fresh-tint)', borderColor: 'var(--fresh-soft)', color: 'var(--fresh)' }
-                          : { background: 'var(--surface)',    borderColor: 'var(--border)',     color: 'var(--ink)' }}>
+                          ? { background: 'var(--fresh-tint)', borderColor: 'var(--ink)', color: 'var(--fresh)' }
+                          : { background: 'var(--surface)',    borderColor: 'var(--ink)',     color: 'var(--ink)' }}>
                     {name}
                   </span>
                 ))}
@@ -267,7 +262,7 @@ export default function RecipesPage({ user }) {
       {/* Too few ingredients */}
       {tooFewIngredients && (
         <div className="text-center py-24 fade-in">
-          <IconTile Icon={Carrot} />
+          <IconTile art="Eggs" />
           <h2 className="text-2xl mb-2">Add an ingredient first</h2>
           <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
             Log what you have in your fridge and Forage finds matching recipes.
@@ -280,7 +275,7 @@ export default function RecipesPage({ user }) {
 
       {/* Loading skeletons */}
       {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
           {[...Array(9)].map((_, i) => (
             <div key={i} style={{ animationDelay: `${i * 60}ms` }}>
               <RecipeCardSkeleton />
@@ -307,7 +302,7 @@ export default function RecipesPage({ user }) {
 
       {/* Recipe grid */}
       {!loading && !selected && recipes.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 fade-in">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 fade-in">
           {recipes.map(recipe => (
             <RecipeCard
               key={recipe.id}
@@ -323,7 +318,7 @@ export default function RecipesPage({ user }) {
       {/* No results */}
       {!loading && !selected && recipes.length === 0 && !tooFewIngredients && !error && (
         <div className="text-center py-24 fade-in">
-          <IconTile Icon={SearchX} />
+          <IconTile art="Lemon" />
           <h2 className="text-2xl mb-2">No recipes match</h2>
           <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
             Clear a filter or add more ingredients to your fridge.

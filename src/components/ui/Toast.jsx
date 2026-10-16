@@ -11,10 +11,10 @@ const ICONS = {
 }
 
 const STYLES = {
-  info:    { bg: 'white',                  border: 'var(--border)',    color: 'var(--ink)',      icon: 'var(--brand)'     },
-  success: { bg: 'var(--fresh-tint)', border: 'var(--fresh-soft)', color: 'var(--fresh)', icon: 'var(--fresh)' },
-  warning: { bg: 'var(--carrot-tint)',     border: 'var(--carrot-soft)',          color: 'var(--carrot)',    icon: 'var(--carrot)'     },
-  error:   { bg: 'var(--danger-tint)',               border: 'var(--danger-soft)',          color: 'var(--danger)', icon: 'var(--danger)'  },
+  info:    { bg: 'var(--ink)', border: 'var(--ink)', color: '#fff', icon: 'var(--saffron)' },
+  success: { bg: 'var(--ink)', border: 'var(--ink)', color: '#fff', icon: '#7FD39A' },
+  warning: { bg: 'var(--ink)', border: 'var(--ink)', color: '#fff', icon: '#F5B25C' },
+  error:   { bg: 'var(--ink)', border: 'var(--ink)', color: '#fff', icon: '#FF8A7D' },
 }
 
 let _id = 0
@@ -58,7 +58,7 @@ export function ToastProvider({ children }) {
             <div
               key={id}
               role="alert"
-              className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px] border slide-up"
+              className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px] border-2 slide-up"
               style={{
                 background:   s.bg,
                 borderColor:  s.border,
@@ -79,8 +79,8 @@ export function ToastProvider({ children }) {
               {action && (
                 <button
                   onClick={() => { action.onClick(); dismiss(id) }}
-                  className="flex-shrink-0 text-sm font-semibold underline underline-offset-2 px-1 py-0.5"
-                  style={{ color: s.color }}
+                  className="flex-shrink-0 text-sm font-bold underline underline-offset-2 px-1 py-0.5"
+                  style={{ color: 'var(--saffron)' }}
                 >
                   {action.label}
                 </button>

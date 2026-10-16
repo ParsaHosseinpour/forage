@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bookmark, ShoppingCart, Trash2, ChevronLeft, Heart, ChefHat } from 'lucide-react'
+import { Bookmark, ShoppingCart, ChevronLeft, ChefHat } from 'lucide-react'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
 import { useShoppingList } from '../../hooks/useShoppingList'
 import { useFridge } from '../../hooks/useFridge'
@@ -16,6 +16,7 @@ import ShoppingList from './ShoppingList'
 import Button from '../ui/Button'
 import { IconTile } from '../ui/glyphs'
 import { useBackToClose } from '../../hooks/useBackToClose'
+import PageHeader from '../layout/PageHeader'
 
 const TABS = [
   { key: 'recipes',  label: 'Saved recipes',  Icon: Bookmark     },
@@ -74,24 +75,21 @@ export default function SavedPage({ user }) {
       {/* Header — hidden in detail view */}
       {!selected && (
         <div className="mb-8">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h1 className="text-4xl mb-1.5">
-                {tab === 'recipes' ? 'Saved recipes' : 'Shopping list'}
-              </h1>
-              <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-                {tab === 'recipes'
-                  ? `${saved.length} recipe${saved.length !== 1 ? 's' : ''} saved`
-                  : `${need.length - checkedCount} item${need.length - checkedCount !== 1 ? 's' : ''} to pick up`}
-              </p>
-            </div>
-            <Button variant="ghost" onClick={() => navigate('/recipes')}>
-              <ChevronLeft size={15} /> Recipes
-            </Button>
-          </div>
+          <PageHeader
+            title={tab === 'recipes' ? 'Saved recipes' : 'Shopping list'}
+            art={tab === 'recipes' ? 'Lemon' : 'Lentils'}
+            subtitle={tab === 'recipes'
+              ? `${saved.length} recipe${saved.length !== 1 ? 's' : ''} saved`
+              : `${need.length - checkedCount} item${need.length - checkedCount !== 1 ? 's' : ''} to pick up`}
+            actions={
+              <Button variant="secondary" onClick={() => navigate('/recipes')}>
+                <ChevronLeft size={15} /> Recipes
+              </Button>
+            }
+          />
 
           {/* Tabs */}
-          <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: 'var(--bg-sunk)' }}>
+          <div className="flex flex-wrap gap-2 w-fit" role="tablist">
             {TABS.map(({ key, label, Icon }) => {
               const active = tab === key
               const badge  = key === 'shopping' && need.length > 0 && !listLoading
@@ -100,19 +98,20 @@ export default function SavedPage({ user }) {
                 <button
                   key={key}
                   onClick={() => setTab(key)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-150"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border-[1.5px] text-[15px] transition-colors duration-100"
+                  role="tab" aria-selected={active}
                   style={{
-                    background: active ? 'white'         : 'transparent',
-                    color:      active ? 'var(--ink)'    : 'var(--ink-muted)',
-                    fontWeight: active ? 500              : 400,
-                    boxShadow:  active ? 'var(--shadow)' : 'none',
+                    background:  active ? 'var(--saffron)' : 'var(--surface)',
+                    borderColor: 'var(--ink)',
+                    color:       active ? 'var(--ink)'     : 'var(--ink-muted)',
+                    fontWeight:  active ? 700 : 600,
                   }}
                 >
                   <Icon size={14} />
                   {label}
                   {badge != null && badge > 0 && (
                     <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
-                          style={{ background: 'var(--brand)', color: 'white', minWidth: 18, textAlign: 'center' }}>
+                          style={{ background: 'var(--ink)', color: 'white', minWidth: 18, textAlign: 'center' }}>
                       {badge}
                     </span>
                   )}
@@ -127,14 +126,14 @@ export default function SavedPage({ user }) {
       {tab === 'recipes' && !selected && (
         <>
           {loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
               {[...Array(3)].map((_, i) => <RecipeCardSkeleton key={i} />)}
             </div>
           )}
 
           {!loading && saved.length === 0 && (
             <div className="text-center py-24 fade-in">
-              <IconTile Icon={Heart} />
+              <IconTile art="Lemon" />
               <h2 className="text-2xl mb-2">No saved recipes yet</h2>
               <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
                 Tap the heart on any recipe to keep it here.
@@ -144,7 +143,7 @@ export default function SavedPage({ user }) {
           )}
 
           {!loading && saved.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 fade-in">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 fade-in">
               {saved.map(row => {
                 const recipe = refreshRecipeMatch(
                   row.recipe_json ?? row,
@@ -162,11 +161,11 @@ export default function SavedPage({ user }) {
                     {/* Cook It — available directly from the card */}
                     <button
                       onClick={() => handleCardCook(recipe)}
-                      className="w-full flex items-center justify-center gap-2 py-2 rounded-[10px] border text-sm font-semibold transition-colors duration-150 hover:bg-[var(--brand-soft)]"
+                      className="w-full flex items-center justify-center gap-2 py-2 rounded-full border-2 text-sm font-bold transition-[transform,box-shadow] duration-100 shadow-[0_3px_0_var(--ink)] active:translate-y-[2px] active:shadow-[0_1px_0_var(--ink)]"
                       style={{
-                        background:  'var(--brand-tint)',
-                        borderColor: 'var(--brand-soft)',
-                        color:       'var(--brand)',
+                        background:  'var(--surface)',
+                        borderColor: 'var(--ink)',
+                        color:       'var(--ink)',
                       }}
                     >
                       <ChefHat size={15} strokeWidth={2} /> I cooked this

@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, ChevronLeft, UtensilsCrossed, Flame, RotateCcw, ChefHat } from 'lucide-react'
+import { Trash2, ChevronLeft, UtensilsCrossed, Flame, RotateCcw } from 'lucide-react'
 import { useCookHistory } from '../../hooks/useCookHistory'
 import RecipePreviewModal from '../recipes/RecipePreviewModal'
 import Button from '../ui/Button'
 import { IconTile, SlotIcon, MoodIcon } from '../ui/glyphs'
 import { useDeferredDelete } from '../../hooks/useDeferredDelete'
+import PageHeader from '../layout/PageHeader'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -68,12 +69,12 @@ function MealTypePicker({ value, onChange }) {
         <button
           key={key}
           onClick={() => onChange(value === key ? null : key)}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs border capitalize transition-all"
+          className="flex items-center gap-1 px-3 py-1 rounded-full text-xs border-[1.5px] capitalize transition-colors"
           style={{
-            background:  value === key ? 'var(--brand-tint)' : 'var(--surface)',
-            borderColor: value === key ? 'var(--brand-soft)' : 'var(--border)',
-            color:       value === key ? 'var(--brand)'      : 'var(--ink-muted)',
-            fontWeight:  value === key ? 600                 : 500,
+            background:  value === key ? 'var(--saffron)' : 'var(--surface)',
+            borderColor: 'var(--ink)',
+            color:       value === key ? 'var(--ink)'     : 'var(--ink-muted)',
+            fontWeight:  value === key ? 700              : 500,
           }}
         >
           <SlotIcon slot={key} size={13} /> {key}
@@ -113,21 +114,14 @@ function MoodPicker({ value, onChange }) {
 function WeeklyStats({ weeklyCalories, weekCount }) {
   if (weekCount === 0) return null
   return (
-    <div className="flex items-center gap-4 px-5 py-4 rounded-2xl border mb-8"
-         style={{ background: 'var(--brand-tint)', borderColor: 'var(--brand-soft)' }}>
-      <Flame size={22} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-      <div>
-        <p className="text-sm font-medium" style={{ color: 'var(--brand)' }}>
-          This week
-        </p>
-        <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>
-          {weekCount} meal{weekCount !== 1 ? 's' : ''} cooked
-          {weeklyCalories > 0 && (
-            <> · <strong style={{ color: 'var(--ink)' }}>{Math.round(weeklyCalories).toLocaleString()} cal</strong> logged</>
-          )}
-        </p>
-      </div>
-    </div>
+    <p className="flex items-center gap-2.5 py-4 mb-6 text-[17px]"
+       style={{ borderTop: '2.5px solid var(--ink)', borderBottom: '1px solid var(--border)' }}>
+      <Flame size={20} style={{ color: 'var(--carrot)', flexShrink: 0 }} />
+      <span>
+        <strong>This week:</strong> {weekCount} meal{weekCount !== 1 ? 's' : ''} cooked
+        {weeklyCalories > 0 && <>, {Math.round(weeklyCalories).toLocaleString()} cal logged</>}
+      </span>
+    </p>
   )
 }
 
@@ -148,14 +142,14 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
   }
 
   return (
-    <div className="rounded-2xl border overflow-hidden transition-shadow hover:shadow-md cursor-pointer"
-         style={{ background: 'white', borderColor: 'var(--border)' }}
+    <div className="overflow-hidden cursor-pointer rounded-[10px] border-[1.5px] transition-colors hover:bg-[var(--surface)]"
+         style={{ background: 'transparent', borderColor: 'var(--ink)' }}
          onClick={(e) => { if (!e.defaultPrevented) onPreview(entry) }}>
 
       {/* Top row: image + title + actions */}
       <div className="flex items-start gap-4 p-4">
         {/* Thumbnail */}
-        <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden"
+        <div className="flex-shrink-0 w-14 h-14 rounded-[8px] overflow-hidden border-[1.5px] border-[var(--ink)]"
              style={{ background: 'var(--bg-sunk)' }}>
           {recipe.image
             ? <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
@@ -193,12 +187,12 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
           <button
             onClick={(e) => { e.preventDefault(); onCookAgain(recipe) }}
             title="Cook again"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs border transition-all"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs border-2 shadow-[0_2px_0_var(--ink)] active:translate-y-[1px] active:shadow-[0_1px_0_var(--ink)] transition-[transform,box-shadow] duration-100"
             style={{
-              background:  'var(--brand-tint)',
-              borderColor: 'var(--brand-soft)',
-              color:       'var(--brand)',
-              fontWeight:  500,
+              background:  'var(--surface)',
+              borderColor: 'var(--ink)',
+              color:       'var(--ink)',
+              fontWeight:  700,
             }}
           >
             <RotateCcw size={12} /> Cook again
@@ -283,22 +277,19 @@ export default function HistoryPage({ user }) {
   return (
     <div className="max-w-3xl mx-auto px-5 py-8">
 
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-4xl mb-1.5">
-            Cook history
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-            {visibleHistory.length > 0
-              ? `${visibleHistory.length} meal${visibleHistory.length !== 1 ? 's' : ''} cooked total`
-              : 'Your cooking journal'}
-          </p>
-        </div>
-        <Button variant="ghost" onClick={() => navigate('/recipes')}>
-          <ChevronLeft size={15} /> Recipes
-        </Button>
-      </div>
+      <PageHeader
+        width="max-w-3xl"
+        title="Cook history"
+        art="Yogurt"
+        subtitle={visibleHistory.length > 0
+          ? `${visibleHistory.length} meal${visibleHistory.length !== 1 ? 's' : ''} cooked`
+          : 'Your cooking journal'}
+        actions={
+          <Button variant="secondary" onClick={() => navigate('/recipes')}>
+            <ChevronLeft size={15} /> Recipes
+          </Button>
+        }
+      />
 
       {/* Weekly stats */}
       <WeeklyStats weeklyCalories={weeklyCalories} weekCount={weekCount} />
@@ -316,12 +307,12 @@ export default function HistoryPage({ user }) {
                 <button
                   key={key}
                   onClick={() => setMealFilter(key)}
-                  className="px-3 py-1.5 rounded-lg text-xs border transition-all"
+                  className="px-3.5 py-1.5 rounded-full text-sm border-[1.5px] transition-colors"
                   style={{
-                    background:  active ? 'var(--ink)'      : 'white',
-                    color:       active ? 'white'           : 'var(--ink-muted)',
-                    borderColor: active ? 'var(--ink)'      : 'var(--border)',
-                    fontWeight:  active ? 500               : 400,
+                    background:  active ? 'var(--saffron)' : 'var(--surface)',
+                    color:       active ? 'var(--ink)'     : 'var(--ink-muted)',
+                    borderColor: 'var(--ink)',
+                    fontWeight:  active ? 700              : 500,
                   }}
                 >
                   {label}
@@ -336,7 +327,7 @@ export default function HistoryPage({ user }) {
           <select
             value={sortKey}
             onChange={e => setSortKey(e.target.value)}
-            className="text-xs border rounded-lg px-2.5 py-1.5"
+            className="text-sm border-[1.5px] border-[var(--ink)] rounded-full px-3.5 py-1.5 bg-[var(--surface)]"
             style={{
               borderColor: 'var(--border)',
               color:       'var(--ink)',
@@ -363,7 +354,7 @@ export default function HistoryPage({ user }) {
       {/* Empty */}
       {!loading && visibleHistory.length === 0 && (
         <div className="text-center py-24 fade-in">
-          <IconTile Icon={ChefHat} />
+          <IconTile art="Yogurt" />
           <h2 className="text-2xl mb-2">No meals logged yet</h2>
           <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
             Open a recipe and tap "I cooked this". It shows up here.

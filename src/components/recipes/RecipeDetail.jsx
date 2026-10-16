@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock, Users, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2, UtensilsCrossed, CalendarPlus, ChefHat } from 'lucide-react'
+import { Clock, ChevronLeft, ExternalLink, ShoppingCart, CheckCircle2, Loader2, UtensilsCrossed, CalendarPlus, ChefHat } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/recipeEngine'
 import { ingredientMatches } from '../../lib/recipeDb'
 import { getMissingTier } from '../../lib/recipeUtils'
@@ -13,8 +13,8 @@ import AddToScheduleModal from './AddToScheduleModal'
 
 function NutrientPill({ label, value }) {
   return (
-    <div className="text-center px-3 py-2 rounded-xl" style={{ background: 'var(--bg-sunk)' }}>
-      <p className="text-xs font-medium" style={{ color: 'var(--ink)' }}>{value}</p>
+    <div className="text-center px-4 py-2 rounded-[10px] border-[1.5px]" style={{ borderColor: 'var(--ink)', background: 'var(--surface)' }}>
+      <p className="text-[20px] leading-tight" style={{ fontFamily: 'var(--font-display)' }}>{value}</p>
       <p className="text-xs mt-0.5" style={{ color: 'var(--ink-muted)' }}>{label}</p>
     </div>
   )
@@ -124,8 +124,8 @@ export default function RecipeDetail({
 
       {/* Hero image */}
       {(recipe.image || detail?.image) && (
-        <div className="rounded-[14px] overflow-hidden mb-8"
-             style={{ height: 'clamp(180px, 24vw, 280px)', background: 'var(--bg-sunk)' }}>
+        <div className="rounded-[10px] overflow-hidden mb-8"
+             style={{ height: 'clamp(180px, 26vw, 320px)', background: 'var(--bg-sunk)', border: '2.5px solid var(--ink)' }}>
           <img src={detail?.image || recipe.image} alt={recipe.title}
                className="w-full h-full object-cover" />
         </div>
@@ -134,29 +134,20 @@ export default function RecipeDetail({
       {/* Title + actions */}
       <div className="mb-8">
         <div className="flex items-start justify-between gap-4 mb-4">
-          <h1 className="text-3xl sm:text-4xl leading-tight"
-              style={{ fontFamily: 'var(--font-display)' }}>
+          <h1 className="text-4xl sm:text-5xl leading-[1.05]">
             {recipe.title}
           </h1>
-          <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+          <div className="flex flex-wrap items-center justify-end gap-2.5 flex-shrink-0 mt-1">
             {onSave && <SaveButton saved={isSaved} onClick={onSave} size="lg" />}
             {onCook && detail && (
-              <button
-                onClick={() => setShowCookModal(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-medium transition-all whitespace-nowrap"
-                style={{ background: 'var(--brand-tint)', borderColor: 'var(--brand-soft)', color: 'var(--brand)' }}
-              >
-                <UtensilsCrossed size={15} /> I Cooked This
-              </button>
+              <Button variant="primary" size="sm" onClick={() => setShowCookModal(true)}>
+                <UtensilsCrossed size={15} /> I cooked this
+              </Button>
             )}
             {onSchedule && (
-              <button
-                onClick={() => setShowScheduleModal(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-medium transition-all whitespace-nowrap"
-                style={{ background: 'var(--brand-tint)', borderColor: 'var(--brand-soft)', color: 'var(--brand)' }}
-              >
-                <CalendarPlus size={15} /> Add to Schedule
-              </button>
+              <Button variant="secondary" size="sm" onClick={() => setShowScheduleModal(true)}>
+                <CalendarPlus size={15} /> Add to schedule
+              </Button>
             )}
           </div>
         </div>
@@ -189,8 +180,8 @@ export default function RecipeDetail({
         {(recipe.diets ?? detail?.diets ?? []).length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
             {(recipe.diets ?? detail.diets).map(d => (
-              <span key={d} className="text-xs px-3 py-1 rounded-full"
-                    style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}>
+              <span key={d} className="text-xs px-3 py-1 rounded-full font-bold capitalize"
+                    style={{ background: 'var(--saffron)', color: 'var(--ink)', border: '1.5px solid var(--ink)' }}>
                 {d}
               </span>
             ))}

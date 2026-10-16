@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Trash2, Pencil, Check, X } from 'lucide-react'
 import { Input } from '../ui/Input'
+import Produce, { produceKey, CATEGORY_ART } from '../ui/Produce'
 
 export default function IngredientCard({ item, onDelete, onUpdate }) {
   const [deleting, setDeleting]   = useState(false)
@@ -83,7 +84,8 @@ export default function IngredientCard({ item, onDelete, onUpdate }) {
       ) : (
         /* ── Display mode ── */
         <div className="flex items-center justify-between flex-1 min-w-0">
-          <p className="text-[15px] font-medium truncate flex-1 min-w-0" style={{ color: 'var(--ink)' }}>
+          <Produce name={produceKey(item.name) ?? CATEGORY_ART[item.category] ?? 'Lentils'} size={34} className="flex-shrink-0 mr-3" />
+          <p className="text-[16px] font-semibold truncate flex-1 min-w-0" style={{ color: 'var(--ink)' }}>
             {item.name}
           </p>
           {(item.quantity || item.unit) && (

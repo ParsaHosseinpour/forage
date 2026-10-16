@@ -1,28 +1,24 @@
 import { Heart } from 'lucide-react'
 
 export default function SaveButton({ saved, onClick, size = 'md', className = '' }) {
-  const dim = size === 'sm' ? 15 : size === 'lg' ? 22 : 18
-  const box = size === 'sm' ? 30 : size === 'lg' ? 40 : 34
+  const dim = size === 'sm' ? 16 : size === 'lg' ? 22 : 18
+  const box = size === 'sm' ? 36 : size === 'lg' ? 44 : 38
 
   return (
     <button
       onClick={(e) => { e.stopPropagation(); onClick() }}
       title={saved ? 'Remove from saved' : 'Save recipe'}
       aria-pressed={saved}
-      className={`flex items-center justify-center rounded-[10px] border transition-colors duration-150 ${className}`}
+      className={`flex items-center justify-center rounded-full border-2 transition-colors duration-100 ${className}`}
       style={{
         width:       box,
         height:      box,
-        background:  saved ? 'var(--brand-tint)' : 'var(--surface)',
-        borderColor: saved ? 'var(--brand-soft)' : 'var(--border)',
-        color:       saved ? 'var(--brand)'      : 'var(--ink-muted)',
+        background:  '#fff',
+        borderColor: 'var(--ink)',
+        color:       saved ? 'var(--tomato)' : 'var(--ink)',
       }}
     >
-      <Heart
-        size={dim}
-        fill={saved ? 'currentColor' : 'none'}
-        strokeWidth={saved ? 0 : 1.75}
-      />
+      <Heart size={dim} fill={saved ? 'currentColor' : 'none'} strokeWidth={2} />
     </button>
   )
 }

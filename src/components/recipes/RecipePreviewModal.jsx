@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Clock, Users, CheckCircle2, ShoppingCart, Loader2 } from 'lucide-react'
+import { X, Clock, Users, Loader2 } from 'lucide-react'
 import { getRecipeDetails } from '../../lib/recipeEngine'
 import BuyIngredientsButton from '../ui/BuyIngredientsButton'
 import { useDialog } from '../../hooks/useDialog'

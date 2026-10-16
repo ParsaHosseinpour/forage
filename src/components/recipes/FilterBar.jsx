@@ -30,12 +30,12 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
               <button
                 key={value}
                 onClick={() => set('diet')(value)}
-                className="px-3.5 py-1.5 rounded-[8px] text-sm border transition-colors duration-150 whitespace-nowrap flex-shrink-0"
+                className="px-3.5 py-1.5 rounded-full text-sm border-[1.5px] transition-colors duration-100 whitespace-nowrap flex-shrink-0"
                 aria-pressed={active}
                 style={{
-                  background:   active ? 'var(--brand)' : 'var(--surface)',
-                  color:        active ? 'white'        : 'var(--ink)',
-                  borderColor:  active ? 'var(--brand)' : 'var(--border)',
+                  background:   active ? 'var(--saffron)' : 'var(--surface)',
+                  color:        'var(--ink)',
+                  borderColor:  'var(--ink)',
                   fontWeight:   active ? 600            : 500,
                 }}
               >
@@ -61,11 +61,11 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
                 <button
                   key={value}
                   onClick={() => set('maxTime')(value)}
-                  className="px-3 py-1 rounded-[8px] text-[13px] border transition-colors duration-150 whitespace-nowrap flex-shrink-0"
+                  className="px-3 py-1 rounded-full text-[13px] border-[1.5px] transition-colors duration-100 whitespace-nowrap flex-shrink-0"
                   style={{
-                    background:  active ? 'var(--brand-tint)' : 'var(--surface)',
-                    color:       active ? 'var(--brand)'      : 'var(--ink-muted)',
-                    borderColor: active ? 'var(--brand-soft)' : 'var(--border)',
+                    background:  active ? 'var(--saffron)' : 'var(--surface)',
+                    color:       active ? 'var(--ink)'        : 'var(--ink-muted)',
+                    borderColor: 'var(--ink)',
                     fontWeight:  active ? 600 : 500,
                   }}
                 >
@@ -90,11 +90,11 @@ export default function FilterBar({ filters, onChange, resultCount, loading }) {
                 <button
                   key={value}
                   onClick={() => set('sort')(value)}
-                  className="px-3 py-1 rounded-[8px] text-[13px] border transition-colors duration-150 whitespace-nowrap flex-shrink-0"
+                  className="px-3 py-1 rounded-full text-[13px] border-[1.5px] transition-colors duration-100 whitespace-nowrap flex-shrink-0"
                   style={{
-                    background:  active ? 'var(--brand-tint)' : 'var(--surface)',
-                    color:       active ? 'var(--brand)'      : 'var(--ink-muted)',
-                    borderColor: active ? 'var(--brand-soft)' : 'var(--border)',
+                    background:  active ? 'var(--saffron)' : 'var(--surface)',
+                    color:       active ? 'var(--ink)'        : 'var(--ink-muted)',
+                    borderColor: 'var(--ink)',
                     fontWeight:  active ? 600 : 500,
                   }}
                 >

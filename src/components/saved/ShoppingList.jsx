@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Check, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, ShoppingBasket, PartyPopper } from 'lucide-react'
+import { Check, Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react'
 import Button from '../ui/Button'
 import BuyIngredientsButton from '../ui/BuyIngredientsButton'
 import { getOrderableItems } from '../../lib/affiliateLinks'
@@ -164,7 +164,7 @@ export default function ShoppingList({
   if (!byRecipe || byRecipe.size === 0) {
     return (
       <div className="text-center py-16 fade-in">
-        <IconTile Icon={ShoppingBasket} />
+        <IconTile art="Lentils" />
         <h3 className="text-xl mb-2">Your list is empty</h3>
         <p className="text-[15px]" style={{ color: 'var(--ink-muted)' }}>
           Save a recipe and its ingredients show up here, grouped by dish.
@@ -176,7 +176,7 @@ export default function ShoppingList({
   if (allTicked) {
     return (
       <div className="text-center py-16 fade-in">
-        <IconTile Icon={PartyPopper} tone="fresh" />
+        <IconTile art="Peas" />
         <h3 className="text-xl mb-2">You have everything</h3>
         <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
           All {totalNeed} item{totalNeed !== 1 ? 's' : ''} checked off. Time to cook.

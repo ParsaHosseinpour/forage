@@ -1,9 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import LandingPage from './components/landing/LandingPage'
 import AuthPage from './components/auth/AuthPage'
 import ResetPasswordPage from './components/auth/ResetPasswordPage'
 import Navbar from './components/layout/Navbar'
+import { HeaderSlotContext } from './components/layout/PageHeader'
+import { hueFor } from './lib/hues'
 import FridgePage from './components/fridge/FridgePage'
 import RecipesPage from './components/fridge/RecipesPage'
 import SavedPage from './components/saved/SavedPage'
@@ -14,20 +17,27 @@ import { usePageTitle } from './hooks/usePageTitle'
 
 function ProtectedLayout({ user }) {
   usePageTitle()
+  const { pathname } = useLocation()
+  const { hue, ink } = hueFor(pathname)
+  const [slot, setSlot] = useState(null)
+
   return (
-    <div className="min-h-screen md:pl-60" style={{ background: 'var(--bg)' }}>
-      <Navbar user={user} />
-      <main className="pb-24 md:pb-0">
-        <Routes>
-          <Route path="/fridge"   element={<FridgePage  user={user} />} />
-          <Route path="/recipes"  element={<RecipesPage user={user} />} />
-          <Route path="/saved"    element={<SavedPage   user={user} />} />
-          <Route path="/history"  element={<HistoryPage  user={user} />} />
-          <Route path="/schedule" element={<SchedulePage user={user} />} />
-          <Route path="/profile"  element={<ProfilePage  user={user} />} />
-          <Route path="*"         element={<Navigate to="/fridge" replace />} />
-        </Routes>
-      </main>
+    <div className="min-h-screen" style={{ background: 'var(--bg)', '--hue': hue, '--hue-ink': ink }}>
+      <HeaderSlotContext.Provider value={slot}>
+        <Navbar user={user} />
+        <div ref={setSlot} />
+        <main className="pb-24 md:pb-0">
+          <Routes>
+            <Route path="/fridge"   element={<FridgePage  user={user} />} />
+            <Route path="/recipes"  element={<RecipesPage user={user} />} />
+            <Route path="/saved"    element={<SavedPage   user={user} />} />
+            <Route path="/history"  element={<HistoryPage  user={user} />} />
+            <Route path="/schedule" element={<SchedulePage user={user} />} />
+            <Route path="/profile"  element={<ProfilePage  user={user} />} />
+            <Route path="*"         element={<Navigate to="/fridge" replace />} />
+          </Routes>
+        </main>
+      </HeaderSlotContext.Provider>
     </div>
   )
 }

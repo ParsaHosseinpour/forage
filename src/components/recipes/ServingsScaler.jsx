@@ -10,8 +10,8 @@ export default function ServingsScaler({ servings, onChange, defaultServings }) 
         Servings
       </span>
 
-      <div className="flex items-center gap-2 rounded-xl border px-1 py-1"
-           style={{ background: 'white', borderColor: 'var(--border)' }}>
+      <div className="flex items-center gap-2 rounded-full border-[1.5px] px-1.5 py-1"
+           style={{ background: 'white', borderColor: 'var(--ink)' }}>
 
         <button
           onClick={() => onChange(Math.max(1, servings - 1))}

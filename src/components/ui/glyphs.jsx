@@ -2,8 +2,21 @@ import {
   Sunrise, Sun, Moon, Apple, Laugh, ThumbsUp, Meh, Flame, Hourglass,
 } from 'lucide-react'
 
-/** Square tile holding a line icon — used for empty states. */
-export function IconTile({ Icon, tone = 'brand', size = 26 }) {
+import Produce from './Produce'
+
+/** Empty-state art: an illustrated sticker (or, for legacy callers, a line icon). */
+export function IconTile({ art, Icon, tone = 'brand', size = 26 }) {
+  if (art) {
+    return (
+      <div
+        className="w-28 h-28 rounded-full grid place-items-center mx-auto mb-5"
+        style={{ background: 'var(--saffron-tint)', border: '2.5px solid var(--ink)', transform: 'rotate(-5deg)' }}
+        aria-hidden="true"
+      >
+        <Produce name={art} size={74} />
+      </div>
+    )
+  }
   const tones = {
     brand: ['var(--brand-tint)', 'var(--brand)'],
     fresh: ['var(--fresh-tint)', 'var(--fresh)'],

@@ -3,7 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { signIn, signUp, requestPasswordReset, resendConfirmationEmail } from '../../lib/supabase'
 import Button from '../ui/Button'
 import { Input, Label } from '../ui/Input'
-import { Sprout, Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import Produce from '../ui/Produce'
 
 // mode: 'signin' | 'signup' | 'forgot'
 export default function AuthPage() {
@@ -77,75 +78,44 @@ export default function AuthPage() {
     forgot: 'Reset your password',
   }
 
-  const SAMPLE = [
-    { name: 'Shakshuka',          have: 5, total: 6 },
-    { name: 'Lentil soup',        have: 6, total: 6 },
-    { name: 'Chicken & rice bowl', have: 3, total: 7 },
-  ]
-
   return (
-    <div className="min-h-screen grid lg:grid-cols-[1.05fr_1fr]" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen grid lg:grid-cols-[1fr_1fr]" style={{ background: 'var(--bg)' }}>
 
-      {/* Left: what the app does, shown with its own meter */}
+      {/* Left: a little of the product's world */}
       <section
         className="hidden lg:flex flex-col justify-between p-14"
-        style={{ background: 'var(--brand)', color: 'white' }}
+        style={{ background: 'var(--butter)', borderRight: '2.5px solid var(--ink)' }}
         aria-hidden="true"
       >
-        <div className="flex items-center gap-2.5">
-          <span className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--saffron)' }}>
-            <Sprout size={19} strokeWidth={2.25} style={{ color: 'var(--ink)' }} />
-          </span>
-          <span className="text-2xl font-extrabold" style={{ letterSpacing: '-0.03em', fontVariationSettings: "'wdth' 85" }}>
-            forage
-          </span>
+        <div className="flex items-center gap-2">
+          <Produce name="Tomatoes" size={34} />
+          <span className="text-[32px] leading-none" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.02em' }}>forage</span>
         </div>
 
         <div>
-          <h2 className="text-5xl mb-10 max-w-md" style={{ lineHeight: 1.04 }}>
-            Cook what is already in your fridge.
-          </h2>
-          <ul className="space-y-6 max-w-sm">
-            {SAMPLE.map(({ name, have, total }) => (
-              <li key={name}>
-                <p className="text-lg font-semibold mb-2" style={{ fontVariationSettings: "'wdth' 96" }}>{name}</p>
-                <div className="flex gap-[3px]">
-                  {Array.from({ length: total }, (_, i) => (
-                    <span
-                      key={i}
-                      className="meter-seg h-2.5 flex-1 rounded-[2px]"
-                      style={{
-                        '--i': i,
-                        background: i < have ? 'var(--saffron)' : 'transparent',
-                        boxShadow:  i < have ? 'none' : 'inset 0 0 0 1.5px rgba(255,255,255,0.4)',
-                      }}
-                    />
-                  ))}
-                </div>
-                <p className="text-sm mt-1.5" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                  {have === total ? 'Everything is in your fridge' : `${have} of ${total} in your fridge`}
-                </p>
-              </li>
+          <div className="flex flex-wrap gap-4 mb-10 max-w-md">
+            {['Eggs', 'Tomatoes', 'Lemon', 'Garlic', 'Spinach', 'Feta'].map((n, i) => (
+              <span key={n} className="grid place-items-center w-[84px] h-[84px] rounded-full"
+                    style={{ background: '#fff', border: '2.5px solid var(--ink)', boxShadow: '0 3px 0 var(--ink)', transform: `rotate(${[-5, 4, -3, 5, -4, 3][i]}deg)` }}>
+                <Produce name={n} size={56} />
+              </span>
             ))}
-          </ul>
+          </div>
+          <p className="text-[56px] max-w-md" style={{ fontFamily: 'var(--font-display)', lineHeight: 1, letterSpacing: '-0.02em' }}>
+            Cook what is already in your fridge.
+          </p>
         </div>
 
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-          Log your ingredients, see what you can make, plan the week.
-        </p>
+        <p className="text-[17px] max-w-sm">Log your ingredients, see what you can make, plan the week.</p>
       </section>
 
       {/* Right: the form */}
       <main className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
 
-          <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-10" aria-label="Back to Forage home">
-            <span className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--brand)' }}>
-              <Sprout size={19} strokeWidth={2.25} style={{ color: 'var(--saffron)' }} />
-            </span>
-            <span className="text-2xl font-extrabold" style={{ letterSpacing: '-0.03em', fontVariationSettings: "'wdth' 85" }}>
-              forage
-            </span>
+          <Link to="/" className="lg:hidden flex items-center gap-2 mb-10" aria-label="Back to Forage home">
+            <Produce name="Tomatoes" size={32} />
+            <span className="text-[30px] leading-none" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.02em' }}>forage</span>
           </Link>
 
           <Link to="/" className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium mb-8 hover:underline"
@@ -153,7 +123,7 @@ export default function AuthPage() {
             <ArrowLeft size={15} strokeWidth={2} /> Back to home
           </Link>
 
-          <h1 className="text-4xl mb-8">{titles[mode]}</h1>
+          <h1 className="text-5xl mb-8">{titles[mode]}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

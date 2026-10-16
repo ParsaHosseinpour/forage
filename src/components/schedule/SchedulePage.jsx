@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, UtensilsCrossed, ShoppingCart, CalendarDays, ChevronLeft, ChevronRight, ChefHat } from 'lucide-react'
+import { Trash2, UtensilsCrossed, ShoppingCart, ChevronLeft, ChevronRight, ChefHat } from 'lucide-react'
 import { useMealPlan, DAY_NAMES, SLOT_TYPES, parseLocalDate } from '../../hooks/useMealPlan'
 import { useFridge } from '../../hooks/useFridge'
 import { usePantry } from '../../hooks/usePantry'
@@ -10,14 +10,15 @@ import { buildDeductionPlan } from '../../lib/cookUtils'
 import Button from '../ui/Button'
 import { IconTile, SlotIcon } from '../ui/glyphs'
 import { useDeferredDelete } from '../../hooks/useDeferredDelete'
+import PageHeader from '../layout/PageHeader'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
 const SLOT_CONFIG = {
-  breakfast: { label: 'Breakfast', bg: 'var(--saffron-tint)', ring: 'var(--saffron)',   text: 'var(--saffron-ink)' },
+  breakfast: { label: 'Breakfast', bg: 'var(--saffron-tint)', ring: 'var(--saffron)',    text: 'var(--saffron-ink)' },
   lunch:     { label: 'Lunch',     bg: 'var(--fresh-tint)',   ring: 'var(--fresh-soft)', text: 'var(--fresh)'       },
-  dinner:    { label: 'Dinner',    bg: 'var(--brand-tint)',   ring: 'var(--brand-soft)', text: 'var(--brand)'       },
-  snack:     { label: 'Snack',     bg: 'var(--bg-sunk)',      ring: 'var(--border)',     text: 'var(--ink-muted)'   },
+  dinner:    { label: 'Dinner',    bg: '#FBE3DE',             ring: '#F2A79C',           text: '#A8281A'            },
+  snack:     { label: 'Snack',     bg: 'var(--carrot-tint)',  ring: 'var(--carrot-soft)', text: 'var(--carrot)'     },
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -334,25 +335,14 @@ export default function SchedulePage({ user }) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 pt-8 pb-8">
 
-      {/* ── Header ── */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-4xl mb-1.5">
-            Meal planner
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--ink-muted)' }}>
-            {weekLabel}
-            {slotCount > 0 && (
-              <span className="ml-2 px-2 py-0.5 rounded-full text-xs"
-                    style={{ background: 'var(--brand-tint)', color: 'var(--brand)' }}>
-                {slotCount} meal{slotCount !== 1 ? 's' : ''} planned
-              </span>
-            )}
-          </p>
-        </div>
-        <div className="flex flex-wrap justify-end gap-2">
+      <PageHeader
+        width="max-w-6xl"
+        title="Meal planner"
+        art="Eggs"
+        subtitle={`${weekLabel}${slotCount > 0 ? `, ${slotCount} meal${slotCount !== 1 ? 's' : ''} planned` : ''}`}
+        actions={<>
           <div className="flex items-center gap-1" role="group" aria-label="Choose week">
             <Button variant="secondary" size="sm" onClick={() => setWeekOffset(o => o - 1)} aria-label="Previous week">
               <ChevronLeft size={14} />
@@ -365,24 +355,15 @@ export default function SchedulePage({ user }) {
             </Button>
           </div>
           <Button variant="secondary" size="sm" onClick={() => navigate('/saved')}>
-            <ShoppingCart size={13} /> List
+            <ShoppingCart size={13} /> Shopping list
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/recipes')}>
-            <ChevronLeft size={13} /> Recipes
-          </Button>
-        </div>
-      </div>
+        </>}
+      />
 
-      {/* ── Tip banner ── */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-2xl mb-6"
-           style={{ background: 'var(--brand-tint)', border: '1px solid var(--brand-soft)' }}>
-        <CalendarDays size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-        <p className="text-xs" style={{ color: 'var(--brand)' }}>
-          Open any recipe → <strong>Add to Schedule</strong> to plan meals.
-          Use <strong>Cook</strong> to log a meal and update your fridge, or <strong>Remove</strong> to take it off the plan.
-          Scheduled meals auto-sync to your Shopping List.
-        </p>
-      </div>
+      <p className="text-[15px] mb-6 max-w-2xl" style={{ color: 'var(--ink-muted)' }}>
+        Add meals from any recipe with <strong>Add to schedule</strong>. <strong>Cook</strong> logs the meal
+        and updates your fridge. Planned meals feed your shopping list.
+      </p>
 
       {/* ── Loading ── */}
       {loading && (
@@ -511,7 +492,7 @@ export default function SchedulePage({ user }) {
       {/* ── Empty state ── */}
       {!loading && slotCount === 0 && (
         <div className="text-center py-16 fade-in">
-          <IconTile Icon={CalendarDays} />
+          <IconTile art="Eggs" />
           <h2 className="text-2xl mb-2">Nothing planned yet</h2>
           <p className="text-[15px] mb-6" style={{ color: 'var(--ink-muted)' }}>
             Open a recipe and tap <strong>Add to schedule</strong> to plan your week.

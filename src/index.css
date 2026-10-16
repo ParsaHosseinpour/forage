@@ -1,56 +1,69 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400..800&family=Young+Serif&display=swap');
 @import "tailwindcss";
 
 /*
-  Forage design tokens — "fridge light".
-  Cool shelf-white surfaces, plum ink, and produce colours that each carry
-  one meaning: green = you have it, carrot = you need to buy it,
-  saffron = the single accent, plum = actions.
+  Forage design tokens.
+  Warm, saturated produce colours on a neutral paper. Each section of the app
+  owns one hue (--hue). Colour also carries meaning: spinach green = you have
+  it / selected, carrot = you need to buy it, red = destructive.
 */
 :root {
-  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Young Serif', Georgia, 'Times New Roman', serif;
+  --font-body:    'Albert Sans', ui-sans-serif, system-ui, sans-serif;
 
-  --bg:          #F0F4F2;   /* the shelf */
-  --bg-sunk:     #E2EAE6;   /* wells, skeletons, inactive */
+  /* Ingredient hues. Each section of the app owns one, like a product line. */
+  --tomato:  #D8321F;
+  --butter:  #FFD23F;
+  --spinach: #1E6B3E;
+  --carrot-hue: #F28A1E;
+  --radish:  #EA6A8E;
+
+  /* Set per route (see Navbar / PageHeader). */
+  --hue:     var(--butter);
+  --hue-ink: #2B2118;
+
+  --bg:          #FAFAF7;   /* paper */
+  --bg-sunk:     #EFEDE4;
   --surface:     #FFFFFF;
-  --border:      #CBD6D1;
+  --border:      #E0DDD0;
 
-  --ink:         #2B1D3A;   /* aubergine, not black */
-  --ink-muted:   #6A6076;
+  --ink:         #2B2118;   /* rind */
+  --ink-muted:   #6B6256;
 
-  --brand:       #5B2A86;   /* plum: actions, links, active */
-  --brand-hover: #47206B;
-  --brand-tint:  #EDE4F5;
-  --brand-soft:  #CDB5E4;
+  /* Interactive colour is spinach: links, selected, primary actions. */
+  --brand:       #1E6B3E;
+  --brand-hover: #17552F;
+  --brand-tint:  #E3F1E3;
+  --brand-soft:  #A9D4B5;
 
-  --saffron:      #F2B400;  /* accent: marks, selection */
-  --saffron-tint: #FFF3CC;
-  --saffron-ink:  #7A5600;
+  --saffron:      #FFD23F;  /* butter: highlights */
+  --saffron-tint: #FFF4C2;
+  --saffron-ink:  #6B5200;
 
-  --fresh:       #2E7D4F;   /* in your fridge / done */
-  --fresh-tint:  #E1F2E7;
-  --fresh-soft:  #A9D6B9;
+  --fresh:       #1E6B3E;   /* in your fridge / done */
+  --fresh-tint:  #E3F1E3;
+  --fresh-soft:  #A9D4B5;
 
-  --carrot:      #B84E16;   /* need to buy / warning */
-  --carrot-tint: #FCE8DA;
-  --carrot-soft: #F1BF9F;
+  --carrot:      #B85408;   /* need to buy / warning (text-safe) */
+  --carrot-tint: #FDE8D2;
+  --carrot-soft: #F5C08A;
 
-  --danger:      #C0332A;   /* delete / error */
-  --danger-tint: #FDECEA;
-  --danger-soft: #F2B4AE;
+  --danger:      #B3261E;   /* delete / error */
+  --danger-tint: #FBE4E1;
+  --danger-soft: #EFAFA9;
 
-  --shadow:    0 1px 0 rgba(43, 29, 58, 0.06);
-  --shadow-md: 0 10px 28px -10px rgba(43, 29, 58, 0.30);
+  --shadow:    0 1px 0 rgba(43, 33, 24, 0.08);
+  --shadow-md: 0 10px 24px -12px rgba(43, 33, 24, 0.35);
 }
 
 * { box-sizing: border-box; }
 
 @layer base {
   body {
-    font-family: var(--font-display);
-    font-optical-sizing: auto;
-    font-size: 15px;
+    font-family: var(--font-body);
+    font-size: 16px;
     line-height: 1.5;
+    font-synthesis: none;
     background: var(--bg);
     color: var(--ink);
     margin: 0;
@@ -59,10 +72,9 @@
 
   h1, h2, h3 {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.12;
-    font-variation-settings: 'wdth' 90;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
   }
 
   button, input, select, textarea { font-family: inherit; }
@@ -74,7 +86,7 @@
 }
 
 :focus-visible {
-  outline: 2px solid var(--brand);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
   border-radius: 6px;
 }

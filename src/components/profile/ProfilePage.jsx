@@ -7,6 +7,7 @@ import {
   signOut, updateUserMeta, updatePassword, deleteMyAccount,
 } from '../../lib/supabase'
 import { DIETS, SERVING_CHOICES, getPrefs, shownName } from '../../lib/preferences'
+import PageHeader from '../layout/PageHeader'
 
 function Section({ title, description, children, tone = 'default' }) {
   const danger = tone === 'danger'
@@ -140,13 +141,13 @@ export default function ProfilePage({ user }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-5 pt-10 pb-16">
-      <div className="mb-8">
-        <h1 className="text-4xl mb-1.5">Profile</h1>
-        <p className="text-[15px]" style={{ color: 'var(--ink-muted)' }}>
-          Signed in as {shownName(user)} · {user.email}
-        </p>
-      </div>
+    <div className="max-w-2xl mx-auto px-5 pt-8 pb-16">
+      <PageHeader
+        width="max-w-2xl"
+        title="Profile"
+        art="Onion"
+        subtitle={`Signed in as ${shownName(user)}, ${user.email}`}
+      />
 
       <div className="space-y-6">
 

@@ -1,9 +1,9 @@
 const base = `
-  w-full px-3.5 py-2.5 rounded-[10px] border border-[var(--border)]
-  bg-[var(--surface)] text-[var(--ink)] text-base sm:text-[15px]
+  w-full px-4 py-2.5 rounded-[10px] border-[1.5px] border-[var(--ink)]
+  bg-[var(--surface)] text-[var(--ink)] text-base
   placeholder:text-[var(--ink-muted)]
-  focus:outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-soft)]
-  transition-colors duration-150
+  focus:outline-none focus:ring-[3px] focus:ring-[var(--saffron)]
+  transition-shadow duration-100
 `
 
 export function Input({ className = '', ...props }) {
