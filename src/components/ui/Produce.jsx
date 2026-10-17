@@ -233,6 +233,22 @@ const ART = {
       <path d="M21 25 C21 24 23 24 23 25" strokeWidth="2" />
     </>
   ),
+  Shaker: (
+    <>
+      <path d="M22 24 H42 L44 55 H20Z" fill="#FFFFFF" />
+      <path d="M22 24 L26 11 H38 L42 24Z" fill="#C9CED4" />
+      <g fill="#2B2118" stroke="none"><circle cx="29" cy="17" r="1.3" /><circle cx="35" cy="17" r="1.3" /><circle cx="32" cy="21" r="1.3" /></g>
+      <rect x="21.5" y="35" width="21" height="11" fill="#FFD23F" strokeWidth="2" />
+    </>
+  ),
+  Bag: (
+    <>
+      <path d="M16 15 H48 V56 H16Z" fill="#F1E3C4" />
+      <path d="M16 15 L20 8 H44 L48 15Z" fill="#E3CFA2" />
+      <circle cx="32" cy="35" r="9" fill="#FFF8E7" strokeWidth="2" />
+      <path d="M27 36 C29 31 35 31 37 36" strokeWidth="2" />
+    </>
+  ),
   Fridge: (
     <>
       <rect x="14" y="5" width="36" height="54" rx="5" fill="#FFFFFF" />

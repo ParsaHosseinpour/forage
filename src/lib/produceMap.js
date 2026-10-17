@@ -18,6 +18,8 @@ export function produceKey(name = '') {
     [/garlic/, 'Garlic'], [/\bpeas?\b|edamame/, 'Peas'],
     [/carrot/, 'Carrot'], [/potato|\byam\b/, 'Potato'], [/mushroom/, 'Mushroom'], [/apple|\bpears?\b/, 'Apple'],
     [/(bell|red|green|yellow|sweet) pepper|capsicum|chil+i|jalape/, 'Pepper'],
+    [/\bpepper\b|\bsalt\b|spice|cumin|paprika|cinnamon|oregano|thyme|seasoning|turmeric/, 'Shaker'],
+    [/flour|sugar|baking|powder|starch|cocoa/, 'Bag'],
     [/broccoli|cauliflower/, 'Broccoli'], [/cucumber|zucchini|courgette|pickle/, 'Cucumber'],
     [/bread|\bbun\b|toast|bagel|tortilla|pita|baguette/, 'Bread'],
     [/\boil\b|vinegar|sauce|ketchup|dressing/, 'Bottle'], [/honey|\bjam\b|syrup/, 'Honey'],
