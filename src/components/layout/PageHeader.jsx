@@ -16,19 +16,23 @@ export default function PageHeader({ title, subtitle, art, actions, width = 'max
 
   return createPortal(
     <div style={{ background: 'var(--hue)', color: 'var(--hue-ink)', borderBottom: '2.5px solid var(--ink)' }}>
-      <div className={`${width} mx-auto px-5 pt-8 pb-7 sm:pt-10 sm:pb-9 flex items-end justify-between gap-6`}>
+      <div className={`${width} mx-auto px-5 pt-5 pb-5 sm:pt-8 sm:pb-7 flex items-end justify-between gap-6`}>
         <div className="min-w-0">
-          <h1 className="text-[2.5rem] sm:text-6xl mb-2">{title}</h1>
-          {subtitle && <p className="text-[17px]">{subtitle}</p>}
-          {actions && <div className="flex flex-wrap items-center gap-2 mt-5">{actions}</div>}
+          <h1 className="text-[2.1rem] sm:text-6xl">{title}</h1>
+          {(subtitle || actions) && (
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-2 sm:mt-3">
+              {subtitle && <p className="text-[15px] sm:text-[17px]">{subtitle}</p>}
+              {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+            </div>
+          )}
         </div>
         {art && (
           <div
-            className="hidden sm:grid flex-shrink-0 place-items-center w-28 h-28 rounded-full"
+            className="hidden sm:grid flex-shrink-0 place-items-center w-24 h-24 rounded-full"
             style={{ background: '#fff', border: '2.5px solid var(--ink)', transform: 'rotate(6deg)' }}
             aria-hidden="true"
           >
-            <Produce name={art} size={78} />
+            <Produce name={art} size={66} />
           </div>
         )}
       </div>

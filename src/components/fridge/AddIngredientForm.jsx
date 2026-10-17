@@ -1,28 +1,18 @@
 import { useState } from 'react'
-import { X, Sparkles, Plus, Carrot, Beef, Milk, Wheat, Package, Snowflake } from 'lucide-react'
+import { X, Sparkles, Plus } from 'lucide-react'
 import Button from '../ui/Button'
 import { Input, Label, Select } from '../ui/Input'
 import IngredientAutocomplete from '../ui/IngredientAutocomplete'
 import { parseBulkIngredients, detectCategory } from '../../lib/ingredientParser'
 import { getIngredientDefaults } from '../../lib/ingredientSuggestions'
+import { CATEGORIES, UNITS } from '../../lib/fridgeConstants'
 
-export const CATEGORIES = [
-  { value: 'produce', label: 'Produce', Icon: Carrot    },
-  { value: 'protein', label: 'Protein', Icon: Beef      },
-  { value: 'dairy',   label: 'Dairy',   Icon: Milk      },
-  { value: 'grains',  label: 'Grains',  Icon: Wheat     },
-  { value: 'pantry',  label: 'Pantry',  Icon: Package   },
-  { value: 'frozen',  label: 'Frozen',  Icon: Snowflake },
-  { value: 'other',   label: 'Other',   Icon: Package   },
-]
-
-const UNITS = ['', 'g', 'kg', 'ml', 'L', 'oz', 'lb', 'cup', 'tbsp', 'tsp', 'piece', 'bunch', 'clove', 'slice']
 const DEFAULT = { name: '', quantity: '', unit: '', category: 'produce' }
 
 // ── Single ingredient form ───────────────────────────────────────────────────
 
-function SingleForm({ onAdd, onClose }) {
-  const [form, setForm]       = useState(DEFAULT)
+function SingleForm({ onAdd, onClose, initialName = '' }) {
+  const [form, setForm]       = useState({ ...DEFAULT, name: initialName })
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
   const [lastAdded, setLastAdded] = useState('')
@@ -293,7 +283,7 @@ function BulkForm({ onAdd, onClose }) {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export default function AddIngredientForm({ onAdd, onClose }) {
+export default function AddIngredientForm({ onAdd, onClose, initialName = '' }) {
   const [tab, setTab] = useState('single')
 
   const tabStyle = (t) => ({
@@ -309,8 +299,8 @@ export default function AddIngredientForm({ onAdd, onClose }) {
   })
 
   return (
-    <div className="rounded-2xl border p-6 slide-up"
-         style={{ background: 'white', borderColor: 'var(--border)', boxShadow: 'var(--shadow-md)' }}>
+    <div className="rounded-[14px] p-6 slide-up"
+         style={{ background: 'var(--surface)', border: '2.5px solid var(--ink)', boxShadow: '0 4px 0 var(--ink)' }}>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
@@ -335,7 +325,7 @@ export default function AddIngredientForm({ onAdd, onClose }) {
       </div>
 
       {tab === 'single'
-        ? <SingleForm onAdd={onAdd} onClose={onClose} />
+        ? <SingleForm onAdd={onAdd} onClose={onClose} initialName={initialName} />
         : <BulkForm  onAdd={onAdd} onClose={onClose} />}
     </div>
   )

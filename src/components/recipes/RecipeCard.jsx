@@ -1,6 +1,7 @@
 import { Clock, Users } from 'lucide-react'
 import SaveButton from './SaveButton'
-import Produce, { produceKey } from '../ui/Produce'
+import Produce from '../ui/Produce'
+import { produceKey } from '../../lib/produceMap'
 
 const MAX_SEGMENTS = 12
 
