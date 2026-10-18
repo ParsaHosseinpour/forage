@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import { Input, Select, Label } from '../ui/Input'
 import Button from '../ui/Button'
-import { IngredientArt } from '../ui/Produce'
 import { useDialog } from '../../hooks/useDialog'
 import { CATEGORIES, UNITS } from '../../lib/fridgeConstants'
 
@@ -44,13 +43,9 @@ export default function IngredientSheet({ item, onClose, onSave, onRemove }) {
         className="w-full max-w-md rounded-[14px] p-5 sm:p-6 fade-in"
         style={{ background: 'var(--bg)', border: '2.5px solid var(--ink)', boxShadow: '0 6px 0 var(--ink)' }}
       >
-        <div className="flex items-center gap-3 mb-5">
-          <span className="grid place-items-center w-14 h-14 rounded-full flex-shrink-0"
-                style={{ background: '#fff', border: '2px solid var(--ink)' }}>
-            <IngredientArt name={name} size={38} />
-          </span>
-          <h2 className="text-[26px] flex-1 min-w-0 truncate">{item.name}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="p-2 rounded-full hover:bg-[var(--bg-sunk)]">
+        <div className="flex items-start gap-3 mb-5">
+          <h2 className="text-[28px] flex-1 min-w-0 break-words">{item.name}</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="p-2 -mr-2 -mt-1 rounded-full hover:bg-[var(--bg-sunk)]">
             <X size={20} />
           </button>
         </div>
