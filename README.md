@@ -14,10 +14,10 @@ Log what's in your fridge, find recipes you can actually cook with it, close the
 - **Recipe search.** Matches your fridge and pantry against our own recipe database, weighted so recipes using more of what you have rank higher, and so a missing protein counts very differently from a missing pinch of spice. Every recipe shows an ingredient bar, one segment per ingredient (filled = in your fridge, outlined = still to buy). Filter by diet and time, sort by best match, fewest missing, most matching or quickest, and scale servings. A long ingredient list collapses to a few chips.
 - **Recipe detail.** Ingredients split into "have" and "need to buy", a servings scaler that live-recalculates every quantity (proper fractions, not decimals), and step-by-step instructions.
 - **"I cooked this".** Deducts exactly what you used from your fridge. Handles unit mismatches (recipe says "2 chicken breasts", your fridge has "500g chicken breast": it estimates the conversion and lets you adjust it), then logs the meal to history.
-- **Saved recipes and shopping list.** Heart a recipe to save it. The shopping list is built live from your saved recipes plus this week's planned meals, grouped by recipe, with anything you already have hidden by default.
+- **Saved recipes and shopping list.** Heart a recipe to save it. The shopping list is built live from your saved recipes plus your planned meals, grouped by recipe, with anything you already have hidden by default. Choose how far ahead it looks (this week, the next 2 weeks or the next 4); each planned meal says when it is planned, so the same recipe on two days stays two entries.
 - **Buy missing ingredients.** One-click search links to Instacart and Amazon for anything still on your list, per ingredient (affiliate-linked).
 - **Cooking history.** A timeline of everything you've cooked, taggable by meal type, rateable on a five-point scale, with a weekly summary and a "cook again" shortcut.
-- **Weekly meal planner.** A 7-day grid with 4 slots per day. Browse any week, schedule a recipe into this week or next from the recipe page, and cook straight from the plan (same deduction flow as the recipe page).
+- **Weekly meal planner.** A 7-day grid with 4 slots per day. Browse any week, schedule a recipe into any week up to 12 weeks ahead from the recipe page, copy a week into the next one (meals already there are skipped), and cook straight from the plan (same deduction flow as the recipe page).
 - **Profile and settings.** Display name, default servings and default diet (used as the starting filters on Recipes), password change, sign out, and delete account (behind a type-your-email confirmation).
 - **Everyday UX.** Removing a fridge item, history entry or planned meal shows an Undo toast before anything is deleted. Dialogs close on Escape and trap focus. The browser Back button closes an open recipe instead of leaving the page. Each page sets its own tab title.
 - **Auth.** Email sign-up and sign-in, forgot-password flow, resend-confirmation flow.
@@ -218,7 +218,6 @@ supabase_*.sql               # Migrations, run in the order listed above
 ## Known limitations
 
 - Recipe count and nutrition data depend on which seed you run. TheMealDB alone (~320 recipes, no nutrition) is enough to demo but not for daily use; `scripts/import-foodcom.py` (522k+ recipes, real nutrition on the majority) is the recommended source for a real deployment. See "Seed the recipe database" above.
-- **Multi-week planning is partial.** You can browse any week in the planner and schedule into this week or next from a recipe page, but the shopping list only reads the current week's plan, so meals planned for next week don't appear on it yet. There is no way to schedule beyond next week from a recipe page or to copy a week.
 - The Supabase project URL and anon key are hardcoded in `src/lib/supabase.js` rather than read from environment variables.
 - No error boundaries around page components.
 - There is no automated test suite in the repo yet.
@@ -248,6 +247,5 @@ supabase_*.sql               # Migrations, run in the order listed above
 - [x] Profile and settings, with account deletion
 - [x] Public landing page and redesigned interface (produce hues, illustration, text-first fridge)
 - [x] Undo for removals, keyboard-friendly dialogs, Back button closes recipes
-- [x] Planner: browse any week, schedule into next week
-- [ ] **Multi-week meal planning (finish):** include upcoming weeks in the shopping list, schedule beyond next week, copy a week
+- [x] Multi-week meal planning: browse any week, schedule up to 12 weeks ahead, copy a week, shopping list covers upcoming weeks
 - [ ] PWA / offline support

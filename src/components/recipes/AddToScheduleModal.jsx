@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
-import { DAY_NAMES, SLOT_TYPES } from '../../hooks/useMealPlan'
+import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { DAY_NAMES, SLOT_TYPES, getMondayOf, shiftWeek, dayMonth } from '../../hooks/useMealPlan'
 import Button from '../ui/Button'
 import { SlotIcon } from '../ui/glyphs'
 import { useDialog } from '../../hooks/useDialog'
@@ -8,7 +8,7 @@ import { useDialog } from '../../hooks/useDialog'
 
 export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
   const dialogRef = useDialog(onClose)
-  const [week, setWeek]            = useState(0)   // 0 = this week, 1 = next
+  const [week, setWeek]            = useState(0)   // weeks from now: 0 = this week
   const [selectedDay,  setDay]  = useState(null)
   const [selectedSlot, setSlot] = useState(null)
   const [loading, setLoading]   = useState(false)
@@ -33,11 +33,11 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
       aria-modal="true"
       aria-label="Add to meal planner"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(43,29,58,0.55)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(43,33,24,0.55)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-sm rounded-2xl border overflow-hidden slide-up"
-           style={{ background: 'white', borderColor: 'var(--border)', boxShadow: 'var(--shadow-md)' }}>
+      <div className="w-full max-w-sm rounded-[14px] overflow-hidden slide-up"
+           style={{ background: 'var(--bg)', border: '2.5px solid var(--ink)', boxShadow: '0 6px 0 var(--ink)' }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
@@ -55,24 +55,28 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
         </div>
 
         <div className="px-5 pb-5 space-y-4">
-          {/* Week */}
-          <div className="flex gap-1 p-1 rounded-[10px]" style={{ background: 'var(--bg-sunk)' }} role="group" aria-label="Week">
-            {[['This week', 0], ['Next week', 1]].map(([label, w]) => (
-              <button
-                key={w}
-                type="button"
-                onClick={() => setWeek(w)}
-                aria-pressed={week === w}
-                className="flex-1 py-1.5 rounded-[8px] text-sm transition-colors"
-                style={{
-                  background: week === w ? 'var(--surface)' : 'transparent',
-                  color:      week === w ? 'var(--ink)'     : 'var(--ink-muted)',
-                  fontWeight: week === w ? 650 : 500,
-                }}
-              >
-                {label}
-              </button>
-            ))}
+          {/* Week: any week up to 12 ahead */}
+          <div className="flex items-center gap-2" role="group" aria-label="Week">
+            <button type="button" onClick={() => setWeek(w => Math.max(0, w - 1))} disabled={week === 0}
+                    aria-label="Earlier week"
+                    className="w-9 h-9 grid place-items-center rounded-full border-[1.5px] disabled:opacity-35"
+                    style={{ borderColor: 'var(--ink)', background: 'var(--surface)' }}>
+              <ChevronLeft size={16} />
+            </button>
+            <div className="flex-1 text-center" aria-live="polite">
+              <p className="text-[16px] font-bold leading-tight">
+                {week === 0 ? 'This week' : week === 1 ? 'Next week' : `Week of ${dayMonth(shiftWeek(getMondayOf(), week * 7))}`}
+              </p>
+              <p className="text-[13px]" style={{ color: 'var(--ink-muted)' }}>
+                {dayMonth(shiftWeek(getMondayOf(), week * 7))} to {dayMonth(shiftWeek(getMondayOf(), week * 7 + 6))}
+              </p>
+            </div>
+            <button type="button" onClick={() => setWeek(w => Math.min(11, w + 1))} disabled={week === 11}
+                    aria-label="Later week"
+                    className="w-9 h-9 grid place-items-center rounded-full border-[1.5px] disabled:opacity-35"
+                    style={{ borderColor: 'var(--ink)', background: 'var(--surface)' }}>
+              <ChevronRight size={16} />
+            </button>
           </div>
 
           {/* Day picker */}
@@ -89,11 +93,13 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
                   <button
                     key={idx}
                     onClick={() => setDay(idx)}
-                    className="py-2 rounded-lg text-xs font-medium transition-all"
+                    className="py-2 rounded-full border-[1.5px] text-[13px] transition-colors"
+                    aria-pressed={selected}
                     style={{
-                      background:  selected ? 'var(--brand)'      : isToday ? 'var(--brand-tint)' : 'var(--bg)',
-                      color:       selected ? 'white'             : isToday ? 'var(--brand)'       : 'var(--ink-muted)',
-                      borderBottom: isToday && !selected ? '2px solid var(--brand)' : '2px solid transparent',
+                      background:  selected ? 'var(--saffron)' : isToday ? 'var(--saffron-tint)' : 'var(--surface)',
+                      borderColor: 'var(--ink)',
+                      color:       selected || isToday ? 'var(--ink)' : 'var(--ink-muted)',
+                      fontWeight:  selected ? 700 : 600,
                     }}
                   >
                     {name.slice(0, 2)}
@@ -116,12 +122,13 @@ export default function AddToScheduleModal({ recipe, onClose, onAdd }) {
                   <button
                     key={slot}
                     onClick={() => setSlot(slot)}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm capitalize transition-all"
+                    className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-full border-[1.5px] text-sm capitalize transition-colors"
+                    aria-pressed={selected}
                     style={{
-                      background:  selected ? 'var(--brand)'      : 'white',
-                      borderColor: selected ? 'var(--brand)'      : 'var(--border)',
-                      color:       selected ? 'white'             : 'var(--ink)',
-                      fontWeight:  selected ? 500                 : 400,
+                      background:  selected ? 'var(--saffron)' : 'var(--surface)',
+                      borderColor: 'var(--ink)',
+                      color:       selected ? 'var(--ink)'     : 'var(--ink-muted)',
+                      fontWeight:  selected ? 700 : 600,
                     }}
                   >
                     <SlotIcon slot={slot} size={15} /> {slot}

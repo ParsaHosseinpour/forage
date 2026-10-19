@@ -8,7 +8,7 @@ import { usePantry } from '../../hooks/usePantry'
 import { useCookHistory } from '../../hooks/useCookHistory'
 import { useToast } from '../ui/Toast'
 import { refreshRecipeMatch } from '../../lib/recipeDb'
-import { useMealPlan } from '../../hooks/useMealPlan'
+import { useMealPlan, usePlannedMeals, weekPhrase } from '../../hooks/useMealPlan'
 import RecipeCard, { RecipeCardSkeleton } from '../recipes/RecipeCard'
 import RecipeDetail from '../recipes/RecipeDetail'
 import CookItModal from '../recipes/CookItModal'
@@ -36,15 +36,18 @@ export default function SavedPage({ user }) {
   const { staples }                            = usePantry(user.id)
   const { saved, loading, toggle, isSaved }    = useSavedRecipes(user.id)
   const { logCook }                            = useCookHistory(user.id)
-  const { slots: scheduledSlots, addSlot }     = useMealPlan(user.id)
+  const [weeks, setWeeks]                       = useState(2)   // planned weeks the shopping list covers
+  const { addSlot }                            = useMealPlan(user.id)
+  const { slots: plannedSlots, reload: reloadPlanned } = usePlannedMeals(user.id, weeks)
   const { byRecipe, need, have, isChecked, toggle: checkToggle,
-          clearAll, checkedCount, loading: listLoading } = useShoppingList(user.id, saved, fridgeItems, staples, scheduledSlots)
+          clearAll, checkedCount, loading: listLoading } = useShoppingList(user.id, saved, fridgeItems, staples, plannedSlots)
 
   const fridgeNames = fridgeItems.map(i => i.name)
 
   const handleSchedule = async (dayIdx, slotType, recipe, weekOffset = 0) => {
     await addSlot(dayIdx, slotType, recipe, weekOffset)
-    toast({ type: 'success', message: weekOffset ? 'Added to next week.' : 'Added to schedule.', duration: 3000 })
+    await reloadPlanned()
+    toast({ type: 'success', message: weekOffset ? `Added to ${weekPhrase(weekOffset)}.` : 'Added to schedule.', duration: 3000 })
   }
 
   // ── Cook It — runs from both the modal (card) and the detail page ──────────
@@ -179,6 +182,27 @@ export default function SavedPage({ user }) {
       )}
 
       {/* ── SHOPPING LIST TAB ── */}
+      {tab === 'shopping' && !selected && (
+        <div className="flex flex-wrap items-center gap-2 mb-6" role="group" aria-label="Planned meals to include">
+          <span className="text-[15px] font-bold mr-1">Planned meals:</span>
+          {[[1, 'This week'], [2, 'Next 2 weeks'], [4, 'Next 4 weeks']].map(([n, label]) => (
+            <button
+              key={n}
+              onClick={() => setWeeks(n)}
+              aria-pressed={weeks === n}
+              className="px-3.5 py-1.5 rounded-full text-sm border-[1.5px] transition-colors duration-100"
+              style={{
+                background:  weeks === n ? 'var(--saffron)' : 'var(--surface)',
+                borderColor: 'var(--ink)',
+                color:       weeks === n ? 'var(--ink)'     : 'var(--ink-muted)',
+                fontWeight:  weeks === n ? 700 : 500,
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       {tab === 'shopping' && !selected && (
         <ShoppingList
           byRecipe={byRecipe}

@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Trash2, UtensilsCrossed, ShoppingCart, ChevronLeft, ChevronRight, ChefHat } from 'lucide-react'
-import { useMealPlan, DAY_NAMES, SLOT_TYPES, parseLocalDate } from '../../hooks/useMealPlan'
+import { useMealPlan, DAY_NAMES, SLOT_TYPES, parseLocalDate, shiftWeek, dayMonth } from '../../hooks/useMealPlan'
+import { getMealPlan, addMealPlanSlots } from '../../lib/supabase'
 import { useFridge } from '../../hooks/useFridge'
 import { usePantry } from '../../hooks/usePantry'
 import { useCookHistory } from '../../hooks/useCookHistory'
@@ -284,6 +285,36 @@ export default function SchedulePage({ user }) {
     return g
   }, [rawGrid, pending])
 
+  // Copy this week's meals into the week after it, skipping any already there.
+  const [copying, setCopying] = useState(false)
+  const copyForward = async () => {
+    setCopying(true)
+    try {
+      const target = shiftWeek(weekStart, 7)
+      const { data: existing } = await getMealPlan(user.id, target)
+      const has = new Set((existing ?? []).map(x => `${x.slot_day}|${x.slot_type}|${x.recipe_id}`))
+      const rows = allSlots
+        .filter(x => !pending.has(x.id) && !has.has(`${x.slot_day}|${x.slot_type}|${x.recipe_id}`))
+        .map(x => ({ user_id: user.id, week_start: target, slot_day: x.slot_day, slot_type: x.slot_type, recipe_json: x.recipe_json, recipe_id: x.recipe_id }))
+      if (rows.length === 0) {
+        toast({ type: 'info', message: 'Next week already has these meals.', duration: 3500 })
+      } else {
+        const { error } = await addMealPlanSlots(rows)
+        if (error) throw new Error(error.message)
+        toast({
+          type: 'success',
+          message: `Copied ${rows.length} meal${rows.length !== 1 ? 's' : ''} to the week of ${dayMonth(target)}.`,
+          duration: 6000,
+          action: { label: 'View', onClick: () => setWeekOffset(o => o + 1) },
+        })
+      }
+    } catch {
+      toast({ type: 'error', message: 'Could not copy the week. Please try again.' })
+    } finally {
+      setCopying(false)
+    }
+  }
+
   const removeWithUndo = (id) => {
     const slot = allSlots.find(x => x.id === id)
     requestRemove(id, slot?.recipe_json?.title ?? 'Meal')
@@ -354,6 +385,9 @@ export default function SchedulePage({ user }) {
               <ChevronRight size={14} />
             </Button>
           </div>
+          <Button variant="secondary" size="sm" loading={copying} disabled={slotCount === 0} onClick={copyForward}>
+            Copy to next week
+          </Button>
           <Button variant="secondary" size="sm" onClick={() => navigate('/saved')}>
             <ShoppingCart size={13} /> Shopping list
           </Button>
@@ -362,7 +396,7 @@ export default function SchedulePage({ user }) {
 
       <p className="text-[15px] mb-6 max-w-2xl" style={{ color: 'var(--ink-muted)' }}>
         Add meals from any recipe with <strong>Add to schedule</strong>. <strong>Cook</strong> logs the meal
-        and updates your fridge. Planned meals feed your shopping list.
+        and updates your fridge. Planned meals feed your shopping list, this week and up to four weeks ahead.
       </p>
 
       {/* ── Loading ── */}

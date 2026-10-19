@@ -5,7 +5,7 @@ import { useFridge } from '../../hooks/useFridge'
 import { useSavedRecipes } from '../../hooks/useSavedRecipes'
 import { usePantry } from '../../hooks/usePantry'
 import { useCookHistory } from '../../hooks/useCookHistory'
-import { useMealPlan } from '../../hooks/useMealPlan'
+import { useMealPlan, weekPhrase } from '../../hooks/useMealPlan'
 import { useToast } from '../ui/Toast'
 import { findRecipes } from '../../lib/recipeEngine'
 import RecipeCard, { RecipeCardSkeleton } from '../recipes/RecipeCard'
@@ -178,7 +178,7 @@ export default function RecipesPage({ user }) {
 
   const handleSchedule = async (dayIdx, slotType, recipe, weekOffset = 0) => {
     await addSlot(dayIdx, slotType, recipe, weekOffset)
-    toast({ type: 'success', message: `${recipe.title} added to ${slotType} on ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][dayIdx]}${weekOffset ? ' next week' : ''}.`, duration: 4000 })
+    toast({ type: 'success', message: `${recipe.title} added to ${slotType} on ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][dayIdx]}${weekOffset ? ` ${weekPhrase(weekOffset)}` : ''}.`, duration: 4000 })
   }
 
   const tooFewIngredients = !fridgeLoading && !pantryLoading && allIngredients.length < 1

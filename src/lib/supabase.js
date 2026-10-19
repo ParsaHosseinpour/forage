@@ -218,6 +218,21 @@ export const getMealPlan = (userId, weekStart) =>
     .eq('week_start', weekStart)
     .order('slot_day')
 
+/** All slots from `fromWeek` to `toWeek` inclusive (both Monday ISO dates). */
+export const getMealPlanRange = (userId, fromWeek, toWeek) =>
+  supabase
+    .from('meal_plan')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('week_start', fromWeek)
+    .lte('week_start', toWeek)
+    .order('week_start')
+    .order('slot_day')
+
+/** Insert several slots at once (used by "copy week"). */
+export const addMealPlanSlots = (rows) =>
+  supabase.from('meal_plan').insert(rows).select()
+
 export const addMealPlanSlot = (userId, weekStart, slotDay, slotType, recipe) =>
   supabase
     .from('meal_plan')

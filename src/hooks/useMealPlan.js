@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { getMealPlan, addMealPlanSlot, deleteMealPlanSlot } from '../lib/supabase'
+import { getMealPlan, getMealPlanRange, addMealPlanSlot, deleteMealPlanSlot } from '../lib/supabase'
 
 /**
  * ISO date string (YYYY-MM-DD) for Monday of the week containing `date`.
@@ -37,8 +37,52 @@ export function shiftWeek(iso, days) {
   return toISO(d)
 }
 
+const shortDate = (d) => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
+
+/** "Tue 21 Oct" for a planned slot (week start + day index). */
+export function plannedDate(weekStart, slotDay) {
+  return shortDate(parseLocalDate(shiftWeek(weekStart, slotDay)))
+}
+
+/** "27 Oct" style label for a Monday ISO date. */
+export function dayMonth(iso) {
+  return parseLocalDate(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+}
+
+/** "this week", "next week", "in 3 weeks" (offset is weeks from the current one). */
+export function weekPhrase(offset) {
+  return offset === 0 ? 'this week' : offset === 1 ? 'next week' : `in ${offset} weeks`
+}
+
 export const DAY_NAMES  = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 export const SLOT_TYPES = ['breakfast', 'lunch', 'dinner', 'snack']
+
+/**
+ * Everything planned from the current week through the next `weeks` weeks,
+ * for the shopping list. `reload` refetches after something is scheduled.
+ */
+export function usePlannedMeals(userId, weeks = 2) {
+  const [slots, setSlots]     = useState([])
+  const [loading, setLoading] = useState(Boolean(userId))
+  const [version, setVersion] = useState(0)
+
+  useEffect(() => {
+    if (!userId) return undefined
+    let cancelled = false
+    const from = getMondayOf()
+    const to   = shiftWeek(from, (weeks - 1) * 7)
+    getMealPlanRange(userId, from, to).then(({ data, error }) => {
+      if (cancelled) return
+      if (!error) setSlots(data ?? [])
+      setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [userId, weeks, version])
+
+  const reload = useCallback(() => setVersion(v => v + 1), [])
+
+  return { slots, loading, reload }
+}
 
 /**
  * `weekOffset` = how many weeks from the current one to show (0 = this week).

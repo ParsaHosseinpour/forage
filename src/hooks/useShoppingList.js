@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { plannedDate } from './useMealPlan'
 import {
   getShoppingChecks,
   checkShoppingItem,
@@ -48,16 +49,21 @@ export function useShoppingList(userId, savedRecipes, fridgeItems = [], pantrySt
 
   /**
    * byRecipe: all ingredients grouped by recipe title.
-   * Includes both saved recipes and scheduled recipes (prefixed with "Scheduled: ").
+   * Includes saved recipes and planned meals (titled with when they are planned).
    * Each entry carries _inFridge so the view can filter/style.
    */
   const byRecipe = useMemo(() => {
     const map = new Map()
 
-    const processRecipes = (recipes, prefix = '') => {
+    const processRecipes = (recipes, planned = false) => {
       for (const row of recipes) {
         const recipe = row.recipe_json ?? row
-        const title  = `${prefix}${recipe.title ?? 'Unknown recipe'}`
+        const base   = recipe.title ?? 'Unknown recipe'
+        // A planned meal says when it is planned, so the same recipe on two
+        // days (or two weeks) stays two entries instead of collapsing into one.
+        const title  = planned && row.week_start != null
+          ? `${base}, planned${row.slot_type ? ` for ${row.slot_type}` : ''} on ${plannedDate(row.week_start, row.slot_day)}`
+          : planned ? `${base}, planned` : base
         const allIngs = recipe.extendedIngredients?.length
           ? recipe.extendedIngredients
           : recipe.missedIngredients ?? []
@@ -78,7 +84,7 @@ export function useShoppingList(userId, savedRecipes, fridgeItems = [], pantrySt
     }
 
     processRecipes(savedRecipes)
-    processRecipes(scheduledRecipes, 'Scheduled: ')
+    processRecipes(scheduledRecipes, true)
     return map
   }, [savedRecipes, scheduledRecipes, inFridge])
 
