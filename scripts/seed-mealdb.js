@@ -17,8 +17,21 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = 'https://vgwtbfnccxiaplhhhzqd.supabase.co'
+// The project URL comes from SUPABASE_URL, VITE_SUPABASE_URL, or the repo's .env
+import { readFileSync } from 'node:fs'
+function envFileValue(name) {
+  try {
+    const m = readFileSync(new URL('../.env', import.meta.url), 'utf8').match(new RegExp(`^${name}=(.+)$`, 'm'))
+    return m ? m[1].trim() : undefined
+  } catch { return undefined }
+}
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || envFileValue('VITE_SUPABASE_URL')
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY
+
+if (!SUPABASE_URL) {
+  console.error('Error: set SUPABASE_URL (or VITE_SUPABASE_URL in .env) to your Supabase project URL.')
+  process.exit(1)
+}
 
 if (!SUPABASE_SERVICE_KEY) {
   console.error('Error: SUPABASE_SERVICE_KEY environment variable is required.')

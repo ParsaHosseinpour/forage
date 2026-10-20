@@ -84,7 +84,16 @@ supabase_step21_delete_account.sql  # delete_my_account() RPC, required for "Del
 
 ### 2. Point the app at your Supabase project
 
-The project URL and anon key are constants at the top of `src/lib/supabase.js` (they currently point at the original project). Replace both with your own from **Project Settings → API**. The anon key is designed to ship in browser code and is protected by Row Level Security. Never put the service-role key in the frontend.
+The app reads its Supabase project from two environment variables, with no values hardcoded in source:
+
+```
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+The committed `.env` holds public defaults that point at the original project, so a fresh clone runs out of the box. To use your own project, put your values in `.env.local` (git-ignored; copy `.env.example`) or set them as environment variables on your host (on Vercel: Project Settings → Environment Variables). Variables set in the environment always win over `.env`. Get both values from **Project Settings → API**.
+
+The anon key is designed to ship in browser code and is protected by Row Level Security. Never put the service-role key in any file; the seed scripts take it from your shell only. If neither variable is found, the app shows a setup screen explaining what to set instead of a blank page.
 
 ### 3. Seed the recipe database
 
@@ -127,6 +136,8 @@ SUPABASE_SERVICE_KEY=your_service_role_key python3 scripts/import-ai-iranian.py 
 
 The recipes live in `scripts/data/iranian-recipes-batch1.json` and `batch2.json`, generated with structured `{quantity, unit, name}` ingredients so no free-text parsing is needed. They have no photos yet and are tagged `source='ai-generated'` so they are easy to find and add images to later.
 
+The scripts take the project URL from `SUPABASE_URL`, `VITE_SUPABASE_URL` or the repo's `.env` (so they work with no extra setup), and the service-role key from `SUPABASE_SERVICE_KEY` in your shell.
+
 All seed scripts are safe to run together or independently; they upsert by `source_id`, so re-running never creates duplicates.
 
 ### 4. Configure Supabase Auth redirect URLs
@@ -149,9 +160,9 @@ npm install
 npm run dev
 ```
 
-### 6. Environment variables (all optional)
+### 6. Other environment variables (optional)
 
-Copy `.env.example` to `.env`. No keys are required for the app to run. These only control the affiliate "buy ingredients" links:
+These only control the affiliate "buy ingredients" links (set them in `.env.local` or on your host):
 
 ```
 VITE_AFFILIATE_PLATFORMS=instacart,amazon
@@ -162,7 +173,7 @@ VITE_WALMART_AFFILIATE_ID=
 
 ### 7. Deploy to Vercel
 
-Import this repo, set the same env vars in **Project Settings → Environment Variables** if you want affiliate tracking, and deploy. `vercel.json` already handles SPA routing (rewrites all paths to `index.html`).
+Import this repo and deploy. To use your own Supabase project or affiliate tracking, set the variables above in **Project Settings → Environment Variables**. `vercel.json` already handles SPA routing (rewrites all paths to `index.html`).
 
 > **Note on commit authorship:** Vercel can silently block deployments if the pushing commit's author email isn't linked to a verified GitHub account. Make sure `git config user.email` matches an email on your GitHub account before pushing.
 
@@ -187,7 +198,8 @@ src/
 ├── hooks/           # One hook per data domain (useFridge, usePantry, useMealPlan, ...) plus
 │                    #   useDialog, useDeferredDelete (undo), useBackToClose, usePageTitle
 ├── lib/
-│   ├── supabase.js          # All Supabase queries in one place (project URL + anon key live here)
+│   ├── supabaseConfig.js    # Reads the Supabase URL and anon key from env vars
+│   ├── supabase.js          # All Supabase queries in one place
 │   ├── recipeDb.js          # Recipe search/match/sort logic + ingredient normalization
 │   ├── recipeEngine.js      # Thin public API over recipeDb
 │   ├── cookUtils.js         # Unit conversion + deduction planning for "Cook It"
@@ -218,7 +230,6 @@ supabase_*.sql               # Migrations, run in the order listed above
 ## Known limitations
 
 - Recipe count and nutrition data depend on which seed you run. TheMealDB alone (~320 recipes, no nutrition) is enough to demo but not for daily use; `scripts/import-foodcom.py` (522k+ recipes, real nutrition on the majority) is the recommended source for a real deployment. See "Seed the recipe database" above.
-- The Supabase project URL and anon key are hardcoded in `src/lib/supabase.js` rather than read from environment variables.
 - No error boundaries around page components.
 - There is no automated test suite in the repo yet.
 - `npm run lint` reports a number of existing errors, mostly the React Hooks rules about setting state inside effects.

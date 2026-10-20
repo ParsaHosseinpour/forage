@@ -1,9 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = 'https://vgwtbfnccxiaplhhhzqd.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnd3RiZm5jY3hpYXBsaGhoenFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjU0MjUsImV4cCI6MjA5NTE0MTQyNX0.KGm4cf_vkbgCQO1w0jJw46_XIKCUwNE37rsWC3ePSBI'
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabaseConfig'
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// When the project is not configured, main.jsx shows a setup screen instead of
+// the app, so this placeholder client is never used. It only keeps the import
+// from throwing before that screen can render.
+export const supabase = createClient(
+  SUPABASE_URL      || 'http://localhost',
+  SUPABASE_ANON_KEY || 'not-configured',
+)
 
 // ─── Auth helpers ────────────────────────────────────────────────────────────
 

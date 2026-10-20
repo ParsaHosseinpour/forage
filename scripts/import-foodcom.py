@@ -64,7 +64,27 @@ except ImportError:
 
 # ─── Config ─────────────────────────────────────────────────────────────────
 
-SUPABASE_URL = "https://vgwtbfnccxiaplhhhzqd.supabase.co"
+def _env_file_value(name):
+    """Read NAME=value from the repo's .env (used as a fallback for the project URL)."""
+    try:
+        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+        with open(env_path, encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith(name + "="):
+                    return line.split("=", 1)[1].strip()
+    except OSError:
+        pass
+    return None
+
+
+SUPABASE_URL = (
+    os.environ.get("SUPABASE_URL")
+    or os.environ.get("VITE_SUPABASE_URL")
+    or _env_file_value("VITE_SUPABASE_URL")
+)
+if not SUPABASE_URL:
+    print("Error: set SUPABASE_URL (or VITE_SUPABASE_URL in the repo's .env) to your Supabase project URL.")
+    sys.exit(1)
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 HF_DATASET = "AkashPS11/recipes_data_food.com"
