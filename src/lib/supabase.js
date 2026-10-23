@@ -2,12 +2,29 @@ import { createClient } from '@supabase/supabase-js'
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabaseConfig'
 
+/**
+ * While the browser knows it is offline, data requests fail immediately.
+ * Without this, the client retries each failed request three times with
+ * growing delays (about seven seconds) before reporting an error, so pages
+ * would sit on a loading skeleton. An AbortError is the one failure the client
+ * does not retry. Auth requests are left alone on purpose: a refused token
+ * refresh must never be mistaken for a sign-out.
+ */
+function offlineAwareFetch(input, init) {
+  const url = typeof input === 'string' ? input : input.url
+  if (typeof navigator !== 'undefined' && navigator.onLine === false && url.includes('/rest/v1/')) {
+    return Promise.reject(new DOMException('You are offline.', 'AbortError'))
+  }
+  return fetch(input, init)
+}
+
 // When the project is not configured, main.jsx shows a setup screen instead of
 // the app, so this placeholder client is never used. It only keeps the import
 // from throwing before that screen can render.
 export const supabase = createClient(
   SUPABASE_URL      || 'http://localhost',
   SUPABASE_ANON_KEY || 'not-configured',
+  { global: { fetch: offlineAwareFetch } },
 )
 
 // ─── Auth helpers ────────────────────────────────────────────────────────────

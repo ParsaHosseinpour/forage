@@ -12,6 +12,8 @@ import Button from '../ui/Button'
 import { IconTile, SlotIcon } from '../ui/glyphs'
 import { useDeferredDelete } from '../../hooks/useDeferredDelete'
 import PageHeader from '../layout/PageHeader'
+import { useOnlineStatus } from '../../hooks/useOnlineStatus'
+import OfflineNotice from '../ui/OfflineNotice'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
@@ -269,6 +271,7 @@ function MobileDayView({ selectedDay, weekStart, todayIdx, grid, onCookNow, onRe
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function SchedulePage({ user }) {
+  const online = useOnlineStatus()
   const navigate   = useNavigate()
   const toast      = useToast()
   const [weekOffset, setWeekOffset] = useState(0)
@@ -524,7 +527,8 @@ export default function SchedulePage({ user }) {
       )}
 
       {/* ── Empty state ── */}
-      {!loading && slotCount === 0 && (
+      {!loading && slotCount === 0 && !online && <OfflineNotice what="meal plan" />}
+      {!loading && slotCount === 0 && online && (
         <div className="text-center py-16 fade-in">
           <IconTile art="Eggs" />
           <h2 className="text-2xl mb-2">Nothing planned yet</h2>

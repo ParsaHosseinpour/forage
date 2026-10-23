@@ -7,6 +7,8 @@ import Button from '../ui/Button'
 import { IconTile, SlotIcon, MoodIcon } from '../ui/glyphs'
 import { useDeferredDelete } from '../../hooks/useDeferredDelete'
 import PageHeader from '../layout/PageHeader'
+import { useOnlineStatus } from '../../hooks/useOnlineStatus'
+import OfflineNotice from '../ui/OfflineNotice'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -227,6 +229,7 @@ function HistoryCard({ entry, cookCount, onRemove, onRatingChange, onMealTypeCha
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function HistoryPage({ user }) {
+  const online = useOnlineStatus()
   const navigate = useNavigate()
   const {
     history, loading,
@@ -352,7 +355,8 @@ export default function HistoryPage({ user }) {
       )}
 
       {/* Empty */}
-      {!loading && visibleHistory.length === 0 && (
+      {!loading && visibleHistory.length === 0 && !online && <OfflineNotice what="cooking history" />}
+      {!loading && visibleHistory.length === 0 && online && (
         <div className="text-center py-24 fade-in">
           <IconTile art="Yogurt" />
           <h2 className="text-2xl mb-2">No meals logged yet</h2>

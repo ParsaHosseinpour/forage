@@ -14,6 +14,7 @@ import HistoryPage from './components/history/HistoryPage'
 import SchedulePage from './components/schedule/SchedulePage'
 import ProfilePage from './components/profile/ProfilePage'
 import { usePageTitle } from './hooks/usePageTitle'
+import OfflineBanner from './components/ui/OfflineBanner'
 
 function ProtectedLayout({ user }) {
   usePageTitle()
@@ -25,6 +26,7 @@ function ProtectedLayout({ user }) {
     <div className="min-h-screen" style={{ background: 'var(--bg)', '--hue': hue, '--hue-ink': ink }}>
       <HeaderSlotContext.Provider value={slot}>
         <Navbar user={user} />
+        <OfflineBanner />
         <div ref={setSlot} />
         <main className="pb-24 md:pb-0">
           <Routes>
@@ -70,6 +72,8 @@ export default function App() {
       {user
         ? <ProtectedLayout user={user} />
         : (
+          <>
+          <OfflineBanner />
           <Routes>
             <Route path="/"      element={<LandingPage />} />
             {/* Forgot-password flow only ever needs the request form here;
@@ -77,6 +81,7 @@ export default function App() {
             <Route path="/login" element={<AuthPage />} />
             <Route path="*"      element={<Navigate to="/login" replace />} />
           </Routes>
+          </>
         )
       }
     </BrowserRouter>

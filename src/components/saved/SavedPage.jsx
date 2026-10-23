@@ -17,6 +17,8 @@ import Button from '../ui/Button'
 import { IconTile } from '../ui/glyphs'
 import { useBackToClose } from '../../hooks/useBackToClose'
 import PageHeader from '../layout/PageHeader'
+import { useOnlineStatus } from '../../hooks/useOnlineStatus'
+import OfflineNotice from '../ui/OfflineNotice'
 
 const TABS = [
   { key: 'recipes',  label: 'Saved recipes',  Icon: Bookmark     },
@@ -24,6 +26,7 @@ const TABS = [
 ]
 
 export default function SavedPage({ user }) {
+  const online = useOnlineStatus()
   const navigate = useNavigate()
   const toast    = useToast()
 
@@ -134,7 +137,8 @@ export default function SavedPage({ user }) {
             </div>
           )}
 
-          {!loading && saved.length === 0 && (
+          {!loading && saved.length === 0 && !online && <OfflineNotice what="saved recipes" />}
+          {!loading && saved.length === 0 && online && (
             <div className="text-center py-24 fade-in">
               <IconTile art="Lemon" />
               <h2 className="text-2xl mb-2">No saved recipes yet</h2>

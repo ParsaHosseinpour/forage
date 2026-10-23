@@ -8,6 +8,7 @@ import {
 } from '../../lib/supabase'
 import { DIETS, SERVING_CHOICES, getPrefs, shownName } from '../../lib/preferences'
 import PageHeader from '../layout/PageHeader'
+import { useInstallPrompt } from '../../hooks/useInstallPrompt'
 
 function Section({ title, description, children, tone = 'default' }) {
   const danger = tone === 'danger'
@@ -66,6 +67,7 @@ function Message({ kind, children }) {
 }
 
 export default function ProfilePage({ user }) {
+  const install = useInstallPrompt()
   const toast = useToast()
   const saved = getPrefs(user)
 
@@ -150,6 +152,22 @@ export default function ProfilePage({ user }) {
       />
 
       <div className="space-y-6">
+
+        {/* Install */}
+        {(install.state !== 'none' || install.isIos) && (
+          <Section
+            title="Install Forage"
+            description={
+              install.state === 'installed'
+                ? 'Forage is installed on this device.'
+                : install.state === 'available'
+                  ? 'Add Forage to your home screen or desktop. It opens in its own window, even with a weak connection.'
+                  : 'On iPhone or iPad: tap the Share button in Safari, then choose Add to Home Screen.'
+            }
+          >
+            {install.state === 'available' && <Button onClick={install.install}>Install Forage</Button>}
+          </Section>
+        )}
 
         {/* Preferences */}
         <Section

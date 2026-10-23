@@ -10,9 +10,12 @@ import Button from '../ui/Button'
 import { Input } from '../ui/Input'
 import { useDeferredDelete } from '../../hooks/useDeferredDelete'
 import PageHeader from '../layout/PageHeader'
+import { useOnlineStatus } from '../../hooks/useOnlineStatus'
+import OfflineNotice from '../ui/OfflineNotice'
 
 export default function FridgePage({ user }) {
-  const { items, loading, add, remove, update } = useFridge(user.id)
+  const { items, loading, error, add, remove, update, reload } = useFridge(user.id)
+  const online = useOnlineStatus()
   const { staples, isActive, toggle, loading: pantryLoading } = usePantry(user.id)
   const [showForm, setShowForm] = useState(false)
   const [prefill, setPrefill]   = useState('')
@@ -23,6 +26,7 @@ export default function FridgePage({ user }) {
 
   const visible = useMemo(() => items.filter(i => !pending.has(i.id)), [items, pending])
   const isEmpty = visible.length === 0
+  const loadFailed = !loading && isEmpty && (!online || Boolean(error))
   const totalIngredients = visible.length + staples.length
   const canFindRecipes = totalIngredients >= 2
 
@@ -33,7 +37,9 @@ export default function FridgePage({ user }) {
 
   const openAdd = (name = '') => { setPrefill(name); setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }
 
-  const subtitle = isEmpty
+  const subtitle = loadFailed
+    ? 'Can’t load right now.'
+    : isEmpty
     ? 'Nothing logged yet.'
     : `${visible.length} ingredient${visible.length !== 1 ? 's' : ''}${staples.length > 0 ? `, ${staples.length} staple${staples.length !== 1 ? 's' : ''}` : ''}`
 
@@ -103,7 +109,9 @@ export default function FridgePage({ user }) {
           </div>
         )}
 
-        {!loading && isEmpty && !showForm && (
+        {loadFailed && <OfflineNotice what="fridge" onRetry={reload} />}
+
+        {!loading && isEmpty && !showForm && !loadFailed && (
           <div className="pb-8">
             <h2 className="text-3xl mb-2">Your fridge is empty</h2>
             <p className="text-[16px] mb-5 max-w-md" style={{ color: 'var(--ink-muted)' }}>
@@ -116,7 +124,7 @@ export default function FridgePage({ user }) {
           </div>
         )}
 
-        {!loading && (
+        {!loading && !loadFailed && (
           <FridgeIndex
             items={visible}
             query={query}

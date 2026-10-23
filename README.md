@@ -19,6 +19,7 @@ Log what's in your fridge, find recipes you can actually cook with it, close the
 - **Cooking history.** A timeline of everything you've cooked, taggable by meal type, rateable on a five-point scale, with a weekly summary and a "cook again" shortcut.
 - **Weekly meal planner.** A 7-day grid with 4 slots per day. Browse any week, schedule a recipe into any week up to 12 weeks ahead from the recipe page, copy a week into the next one (meals already there are skipped), and cook straight from the plan (same deduction flow as the recipe page).
 - **Profile and settings.** Display name, default servings and default diet (used as the starting filters on Recipes), password change, sign out, and delete account (behind a type-your-email confirmation).
+- **Install and offline.** Forage is an installable web app: add it to your phone's home screen or your desktop and it opens in its own window. The app itself (pages, styles, fonts after the first visit) is cached, so it opens with no connection. Your data still lives online: while offline you see an "offline" bar and a clear message instead of an empty page, and everything reloads when you reconnect. When a new version is deployed, an "update ready" toast lets you reload at a good moment.
 - **Everyday UX.** Removing a fridge item, history entry or planned meal shows an Undo toast before anything is deleted. Dialogs close on Escape and trap focus. The browser Back button closes an open recipe instead of leaving the page. Each page sets its own tab title.
 - **Auth.** Email sign-up and sign-in, forgot-password flow, resend-confirmation flow.
 
@@ -31,6 +32,7 @@ Log what's in your fridge, find recipes you can actually cook with it, close the
 | Frontend | React 19 + Vite 8 + Tailwind CSS v4 + React Router 7 + lucide-react |
 | Backend | Supabase (Postgres + Auth + Row Level Security + RPC functions) |
 | Recipe data | Self-hosted in our own `recipes` table, seeded from [TheMealDB](https://www.themealdb.com/) (free, ~320 recipes), [Food.com via Hugging Face](https://huggingface.co/datasets/AkashPS11/recipes_data_food.com) (MIT licensed, 522k+ recipes with real nutrition data), and 50 hand-validated Iranian recipes |
+| PWA | `vite-plugin-pwa` (Workbox): web manifest, service worker, precached app shell |
 | Hosting | Vercel, auto-deploys from `main` |
 | Type | Young Serif (headings) and Albert Sans (text), loaded from Google Fonts |
 | Affiliate links | Instacart + Amazon search links, per ingredient, configurable |
@@ -48,6 +50,19 @@ Warm produce colours on a neutral paper, and illustration instead of stock image
 - **Page headers.** `PageHeader` renders a full-width colour band through a portal into a slot owned by the layout, so each page declares its header where its own logic lives.
 - **Illustrations.** `src/components/ui/Produce.jsx` holds the hand-drawn flat produce set (one ink-outline weight). `src/lib/produceMap.js` maps ingredient names to illustrations; anything without one gets a lettered sticker rather than a wrong picture. They appear on the landing page, recipe cards without photos, empty states and page headers.
 - **Controls.** Buttons look printed and pressable (ink outline, hard 3px shadow); chips are pills; recipe cards are borderless tiles with a framed photo.
+
+---
+
+## Install and offline (PWA)
+
+Configured in `vite.config.js`; the service worker is generated at build time and only runs in production builds (`npm run build`), not in `npm run dev`.
+
+- **Cached:** the app shell (HTML, JavaScript, CSS, icons), plus the Google Fonts files after the first visit, so the app opens offline.
+- **Deliberately not cached:** Supabase responses (stale or per-user data is worse than none) and recipe photos hosted elsewhere. Offline, photos show the illustrated placeholder.
+- **Offline behaviour:** a bar explains the state, and pages that would otherwise say "nothing here yet" say "You're offline" instead. Data requests fail immediately while the browser is offline rather than retrying for several seconds (see `offlineAwareFetch` in `src/lib/supabase.js`); sign-in and session refresh are left alone so being offline never signs anyone out.
+- **Updates:** a new deploy installs in the background and shows an "update ready" toast; reloading applies it.
+- **Installing:** Chrome, Edge and Android offer an Install button on the Profile page; on iPhone and iPad the Profile page explains Share, then Add to Home Screen.
+- **On Vercel:** `vercel.json` serves `sw.js` and the manifest uncached so updates are picked up promptly.
 
 ---
 
@@ -194,11 +209,14 @@ src/
 │   ├── history/     # Cooking history timeline + recipe preview modal
 │   ├── profile/     # Profile and settings, account deletion
 │   ├── layout/      # Navbar (masthead + mobile tab bar), PageHeader (portal colour band)
-│   └── ui/          # Button, Input, Toast, Produce (illustrations), glyphs, autocomplete, buy button
+│   └── ui/          # Button, Input, Toast, Produce (illustrations), glyphs, autocomplete, buy button,
+│                    #   OfflineBanner, OfflineNotice, PwaUpdater, ConfigMissing
 ├── hooks/           # One hook per data domain (useFridge, usePantry, useMealPlan, ...) plus
-│                    #   useDialog, useDeferredDelete (undo), useBackToClose, usePageTitle
+│                    #   useDialog, useDeferredDelete (undo), useBackToClose, usePageTitle,
+│                    #   useOnlineStatus, useInstallPrompt
 ├── lib/
 │   ├── supabaseConfig.js    # Reads the Supabase URL and anon key from env vars
+│   ├── installPrompt.js     # Captures the browser's install event at startup
 │   ├── supabase.js          # All Supabase queries in one place
 │   ├── recipeDb.js          # Recipe search/match/sort logic + ingredient normalization
 │   ├── recipeEngine.js      # Thin public API over recipeDb
@@ -216,6 +234,8 @@ src/
 ├── App.jsx
 ├── index.css                # Design tokens
 └── main.jsx
+public/                      # favicon.svg and the app icons (192, 512, maskable, Apple touch)
+vite.config.js               # Vite + Tailwind + PWA (manifest, service worker rules)
 scripts/
 ├── seed-mealdb.js           # TheMealDB seed (quick start, ~320 recipes)
 ├── import-foodcom.py        # Food.com import (recommended, 522k+ recipes + nutrition)
@@ -230,6 +250,7 @@ supabase_*.sql               # Migrations, run in the order listed above
 ## Known limitations
 
 - Recipe count and nutrition data depend on which seed you run. TheMealDB alone (~320 recipes, no nutrition) is enough to demo but not for daily use; `scripts/import-foodcom.py` (522k+ recipes, real nutrition on the majority) is the recommended source for a real deployment. See "Seed the recipe database" above.
+- Offline support covers the app shell, not your data: you can open Forage with no connection, but your fridge, recipes and plan load only when you are online, and changes cannot be saved offline. Queuing changes while offline is not built.
 - No error boundaries around page components.
 - There is no automated test suite in the repo yet.
 - `npm run lint` reports a number of existing errors, mostly the React Hooks rules about setting state inside effects.
@@ -259,4 +280,12 @@ supabase_*.sql               # Migrations, run in the order listed above
 - [x] Public landing page and redesigned interface (produce hues, illustration, text-first fridge)
 - [x] Undo for removals, keyboard-friendly dialogs, Back button closes recipes
 - [x] Multi-week meal planning: browse any week, schedule up to 12 weeks ahead, copy a week, shopping list covers upcoming weeks
-- [ ] PWA / offline support
+- [x] PWA / offline support: installable, app shell works offline, clear offline states, update prompt
+- [x] Supabase configuration moved to environment variables
+
+### Ideas, not started
+
+- Queue changes made while offline and sync them when the connection returns
+- Automated tests in the repo (browser checks were used during development but are not committed)
+- Error boundaries around pages
+- Update the dependencies flagged by `npm audit` (Vite, React Router, PostCSS and their sub-dependencies)
